@@ -66,35 +66,33 @@ class TrafficUsage extends StatelessWidget {
           return Padding(
             padding: baseInfoEdgeInsets.copyWith(top: 0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: 1,
-                          child: DonutChart(
-                            data: [
-                              DonutChartData(
-                                value: upTotalTrafficValue.value.toDouble(),
-                                color: primaryColor,
-                              ),
-                              DonutChartData(
-                                value: downTotalTrafficValue.value.toDouble(),
-                                color: secondaryColor,
-                              ),
-                            ],
-                          ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 1,
+                        child: DonutChart(
+                          data: [
+                            DonutChartData(
+                              value: upTotalTrafficValue.value.toDouble(),
+                              color: primaryColor,
+                            ),
+                            DonutChartData(
+                              value: downTotalTrafficValue.value.toDouble(),
+                              color: secondaryColor,
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: LayoutBuilder(
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: LayoutBuilder(
                             builder: (_, container) {
                               final uploadText = Text(
                                 maxLines: 1,
@@ -177,7 +175,6 @@ class TrafficUsage extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
                 _buildTrafficDataItem(
                   context,
                   Icon(Icons.arrow_upward, color: primaryColor, size: 14),
