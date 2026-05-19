@@ -98,15 +98,19 @@ class CommonCard extends StatelessWidget {
     this.selectWidget,
     this.radius,
     required this.child,
+    this.padding,
+    this.enterAnimated = false,
     this.info,
     this.onLongPress,
   }) : isSelected = isSelected ?? false;
 
+  final bool enterAnimated;
   final bool isSelected;
   final void Function()? onPressed;
   final void Function()? onLongPress;
   final Widget? selectWidget;
   final Widget child;
+  final EdgeInsets? padding;
   final Info? info;
   final CommonCardType type;
   final double? radius;
@@ -192,7 +196,7 @@ class CommonCard extends StatelessWidget {
         children: children,
       );
     }
-    return OutlinedButton(
+    final card = OutlinedButton(
       onLongPress: onLongPress,
       clipBehavior: Clip.antiAlias,
       style: ButtonStyle(
@@ -217,6 +221,10 @@ class CommonCard extends StatelessWidget {
       onPressed: onPressed,
       child: childWidget,
     );
+    return switch (enterAnimated) {
+      true => FadeScaleEnterBox(child: card),
+      false => card,
+    };
   }
 }
 
