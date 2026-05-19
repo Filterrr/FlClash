@@ -1,4 +1,5 @@
 export 'animate_grid.dart';
+export 'app_sidebar.dart';
 export 'back_scope.dart';
 export 'builder.dart';
 export 'card.dart';
