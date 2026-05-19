@@ -3,6 +3,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
+import 'fade_box.dart';
 import 'text.dart';
 
 class Info {
