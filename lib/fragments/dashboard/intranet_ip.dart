@@ -18,29 +18,6 @@ class _IntranetIPState extends State<IntranetIP> {
   final ipNotifier = ValueNotifier<String?>("");
   late StreamSubscription subscription;
 
-  Future<String> getNetworkType() async {
-    try {
-      final interfaces = await NetworkInterface.list(
-        includeLoopback: false,
-        type: InternetAddressType.any,
-      );
-      for (var interface in interfaces) {
-        if (interface.name.toLowerCase().contains('wlan') ||
-            interface.name.toLowerCase().contains('wi-fi')) {
-          return 'WiFi';
-        }
-        if (interface.name.toLowerCase().contains('rmnet') ||
-            interface.name.toLowerCase().contains('ccmni') ||
-            interface.name.toLowerCase().contains('cellular')) {
-          return 'Mobile Data';
-        }
-      }
-      return 'Unknown';
-    } catch (e) {
-      return 'Error';
-    }
-  }
-
   Future<String?> getLocalIpAddress() async {
     await Future.delayed(animateDuration);
     List<NetworkInterface> interfaces = await NetworkInterface.list(
@@ -73,7 +50,6 @@ class _IntranetIPState extends State<IntranetIP> {
     super.initState();
     subscription = Connectivity().onConnectivityChanged.listen((_) async {
       ipNotifier.value = null;
-      debugPrint("[App] Connection change");
       ipNotifier.value = await getLocalIpAddress() ?? "";
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -90,42 +66,34 @@ class _IntranetIPState extends State<IntranetIP> {
       ),
       onPressed: () {},
       child: Container(
-        padding: const EdgeInsets.all(16).copyWith(top: 0),
-        height: globalState.measure.titleMediumHeight + 24 - 2,
-        child: ValueListenableBuilder(
-          valueListenable: ipNotifier,
-          builder: (_, value, __) {
-            return FadeBox(
-              child: value != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: TooltipText(
-                            text: Text(
-                              value.isNotEmpty
-                                  ? value
-                                  : appLocalizations.noNetwork,
-                              style: context
-                                  .textTheme.titleLarge?.toSoftBold.toMinus,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+        padding: baseInfoEdgeInsets.copyWith(top: 0),
+        child: SizedBox(
+          height: globalState.measure.bodyMediumHeight + 2,
+          child: ValueListenableBuilder(
+            valueListenable: ipNotifier,
+            builder: (_, value, __) {
+              return FadeThroughBox(
+                child: value != null
+                    ? TooltipText(
+                        text: Text(
+                          value.isNotEmpty
+                              ? value
+                              : appLocalizations.noNetwork,
+                          style: context.textTheme.bodyMedium?.toLight,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    )
-                  : const Padding(
-                      padding: EdgeInsets.all(2),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: CircularProgressIndicator(),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(2),
+                        child: const AspectRatio(
+                          aspectRatio: 1,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        ),
                       ),
-                    ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

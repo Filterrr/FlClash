@@ -50,22 +50,18 @@ class _DashboardFragmentState extends State<DashboardFragment> {
           child: Selector<AppState, double>(
             selector: (_, appState) => appState.viewWidth,
             builder: (_, viewWidth, ___) {
-              final columns = max(4 * ((viewWidth / 350).ceil()), 8);
+              final columns = max(4 * ((viewWidth / 280).ceil()), 8);
               final int switchCount = (4 / columns) * viewWidth < 200 ? 8 : 4;
+              final spacing = 14.0;
               return Grid(
                 crossAxisCount: columns,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
                 children: [
                   const GridItem(
                     crossAxisCellCount: 8,
                     child: NetworkSpeed(),
                   ),
-                  // if (Platform.isAndroid)
-                  //   GridItem(
-                  //     crossAxisCellCount: switchCount,
-                  //     child: const VPNSwitch(),
-                  //   ),
                   if (system.isDesktop) ...[
                     GridItem(
                       crossAxisCellCount: switchCount,

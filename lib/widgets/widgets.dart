@@ -7,6 +7,7 @@ export 'chip.dart';
 export 'color_scheme_box.dart';
 export 'connection_item.dart';
 export 'disabled_mask.dart';
+export 'donut_chart.dart';
 export 'fade_box.dart';
 export 'float_layout.dart';
 export 'grid.dart';
