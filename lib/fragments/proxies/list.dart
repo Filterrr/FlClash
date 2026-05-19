@@ -340,7 +340,6 @@ class ListHeader extends StatefulWidget {
   final Function(String groupName) onChange;
   final Function(String groupName) onScrollToSelected;
   final bool isExpand;
-  final bool enterAnimated;
 
   const ListHeader({
     super.key,
@@ -348,7 +347,6 @@ class ListHeader extends StatefulWidget {
     required this.onChange,
     required this.onScrollToSelected,
     required this.isExpand,
-    this.enterAnimated = true,
   });
 
   @override
@@ -435,40 +433,30 @@ class _ListHeaderState extends State<ListHeader>
           },
           builder: (_, icon, __) {
             return switch (iconStyle) {
-              ProxiesIconStyle.standard => LayoutBuilder(
-                  builder: (_, constraints) {
-                    return Container(
-                      margin: const EdgeInsets.only(right: 16),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Container(
-                          height: constraints.maxHeight,
-                          width: constraints.maxWidth,
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: context.colorScheme.secondaryContainer,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: CommonIcon(
-                            src: icon,
-                            size: constraints.maxHeight - 12,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+              ProxiesIconStyle.standard => Container(
+                  height: 48,
+                  width: 48,
+                  margin: const EdgeInsets.only(
+                    right: 16,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: CommonIcon(
+                    src: icon,
+                    size: 32,
+                  ),
                 ),
               ProxiesIconStyle.icon => Container(
-                  margin: const EdgeInsets.only(right: 16),
-                  child: LayoutBuilder(
-                    builder: (_, constraints) {
-                      return CommonIcon(
-                        src: icon,
-                        size: constraints.maxHeight - 8,
-                      );
-                    },
+                  margin: const EdgeInsets.only(
+                    right: 16,
+                  ),
+                  child: CommonIcon(
+                    src: icon,
+                    size: 42,
                   ),
                 ),
               ProxiesIconStyle.none => Container(),
@@ -485,7 +473,6 @@ class _ListHeaderState extends State<ListHeader>
       key: widget.key,
       radius: 18,
       type: CommonCardType.filled,
-      enterAnimated: widget.enterAnimated,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -507,7 +494,9 @@ class _ListHeaderState extends State<ListHeader>
                           groupName,
                           style: context.textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(
+                          height: 4,
+                        ),
                         Flexible(
                           flex: 1,
                           child: Row(
@@ -526,8 +515,10 @@ class _ListHeaderState extends State<ListHeader>
                                   builder: (currentGroupName) {
                                     return Row(
                                       mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         if (currentGroupName.isNotEmpty) ...[
                                           Flexible(
@@ -548,7 +539,9 @@ class _ListHeaderState extends State<ListHeader>
                             ],
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(
+                          width: 4,
+                        ),
                       ],
                     ),
                   )
@@ -562,15 +555,21 @@ class _ListHeaderState extends State<ListHeader>
                     onPressed: () {
                       widget.onScrollToSelected(groupName);
                     },
-                    icon: const Icon(Icons.adjust),
+                    icon: const Icon(
+                      Icons.adjust,
+                    ),
                   ),
                   IconButton(
                     onPressed: () {
                       _delayTest(widget.group.all);
                     },
-                    icon: const Icon(Icons.network_ping),
+                    icon: const Icon(
+                      Icons.network_ping,
+                    ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(
+                    width: 4,
+                  ),
                 ],
                 AnimatedBuilder(
                   animation: _animationController.view,
@@ -581,7 +580,9 @@ class _ListHeaderState extends State<ListHeader>
                       },
                       icon: RotationTransition(
                         turns: _iconTurns,
-                        child: const Icon(Icons.expand_more),
+                        child: const Icon(
+                          Icons.expand_more,
+                        ),
                       ),
                     );
                   },
