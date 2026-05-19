@@ -45,25 +45,21 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
     return RepaintBoundary(
       child: CommonCard(
         onPressed: () {},
+        info: Info(
+          label: appLocalizations.networkSpeed,
+          iconData: Icons.speed_sharp,
+        ),
         child: Selector<AppFlowingState, List<Traffic>>(
           selector: (_, appFlowingState) => appFlowingState.traffics,
           builder: (_, traffics, __) {
             return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
                   padding: baseInfoEdgeInsets.copyWith(bottom: 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: InfoHeader(
-                          padding: EdgeInsets.zero,
-                          info: Info(
-                            label: appLocalizations.networkSpeed,
-                            iconData: Icons.speed_sharp,
-                          ),
-                        ),
-                      ),
                       const SizedBox(width: 8),
                       Text(
                         '↑ ${_getLastTraffic(traffics).up.show}/s  ↓ ${_getLastTraffic(traffics).down.show}/s',
@@ -74,10 +70,11 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                     ],
                   ),
                 ),
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16)
-                        .copyWith(bottom: 0, left: 0, right: 0),
+                Padding(
+                  padding: const EdgeInsets.all(16)
+                      .copyWith(bottom: 0, left: 0, right: 0),
+                  child: SizedBox(
+                    height: 100,
                     child: LineChart(
                       gradient: true,
                       color: Theme.of(context).colorScheme.primary,

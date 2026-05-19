@@ -243,16 +243,18 @@ class _DelayBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final delayColor = other.getDelayColor(delay);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
         color: delayColor?.withAlpha(25),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
       child: Text(
         delay > 0 ? '$delay ms' : "Timeout",
         style: context.textTheme.labelSmall?.copyWith(
           overflow: TextOverflow.ellipsis,
           color: delayColor,
+          height: 1,
         ),
       ),
     );
