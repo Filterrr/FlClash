@@ -15,9 +15,8 @@ class Other {
   Color? getDelayColor(int? delay) {
     if (delay == null) return null;
     if (delay < 0) return Colors.red;
-    if (delay < 200) return Colors.green;
-    if (delay < 600) return const Color(0xFFC57F0A);
-    return Colors.red;
+    if (delay < 600) return Colors.green;
+    return const Color(0xFFC57F0A);
   }
 
   String get id {

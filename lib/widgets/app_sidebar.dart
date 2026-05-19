@@ -30,6 +30,12 @@ class AppSidebar extends StatelessWidget {
           children: [
             if (Platform.isMacOS) const SizedBox(height: 22),
             const SizedBox(height: 10),
+            if (!Platform.isMacOS) ...[
+              const ClipRect(child: _SidebarAppIcon()),
+              const SizedBox(height: 4),
+              _SidebarVersionLabel(),
+              const SizedBox(height: 12),
+            ],
             Expanded(
               child: Selector<Config, bool>(
                 selector: (_, config) => config.appSetting.showLabel,
@@ -50,6 +56,44 @@ class AppSidebar extends StatelessWidget {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SidebarAppIcon extends StatelessWidget {
+  const _SidebarAppIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: ShapeDecoration(
+        color: context.colorScheme.surfaceContainerHighest,
+        shape: RoundedSuperellipseBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Transform.translate(
+        offset: const Offset(0, -1),
+        child: Image.asset(
+          'assets/images/icon.png',
+          width: 34,
+          height: 34,
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarVersionLabel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final version = globalState.packageInfo.version;
+    return Text(
+      'v$version',
+      style: context.textTheme.labelSmall?.copyWith(
+        color: context.colorScheme.onSurfaceVariant.opacity60,
       ),
     );
   }

@@ -353,7 +353,10 @@ class ListHeader extends StatefulWidget {
   State<ListHeader> createState() => _ListHeaderState();
 }
 
-class _ListHeaderState extends State<ListHeader> {
+class _ListHeaderState extends State<ListHeader>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _iconTurns;
   var isLock = false;
 
   String get icon => widget.group.icon;
@@ -373,6 +376,39 @@ class _ListHeaderState extends State<ListHeader> {
 
   _handleChange(String groupName) {
     widget.onChange(groupName);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _iconTurns = _animationController.drive(
+      Tween<double>(begin: 0.0, end: 0.5),
+    );
+    if (isExpand) {
+      _animationController.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(ListHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isExpand != widget.isExpand) {
+      if (isExpand) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    }
   }
 
   Widget _buildIcon() {
@@ -454,7 +490,7 @@ class _ListHeaderState extends State<ListHeader> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        EmojiText(
+                        Text(
                           groupName,
                           style: context.textTheme.titleMedium,
                         ),
@@ -516,55 +552,41 @@ class _ListHeaderState extends State<ListHeader> {
               children: [
                 if (isExpand) ...[
                   IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.all(2),
                     onPressed: () {
                       widget.onScrollToSelected(groupName);
                     },
-                    style: const ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    iconSize: 19,
                     icon: const Icon(
                       Icons.adjust,
                     ),
                   ),
-                  const SizedBox(
-                    width: 2,
-                  ),
                   IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.all(2),
                     onPressed: () {
                       _delayTest(widget.group.all);
                     },
-                    style: const ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    iconSize: 20,
                     icon: const Icon(
                       Icons.network_ping,
                     ),
                   ),
                   const SizedBox(
-                    width: 6,
+                    width: 4,
                   ),
-                ] else
-                  const SizedBox(
-                    width: 6,
-                  ),
-                IconButton.filledTonal(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.all(2),
-                  iconSize: 24,
-                  style: const ButtonStyle(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () {
-                    _handleChange(groupName);
+                ],
+                AnimatedBuilder(
+                  animation: _animationController.view,
+                  builder: (_, __) {
+                    return IconButton.filledTonal(
+                      onPressed: () {
+                        _handleChange(groupName);
+                      },
+                      icon: RotationTransition(
+                        turns: _iconTurns,
+                        child: const Icon(
+                          Icons.expand_more,
+                        ),
+                      ),
+                    );
                   },
-                  icon: CommonExpandIcon(expand: isExpand),
-                ),
+                )
               ],
             )
           ],

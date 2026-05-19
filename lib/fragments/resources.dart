@@ -136,7 +136,6 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
               height: 24,
               child: FadeBox(
                 key: Key("fade_box_${geoItem.label}"),
-                alignment: Alignment.centerLeft,
                 child: snapshot.data == null
                     ? const SizedBox(
                         width: 24,

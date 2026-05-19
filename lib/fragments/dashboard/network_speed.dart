@@ -39,54 +39,127 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
     return traffics.last;
   }
 
+  Widget _getLabel({
+    required String label,
+    required IconData iconData,
+    required TrafficValue value,
+  }) {
+    final showValue = value.showValue;
+    final showUnit = "${value.showUnit}/s";
+    final titleLargeSoftBold =
+        Theme.of(context).textTheme.titleLarge?.toSoftBold;
+    final bodyMedium = Theme.of(context).textTheme.bodySmall?.toLight;
+    final valueText = Text(
+      showValue,
+      style: titleLargeSoftBold,
+      maxLines: 1,
+    );
+    final unitText = Text(
+      showUnit,
+      style: bodyMedium,
+      maxLines: 1,
+    );
+    final size = globalState.measure.computeTextSize(valueText);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Flexible(
+              child: Icon(iconData),
+            ),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleSmall?.toSoftBold,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+            width: size.width,
+            height: size.height,
+            child: OverflowBox(
+              maxWidth: 156,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: valueText,
+                  ),
+                  const Flexible(
+                    flex: 0,
+                    child: SizedBox(
+                      width: 4,
+                    ),
+                  ),
+                  Flexible(
+                    child: unitText,
+                  ),
+                ],
+              ),
+            ))
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final color = context.colorScheme.onSurfaceVariant.opacity80;
-    return RepaintBoundary(
-      child: CommonCard(
-        onPressed: () {},
-        info: Info(
-          label: appLocalizations.networkSpeed,
-          iconData: Icons.speed_sharp,
-        ),
-        child: Selector<AppFlowingState, List<Traffic>>(
-          selector: (_, appFlowingState) => appFlowingState.traffics,
-          builder: (_, traffics, __) {
-            return Column(
+    return CommonCard(
+      onPressed: () {},
+      info: Info(
+        label: appLocalizations.networkSpeed,
+        iconData: Icons.speed_sharp,
+      ),
+      child: Selector<AppFlowingState, List<Traffic>>(
+        selector: (_, appFlowingState) => appFlowingState.traffics,
+        builder: (_, traffics, __) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: baseInfoEdgeInsets.copyWith(bottom: 0),
+                Expanded(
+                  flex: 0,
+                  child: LineChart(
+                    color: Theme.of(context).colorScheme.primary,
+                    points: _getPoints(traffics),
+                    height: 100,
+                  ),
+                ),
+                const Flexible(child: SizedBox(height: 16)),
+                Flexible(
+                  flex: 0,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      const SizedBox(width: 8),
-                      Text(
-                        '↑ ${_getLastTraffic(traffics).up.show}/s  ↓ ${_getLastTraffic(traffics).down.show}/s',
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: color,
+                      Expanded(
+                        child: _getLabel(
+                          iconData: Icons.upload,
+                          label: appLocalizations.upload,
+                          value: _getLastTraffic(traffics).up,
+                        ),
+                      ),
+                      Expanded(
+                        child: _getLabel(
+                          iconData: Icons.download,
+                          label: appLocalizations.download,
+                          value: _getLastTraffic(traffics).down,
                         ),
                       ),
                     ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16)
-                      .copyWith(bottom: 0, left: 0, right: 0),
-                  child: SizedBox(
-                    height: 100,
-                    child: LineChart(
-                      gradient: true,
-                      color: Theme.of(context).colorScheme.primary,
-                      points: _getPoints(traffics),
-                      duration: midDuration,
-                    ),
-                  ),
-                ),
+                )
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

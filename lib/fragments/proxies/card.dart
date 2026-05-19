@@ -37,12 +37,11 @@ class ProxyCard extends StatelessWidget {
           proxy.name,
         ),
         builder: (context, delay, __) {
-          return FadeThroughBox(
-            alignment: type == ProxyCardType.expand
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
-            child: delay == 0 || delay == null
-                ? SizedBox(
+          return FadeBox(
+            child: Builder(
+              builder: (_) {
+                if (delay == 0 || delay == null) {
+                  return SizedBox(
                     height: measure.labelSmallHeight,
                     width: measure.labelSmallHeight,
                     child: delay == 0
@@ -55,11 +54,22 @@ class ProxyCard extends StatelessWidget {
                             padding: EdgeInsets.zero,
                             onPressed: _handleTestCurrentDelay,
                           ),
-                  )
-                : GestureDetector(
-                    onTap: _handleTestCurrentDelay,
-                    child: _DelayBadge(delay: delay),
+                  );
+                }
+                return GestureDetector(
+                  onTap: _handleTestCurrentDelay,
+                  child: Text(
+                    delay > 0 ? '$delay ms' : "Timeout",
+                    style: context.textTheme.labelSmall?.copyWith(
+                      overflow: TextOverflow.ellipsis,
+                      color: other.getDelayColor(
+                        delay,
+                      ),
+                    ),
                   ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -122,12 +132,12 @@ class ProxyCard extends StatelessWidget {
     final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
-    return Stack(
-      children: [
-        currentSelectedProxyNameBuilder(
-          groupName: groupName,
-          builder: (currentGroupName) {
-            return CommonCard(
+    return currentSelectedProxyNameBuilder(
+      groupName: groupName,
+      builder: (currentGroupName) {
+        return Stack(
+          children: [
+            CommonCard(
               type: style,
               key: key,
               onPressed: () {
@@ -135,8 +145,7 @@ class ProxyCard extends StatelessWidget {
               },
               isSelected: currentGroupName == proxy.name,
               child: Container(
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,14 +168,14 @@ class ProxyCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: context.textTheme.bodySmall?.copyWith(
                                 color: context.textTheme.bodySmall?.color
-                                    ?.opacity80,
+                                    ?.opacity60,
                               ),
                             );
                           },
                         ),
                       ),
                       const SizedBox(
-                        height: 6,
+                        height: 8,
                       ),
                       delayText,
                     ] else
@@ -184,7 +193,7 @@ class ProxyCard extends StatelessWidget {
                                   style: context.textTheme.bodySmall?.copyWith(
                                     overflow: TextOverflow.ellipsis,
                                     color: context.textTheme.bodySmall?.color
-                                        ?.opacity80,
+                                        ?.opacity60,
                                   ),
                                 ),
                               ),
@@ -196,23 +205,19 @@ class ProxyCard extends StatelessWidget {
                   ],
                 ),
               ),
-            );
-          },
-        ),
-        if (groupType.isURLTestOrFallback)
-          Selector<Config, String>(
-            selector: (_, config) {
-              final selectedProxyName =
-                  config.currentSelectedMap[groupName];
-              return selectedProxyName ?? '';
-            },
-            builder: (_, value, __) {
-              if (value != proxy.name) return Container();
-              return Positioned(
-                top: 0,
-                right: 0,
-                child: FadeScaleEnterBox(
-                  key: ValueKey(value),
+            ),
+            if (groupType.isURLTestOrFallback)
+              Selector<Config, String>(
+                selector: (_, config) {
+                  final selectedProxyName =
+                      config.currentSelectedMap[groupName];
+                  return selectedProxyName ?? '';
+                },
+                builder: (_, value, child) {
+                  if (value != proxy.name) return Container();
+                  return child!;
+                },
+                child: Positioned.fill(
                   child: Container(
                     alignment: Alignment.topRight,
                     margin: const EdgeInsets.all(8),
@@ -226,37 +231,10 @@ class ProxyCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              );
-            },
-          )
-      ],
-    );
-  }
-}
-
-class _DelayBadge extends StatelessWidget {
-  final int delay;
-
-  const _DelayBadge({required this.delay});
-
-  @override
-  Widget build(BuildContext context) {
-    final delayColor = other.getDelayColor(delay);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: delayColor?.withAlpha(25),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        delay > 0 ? '$delay ms' : "Timeout",
-        style: context.textTheme.labelSmall?.copyWith(
-          overflow: TextOverflow.ellipsis,
-          color: delayColor,
-          height: 1,
-        ),
-      ),
+              )
+          ],
+        );
+      },
     );
   }
 }

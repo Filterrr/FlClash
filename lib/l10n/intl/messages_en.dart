@@ -290,8 +290,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Modify network-related settings"),
         "networkDetection":
             MessageLookupByLibrary.simpleMessage("Network detection"),
-        "detectionTip": MessageLookupByLibrary.simpleMessage(
-            "Depends on third-party API, for reference only"),
         "networkSpeed": MessageLookupByLibrary.simpleMessage("Network speed"),
         "noData": MessageLookupByLibrary.simpleMessage("No data"),
         "noHotKey": MessageLookupByLibrary.simpleMessage("No HotKey"),

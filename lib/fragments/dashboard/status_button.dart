@@ -1,4 +1,5 @@
-import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/app_localizations.dart';
+import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -12,7 +13,7 @@ class TUNButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
+    return ButtonContainer(
       onPressed: () {
         showSheet(
           context: context,
@@ -31,45 +32,21 @@ class TUNButton extends StatelessWidget {
         label: appLocalizations.tun,
         iconData: Icons.stacked_line_chart,
       ),
-      child: Container(
-        padding: baseInfoEdgeInsets.copyWith(top: 4, bottom: 8, right: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 1,
-              child: TooltipText(
-                text: Text(
-                  appLocalizations.options,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontSize: 12)
-                      .toLight,
-                ),
-              ),
-            ),
-            Selector<ClashConfig, bool>(
-              selector: (_, clashConfig) => clashConfig.tun.enable,
-              builder: (_, enable, __) {
-                return LocaleBuilder(
-                  builder: (_) => Switch(
-                    value: enable,
-                    onChanged: (value) {
-                      final clashConfig = globalState.appController.clashConfig;
-                      clashConfig.tun = clashConfig.tun.copyWith(
-                        enable: value,
-                      );
-                    },
-                  ),
+      child: Selector<ClashConfig, bool>(
+        selector: (_, clashConfig) => clashConfig.tun.enable,
+        builder: (_, enable, __) {
+          return LocaleBuilder(
+            builder: (_) => Switch(
+              value: enable,
+              onChanged: (value) {
+                final clashConfig = globalState.appController.clashConfig;
+                clashConfig.tun = clashConfig.tun.copyWith(
+                  enable: value,
                 );
               },
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -80,7 +57,7 @@ class SystemProxyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
+    return ButtonContainer(
       onPressed: () {
         showSheet(
           context: context,
@@ -101,45 +78,53 @@ class SystemProxyButton extends StatelessWidget {
         label: appLocalizations.systemProxy,
         iconData: Icons.shuffle,
       ),
-      child: Container(
-        padding: baseInfoEdgeInsets.copyWith(top: 4, bottom: 8, right: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 1,
-              child: TooltipText(
-                text: Text(
-                  appLocalizations.options,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontSize: 12)
-                      .toLight,
-                ),
-              ),
-            ),
-            Selector<Config, bool>(
-              selector: (_, config) => config.networkProps.systemProxy,
-              builder: (_, systemProxy, __) {
-                return LocaleBuilder(
-                  builder: (_) => Switch(
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    value: systemProxy,
-                    onChanged: (value) {
-                      final config = globalState.appController.config;
-                      config.networkProps =
-                          config.networkProps.copyWith(systemProxy: value);
-                    },
-                  ),
-                );
+      child: Selector<Config, bool>(
+        selector: (_, config) => config.networkProps.systemProxy,
+        builder: (_, systemProxy, __) {
+          return LocaleBuilder(
+            builder: (_) => Switch(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              value: systemProxy,
+              onChanged: (value) {
+                final config = globalState.appController.config;
+                config.networkProps =
+                    config.networkProps.copyWith(systemProxy: value);
               },
             ),
-          ],
-        ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ButtonContainer extends StatelessWidget {
+  final Info info;
+  final Widget child;
+  final VoidCallback onPressed;
+
+  const ButtonContainer({
+    super.key,
+    required this.info,
+    required this.child,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonCard(
+      onPressed: onPressed,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InfoHeader(
+            info: info,
+            actions: [
+              child,
+            ],
+          ),
+        ],
       ),
     );
   }
