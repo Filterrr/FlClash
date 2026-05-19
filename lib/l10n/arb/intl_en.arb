@@ -17,6 +17,7 @@
   "networkSpeed": "Network speed",
   "outboundMode": "Outbound mode",
   "networkDetection": "Network detection",
+  "detectionTip": "Depends on third-party API, for reference only",
   "upload": "Upload",
   "download": "Download",
   "noProxy": "No proxy",

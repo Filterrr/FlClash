@@ -230,6 +230,15 @@ class AppLocalizations {
     );
   }
 
+  String get detectionTip {
+    return Intl.message(
+      'Depends on third-party API, for reference only',
+      name: 'detectionTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Upload`
   String get upload {
     return Intl.message(

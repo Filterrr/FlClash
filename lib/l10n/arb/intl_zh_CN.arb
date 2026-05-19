@@ -17,6 +17,7 @@
   "networkSpeed": "网络速度",
   "outboundMode": "出站模式",
   "networkDetection": "网络检测",
+  "detectionTip": "依赖第三方API，仅供参考",
   "upload": "上传",
   "download": "下载",
   "noProxy": "暂无代理",
