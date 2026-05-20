@@ -37,39 +37,33 @@ class ProxyCard extends StatelessWidget {
           proxy.name,
         ),
         builder: (context, delay, __) {
-          return FadeBox(
-            child: Builder(
-              builder: (_) {
-                if (delay == 0 || delay == null) {
-                  return SizedBox(
+          return FadeThroughBox(
+            alignment: type == ProxyCardType.expand
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
+            child: delay == 0 || delay == null
+                ? SizedBox(
                     height: measure.labelSmallHeight,
                     width: measure.labelSmallHeight,
                     child: delay == 0
-                        ? const CircularProgressIndicator(
-                            strokeWidth: 2,
-                          )
+                        ? const CircularProgressIndicator(strokeWidth: 2)
                         : IconButton(
                             icon: const Icon(Icons.bolt),
                             iconSize: globalState.measure.labelSmallHeight,
                             padding: EdgeInsets.zero,
                             onPressed: _handleTestCurrentDelay,
                           ),
-                  );
-                }
-                return GestureDetector(
-                  onTap: _handleTestCurrentDelay,
-                  child: Text(
-                    delay > 0 ? '$delay ms' : "Timeout",
-                    style: context.textTheme.labelSmall?.copyWith(
-                      overflow: TextOverflow.ellipsis,
-                      color: other.getDelayColor(
-                        delay,
+                  )
+                : GestureDetector(
+                    onTap: _handleTestCurrentDelay,
+                    child: Text(
+                      delay > 0 ? '$delay ms' : 'Timeout',
+                      style: context.textTheme.labelSmall?.copyWith(
+                        overflow: TextOverflow.ellipsis,
+                        color: other.getDelayColor(delay),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
           );
         },
       ),
@@ -132,51 +126,33 @@ class ProxyCard extends StatelessWidget {
     final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
-    return currentSelectedProxyNameBuilder(
-      groupName: groupName,
-      builder: (currentGroupName) {
-        return Stack(
-          children: [
-            CommonCard(
+    return Stack(
+      children: [
+        currentSelectedProxyNameBuilder(
+          groupName: groupName,
+          builder: (currentSelectedProxyName) {
+            return CommonCard(
               type: style,
               key: key,
               onPressed: () {
                 _changeProxy(context);
               },
-              isSelected: currentGroupName == proxy.name,
+              isSelected: currentSelectedProxyName == proxy.name,
               child: Container(
-                padding: const EdgeInsets.all(12),
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     proxyNameText,
-                    const SizedBox(
-                      height: 8,
-                    ),
+                    const SizedBox(height: 8),
                     if (type == ProxyCardType.expand) ...[
                       SizedBox(
                         height: measure.bodySmallHeight,
-                        child: Selector<AppState, String>(
-                          selector: (context, appState) => appState.getDesc(
-                            proxy.type,
-                            proxy.name,
-                          ),
-                          builder: (_, desc, __) {
-                            return EmojiText(
-                              desc,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.textTheme.bodySmall?.color
-                                    ?.opacity60,
-                              ),
-                            );
-                          },
-                        ),
+                        child: _ProxyDesc(proxy: proxy),
                       ),
-                      const SizedBox(
-                        height: 8,
-                      ),
+                      const SizedBox(height: 6),
                       delayText,
                     ] else
                       SizedBox(
@@ -192,8 +168,11 @@ class ProxyCard extends StatelessWidget {
                                   proxy.type,
                                   style: context.textTheme.bodySmall?.copyWith(
                                     overflow: TextOverflow.ellipsis,
-                                    color: context.textTheme.bodySmall?.color
-                                        ?.opacity60,
+                                    color: context
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.opacity80,
                                   ),
                                 ),
                               ),
@@ -205,36 +184,77 @@ class ProxyCard extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-            if (groupType.isURLTestOrFallback)
-              Selector<Config, String>(
-                selector: (_, config) {
-                  final selectedProxyName =
-                      config.currentSelectedMap[groupName];
-                  return selectedProxyName ?? '';
-                },
-                builder: (_, value, child) {
-                  if (value != proxy.name) return Container();
-                  return child!;
-                },
-                child: Positioned.fill(
-                  child: Container(
-                    alignment: Alignment.topRight,
-                    margin: const EdgeInsets.all(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.secondaryContainer,
-                      ),
-                      child: const SelectIcon(),
-                    ),
-                  ),
-                ),
-              )
-          ],
+            );
+          },
+        ),
+        if (groupType.isURLTestOrFallback)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: _ProxyComputedMark(groupName: groupName, proxy: proxy),
+          ),
+      ],
+    );
+  }
+}
+
+class _ProxyDesc extends StatelessWidget {
+  final Proxy proxy;
+
+  const _ProxyDesc({required this.proxy});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<AppState, String>(
+      selector: (context, appState) => appState.getDesc(
+        proxy.type,
+        proxy.name,
+      ),
+      builder: (_, desc, __) {
+        return EmojiText(
+          desc,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: context.textTheme.bodySmall?.color?.opacity80,
+          ),
         );
       },
+    );
+  }
+}
+
+class _ProxyComputedMark extends StatelessWidget {
+  final String groupName;
+  final Proxy proxy;
+
+  const _ProxyComputedMark({
+    required this.groupName,
+    required this.proxy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, String>(
+      selector: (_, config) {
+        final selectedProxyName = config.currentSelectedMap[groupName];
+        return selectedProxyName ?? '';
+      },
+      builder: (_, value, child) {
+        if (value != proxy.name) return const SizedBox();
+        return child!;
+      },
+      child: Container(
+        alignment: Alignment.topRight,
+        margin: const EdgeInsets.all(8),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: context.colorScheme.secondaryContainer,
+          ),
+          child: const SelectIcon(),
+        ),
+      ),
     );
   }
 }

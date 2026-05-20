@@ -226,13 +226,14 @@ class SelectIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.inversePrimary,
+      color: Theme.of(context).colorScheme.secondaryContainer,
       shape: const CircleBorder(),
       child: Container(
         padding: const EdgeInsets.all(4),
-        child: const Icon(
+        child: Icon(
           Icons.check,
           size: 16,
+          color: Theme.of(context).colorScheme.onSecondaryContainer,
         ),
       ),
     );
