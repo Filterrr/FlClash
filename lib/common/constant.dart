@@ -18,6 +18,8 @@ const helperTag = "2024125";
 const httpTimeoutDuration = Duration(milliseconds: 5000);
 const moreDuration = Duration(milliseconds: 100);
 const animateDuration = Duration(milliseconds: 100);
+const midDuration = Duration(milliseconds: 200);
+const commonDuration = Duration(milliseconds: 300);
 const defaultUpdateDuration = Duration(days: 1);
 const mmdbFileName = "geoip.metadb";
 const asnFileName = "ASN.mmdb";
@@ -42,6 +44,16 @@ const profilesDirectoryName = "profiles";
 const localhost = "127.0.0.1";
 const clashConfigKey = "clash_config";
 const configKey = "config";
+final baseInfoEdgeInsets = EdgeInsets.symmetric(
+  vertical: 16,
+  horizontal: 16,
+);
+final listHeaderPadding = EdgeInsets.only(
+  left: 16,
+  right: 8,
+  top: 24,
+  bottom: 8,
+);
 const listItemPadding = EdgeInsets.symmetric(horizontal: 16);
 const double dialogCommonWidth = 300;
 const repository = "chen08209/FlClash";
@@ -51,11 +63,13 @@ const maxLaptopWidth = 840;
 const geodataLoaderMemconservative = "memconservative";
 const geodataLoaderStandard = "standard";
 const defaultTestUrl = "https://www.gstatic.com/generate_204";
-final filter = ImageFilter.blur(
+final commonFilter = ImageFilter.blur(
   sigmaX: 5,
   sigmaY: 5,
   tileMode: TileMode.mirror,
 );
+@deprecated
+final filter = commonFilter;
 
 const navigationItemListEquality = ListEquality<NavigationItem>();
 const connectionListEquality = ListEquality<Connection>();
@@ -78,4 +92,14 @@ const viewModeColumnsMap = {
   ViewMode.desktop: [4, 3],
 };
 
-const defaultPrimaryColor = Colors.brown;
+const defaultPrimaryColor = 0XFFD8C0C3;
+
+const defaultPrimaryColors = [
+  0xFF795548,
+  0xFF03A9F4,
+  0xFFFFFF00,
+  0XFFBBC9CC,
+  0XFFABD397,
+  defaultPrimaryColor,
+  0XFF665390,
+];

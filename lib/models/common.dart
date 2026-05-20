@@ -338,13 +338,13 @@ class SystemColorSchemes {
               brightness: Brightness.dark,
             )
           : ColorScheme.fromSeed(
-              seedColor: defaultPrimaryColor,
+              seedColor: Color(defaultPrimaryColor),
               brightness: Brightness.dark,
             );
     }
     return lightColorScheme != null
         ? ColorScheme.fromSeed(seedColor: darkColorScheme!.primary)
-        : ColorScheme.fromSeed(seedColor: defaultPrimaryColor);
+        : ColorScheme.fromSeed(seedColor: Color(defaultPrimaryColor));
   }
 }
 

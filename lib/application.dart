@@ -229,6 +229,11 @@ class ApplicationState extends State<Application> {
                         systemColorSchemes: systemColorSchemes,
                         primaryColor: state.primaryColor,
                       ),
+                      floatingActionButtonTheme: FloatingActionButtonThemeData(
+                        shape: const RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
                     ),
                     darkTheme: ThemeData(
                       useMaterial3: true,
@@ -238,7 +243,12 @@ class ApplicationState extends State<Application> {
                         brightness: Brightness.dark,
                         systemColorSchemes: systemColorSchemes,
                         primaryColor: state.primaryColor,
-                      ).toPrueBlack(state.prueBlack),
+                      ).toPureBlack(state.prueBlack),
+                      floatingActionButtonTheme: FloatingActionButtonThemeData(
+                        shape: const RoundedSuperellipseBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        ),
+                      ),
                     ),
                     home: child,
                   );

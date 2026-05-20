@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 
 class CommonScaffold extends StatefulWidget {
   final Widget body;
-  final Widget? bottomNavigationBar;
-  final Widget? sideNavigationBar;
   final String title;
   final Widget? leading;
   final List<Widget>? actions;
@@ -15,8 +13,6 @@ class CommonScaffold extends StatefulWidget {
   const CommonScaffold({
     super.key,
     required this.body,
-    this.sideNavigationBar,
-    this.bottomNavigationBar,
     this.leading,
     required this.title,
     this.actions,
@@ -102,13 +98,11 @@ class CommonScaffoldState extends State<CommonScaffold> {
     }
   }
 
-  Widget? get _sideNavigationBar => widget.sideNavigationBar;
-
   Widget get body => SafeArea(child: widget.body);
 
   @override
   Widget build(BuildContext context) {
-    final scaffold = ValueListenableBuilder(
+    return ValueListenableBuilder(
       valueListenable: _floatingActionButton,
       builder: (_, value, __) {
         return Scaffold(
@@ -136,9 +130,7 @@ class CommonScaffoldState extends State<CommonScaffold> {
                                 ? Brightness.light
                                 : Brightness.dark,
                         systemNavigationBarColor:
-                            widget.bottomNavigationBar != null
-                                ? context.colorScheme.surfaceContainer
-                                : context.colorScheme.surface,
+                            context.colorScheme.surface,
                         systemNavigationBarDividerColor: Colors.transparent,
                       ),
                       automaticallyImplyLeading:
@@ -167,26 +159,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
           ),
           body: body,
           floatingActionButton: value,
-          bottomNavigationBar: widget.bottomNavigationBar,
         );
       },
     );
-    return _sideNavigationBar != null
-        ? Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _sideNavigationBar!,
-              Expanded(
-                flex: 1,
-                child: Material(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: scaffold,
-                  ),
-                ),
-              ),
-            ],
-          )
-        : scaffold;
   }
 }

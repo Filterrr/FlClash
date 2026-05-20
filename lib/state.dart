@@ -279,7 +279,7 @@ class GlobalState {
         barrierDismissible: dismissible,
       ),
       builder: (_) => child,
-      filter: filter,
+      filter: commonFilter,
     );
   }
 

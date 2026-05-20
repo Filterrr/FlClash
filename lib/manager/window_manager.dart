@@ -261,7 +261,7 @@ class _WindowHeaderState extends State<WindowHeader> {
                 _updateMaximized();
               },
               child: Container(
-                color: context.colorScheme.secondary.toSoft(),
+                color: context.colorScheme.secondary.opacity12,
                 alignment: Alignment.centerLeft,
                 height: kHeaderHeight,
               ),

@@ -58,7 +58,7 @@ showExtendPage(
         );
       },
       constraints: const BoxConstraints(),
-      filter: isBlur ? filter : null,
+      filter: isBlur ? commonFilter : null,
     ),
   );
 }

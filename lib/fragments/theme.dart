@@ -200,12 +200,7 @@ class _ThemeColorsBoxState extends State<ThemeColorsBox> {
     ];
     List<Color?> primaryColors = [
       null,
-      defaultPrimaryColor,
-      Colors.pinkAccent,
-      Colors.lightBlue,
-      Colors.greenAccent,
-      Colors.yellowAccent,
-      Colors.purple,
+      ...defaultPrimaryColors.map((c) => Color(c)),
     ];
     List<FontFamilyItem> fontFamilyItems = [
       FontFamilyItem(

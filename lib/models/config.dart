@@ -145,10 +145,10 @@ class ProxiesStyle with _$ProxiesStyle {
 final defaultThemeProps = Platform.isWindows
     ? const ThemeProps().copyWith(
         fontFamily: FontFamily.miSans,
-        primaryColor: defaultPrimaryColor.value,
+        primaryColor: defaultPrimaryColor,
       )
     : const ThemeProps().copyWith(
-        primaryColor: defaultPrimaryColor.value,
+        primaryColor: defaultPrimaryColor,
       );
 
 @freezed

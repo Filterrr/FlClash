@@ -1,5 +1,6 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
 import 'text.dart';
@@ -17,19 +18,25 @@ class Info {
 class InfoHeader extends StatelessWidget {
   final Info info;
   final List<Widget> actions;
+  final EdgeInsets? padding;
 
   const InfoHeader({
     super.key,
     required this.info,
+    this.padding,
     List<Widget>? actions,
   }) : actions = actions ?? const [];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+    EdgeInsetsGeometry nextPadding = padding ?? baseInfoEdgeInsets;
+    if (actions.isNotEmpty) {
+      nextPadding = nextPadding.subtract(const EdgeInsets.symmetric(vertical: 8));
+    }
+    return Padding(
+      padding: nextPadding,
       child: Row(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
@@ -40,7 +47,7 @@ class InfoHeader extends StatelessWidget {
                 if (info.iconData != null) ...[
                   Icon(
                     info.iconData,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(
                     width: 8,
@@ -53,7 +60,9 @@ class InfoHeader extends StatelessWidget {
                       info.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                   ),
                 ),
@@ -63,13 +72,17 @@ class InfoHeader extends StatelessWidget {
           const SizedBox(
             width: 8,
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ...actions,
-            ],
-          ),
+          if (actions.isNotEmpty)
+            SizedBox(
+              height: globalState.measure.titleSmallHeight + 16,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ...actions,
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -82,28 +95,30 @@ class CommonCard extends StatelessWidget {
     bool? isSelected,
     this.type = CommonCardType.plain,
     this.onPressed,
-    this.info,
     this.selectWidget,
-    this.radius = 12,
+    this.radius,
     required this.child,
+    this.info,
+    this.onLongPress,
   }) : isSelected = isSelected ?? false;
 
   final bool isSelected;
   final void Function()? onPressed;
+  final void Function()? onLongPress;
   final Widget? selectWidget;
   final Widget child;
   final Info? info;
   final CommonCardType type;
-  final double radius;
+  final double? radius;
 
   BorderSide getBorderSide(BuildContext context, Set<WidgetState> states) {
+    final colorScheme = context.colorScheme;
     if (type == CommonCardType.filled) {
       return BorderSide.none;
     }
-    final colorScheme = Theme.of(context).colorScheme;
     final hoverColor = isSelected
-        ? colorScheme.primary.toLight()
-        : colorScheme.primary.toLighter();
+        ? colorScheme.primary.opacity80
+        : colorScheme.primary.opacity60;
     if (states.contains(WidgetState.hovered) ||
         states.contains(WidgetState.focused) ||
         states.contains(WidgetState.pressed)) {
@@ -112,31 +127,38 @@ class CommonCard extends StatelessWidget {
       );
     }
     return BorderSide(
-      color: isSelected ? colorScheme.primary : colorScheme.onSurface.toSoft(),
+      color: isSelected
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerHighest,
     );
   }
 
   Color? getBackgroundColor(BuildContext context, Set<WidgetState> states) {
-    final colorScheme = Theme.of(context).colorScheme;
-    switch (type) {
-      case CommonCardType.plain:
-        if (isSelected) {
-          return colorScheme.secondaryContainer;
-        }
-        if (states.isEmpty) {
-          return colorScheme.secondaryContainer.toLittle();
-        }
-        return Theme.of(context)
-            .outlinedButtonTheme
-            .style
-            ?.backgroundColor
-            ?.resolve(states);
-      case CommonCardType.filled:
-        if (isSelected) {
-          return colorScheme.secondaryContainer;
-        }
-        return colorScheme.surfaceContainer;
+    final colorScheme = context.colorScheme;
+    if (type == CommonCardType.filled) {
+      if (isSelected) {
+        return colorScheme.secondaryContainer.opacity80;
+      }
+      return colorScheme.surfaceContainerHigh;
     }
+    if (isSelected) {
+      return colorScheme.secondaryContainer;
+    }
+    return colorScheme.surfaceContainerLow;
+  }
+
+  Color? getForegroundColor(BuildContext context, Set<WidgetState> states) {
+    final colorScheme = context.colorScheme;
+    if (type == CommonCardType.filled) {
+      if (isSelected) {
+        return colorScheme.onSecondaryContainer;
+      }
+      return colorScheme.onSurfaceVariant;
+    }
+    if (isSelected) {
+      return colorScheme.onSecondaryContainer;
+    }
+    return colorScheme.onSurfaceVariant;
   }
 
   @override
@@ -148,6 +170,7 @@ class CommonCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InfoHeader(
+            padding: baseInfoEdgeInsets.copyWith(bottom: 0),
             info: info!,
           ),
           Flexible(
@@ -170,16 +193,22 @@ class CommonCard extends StatelessWidget {
       );
     }
     return OutlinedButton(
+      onLongPress: onLongPress,
       clipBehavior: Clip.antiAlias,
       style: ButtonStyle(
         padding: const WidgetStatePropertyAll(EdgeInsets.zero),
         shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radius),
+          RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.circular(radius ?? 14),
           ),
         ),
+        iconColor: WidgetStatePropertyAll(context.colorScheme.primary),
+        iconSize: WidgetStateProperty.all(20),
         backgroundColor: WidgetStateProperty.resolveWith(
           (states) => getBackgroundColor(context, states),
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => getForegroundColor(context, states),
         ),
         side: WidgetStateProperty.resolveWith(
           (states) => getBorderSide(context, states),
@@ -197,14 +226,42 @@ class SelectIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.inversePrimary,
+      color: Theme.of(context).colorScheme.secondaryContainer,
       shape: const CircleBorder(),
       child: Container(
         padding: const EdgeInsets.all(4),
-        child: const Icon(
+        child: Icon(
           Icons.check,
           size: 16,
+          color: Theme.of(context).colorScheme.onSecondaryContainer,
         ),
+      ),
+    );
+  }
+}
+
+class SettingsBlock extends StatelessWidget {
+  final String title;
+  final List<Widget> settings;
+
+  const SettingsBlock({
+    super.key,
+    required this.title,
+    required this.settings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          InfoHeader(info: Info(label: title)),
+          Card(
+            color: context.colorScheme.surfaceContainer,
+            child: Column(children: settings),
+          ),
+        ],
       ),
     );
   }

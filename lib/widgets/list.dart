@@ -427,11 +427,15 @@ class ListItem<T> extends StatelessWidget {
 
 class ListHeader extends StatelessWidget {
   final String title;
+  final String? subTitle;
   final List<Widget> actions;
+  final EdgeInsets? padding;
 
   const ListHeader({
     super.key,
     required this.title,
+    this.subTitle,
+    this.padding,
     List<Widget>? actions,
   }) : actions = actions ?? const [];
 
@@ -439,29 +443,38 @@ class ListHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 12,
-      ),
+      padding: padding ?? listHeaderPadding,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-          ),
           Expanded(
-            flex: 1,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...actions,
+                Text(
+                  title,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant.opacity80,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (subTitle != null)
+                  Text(
+                    subTitle!,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.outline,
+                    ),
+                  ),
               ],
             ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ...actions,
+            ],
           ),
         ],
       ),
