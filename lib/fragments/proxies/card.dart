@@ -74,7 +74,9 @@ class ProxyCard extends StatelessWidget {
           proxy.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
       );
     } else {
@@ -84,7 +86,9 @@ class ProxyCard extends StatelessWidget {
           proxy.name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium,
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
       );
     }
@@ -237,7 +241,7 @@ class _ProxyComputedMark extends StatelessWidget {
       },
       builder: (_, value, child) {
         if (value != proxy.name) return const SizedBox();
-        return child!;
+        return FadeScaleEnterBox(child: child!);
       },
       child: Container(
         alignment: Alignment.topRight,
@@ -267,7 +271,7 @@ class DelayChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final delayColor = other.getDelayColor(delay) ?? context.colorScheme.onSurface;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: delayColor.opacity15,
         borderRadius: BorderRadius.circular(6),
