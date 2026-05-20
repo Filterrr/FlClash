@@ -71,7 +71,7 @@ class CommonTargetIcon extends StatelessWidget {
       return Image.memory(
         base64,
         gaplessPlayback: true,
-        errorBuilder: (_, error, _) {
+        errorBuilder: (_, error, ___) {
           return _defaultIcon();
         },
       );
