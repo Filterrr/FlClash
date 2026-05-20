@@ -104,10 +104,12 @@ class HomePage extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 1,
-                  child: CommonScaffold(
-                    key: globalState.homeScaffoldKey,
-                    title: Intl.message(currentLabel),
-                    body: child!,
+                  child: ClipRect(
+                    child: CommonScaffold(
+                      key: globalState.homeScaffoldKey,
+                      title: Intl.message(currentLabel),
+                      body: child!,
+                    ),
                   ),
                 ),
               ],
