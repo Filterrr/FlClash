@@ -271,8 +271,7 @@ class DelayChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final delayColor = other.getDelayColor(delay) ?? context.colorScheme.onSurface;
     return Container(
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
       decoration: BoxDecoration(
         color: delayColor.opacity15,
         borderRadius: BorderRadius.circular(12),
