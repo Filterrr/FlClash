@@ -56,12 +56,8 @@ class ProxyCard extends StatelessWidget {
                   )
                 : GestureDetector(
                     onTap: _handleTestCurrentDelay,
-                    child: Text(
-                      delay > 0 ? '$delay ms' : 'Timeout',
-                      style: context.textTheme.labelSmall?.copyWith(
-                        overflow: TextOverflow.ellipsis,
-                        color: other.getDelayColor(delay),
-                      ),
+                    child: DelayChip(
+                      delay: delay,
                     ),
                   ),
           );
@@ -253,6 +249,34 @@ class _ProxyComputedMark extends StatelessWidget {
             color: context.colorScheme.secondaryContainer,
           ),
           child: const SelectIcon(),
+        ),
+      ),
+    );
+  }
+}
+
+class DelayChip extends StatelessWidget {
+  final int delay;
+
+  const DelayChip({
+    super.key,
+    required this.delay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final delayColor = other.getDelayColor(delay) ?? context.colorScheme.onSurface;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: delayColor.opacity15,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        delay > 0 ? '$delay ms' : 'Timeout',
+        style: context.textTheme.labelSmall?.copyWith(
+          overflow: TextOverflow.ellipsis,
+          color: delayColor,
         ),
       ),
     );
