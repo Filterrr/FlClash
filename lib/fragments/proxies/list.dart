@@ -141,12 +141,15 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
           final children = proxies
               .map<Widget>(
                 (proxy) => Flexible(
-                  child: ProxyCard(
-                    type: type,
-                    groupType: group.type,
-                    key: ValueKey('$groupName.${proxy.name}'),
-                    proxy: proxy,
-                    groupName: groupName,
+                  child: SizedBox(
+                    height: getItemHeight(type),
+                    child: ProxyCard(
+                      type: type,
+                      groupType: group.type,
+                      key: ValueKey('$groupName.${proxy.name}'),
+                      proxy: proxy,
+                      groupName: groupName,
+                    ),
                   ),
                 ),
               )
@@ -194,6 +197,7 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
     return SizedBox(
       height: listHeaderHeight,
       child: ListHeader(
+        enterAnimated: false,
         onScrollToSelected: _scrollToGroupSelected,
         key: Key(groupName),
         isExpand: isExpand,
@@ -340,6 +344,7 @@ class ListHeader extends StatefulWidget {
   final Function(String groupName) onChange;
   final Function(String groupName) onScrollToSelected;
   final bool isExpand;
+  final bool enterAnimated;
 
   const ListHeader({
     super.key,
@@ -347,16 +352,14 @@ class ListHeader extends StatefulWidget {
     required this.onChange,
     required this.onScrollToSelected,
     required this.isExpand,
+    this.enterAnimated = true,
   });
 
   @override
   State<ListHeader> createState() => _ListHeaderState();
 }
 
-class _ListHeaderState extends State<ListHeader>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _iconTurns;
+class _ListHeaderState extends State<ListHeader> {
   var isLock = false;
 
   String get icon => widget.group.icon;
@@ -367,48 +370,15 @@ class _ListHeaderState extends State<ListHeader>
 
   bool get isExpand => widget.isExpand;
 
-  _delayTest(List<Proxy> proxies) async {
+  Future<void> _delayTest() async {
     if (isLock) return;
     isLock = true;
-    await delayTest(proxies);
+    await delayTest(widget.group.all);
     isLock = false;
   }
 
-  _handleChange(String groupName) {
+  void _handleChange(String groupName) {
     widget.onChange(groupName);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _iconTurns = _animationController.drive(
-      Tween<double>(begin: 0.0, end: 0.5),
-    );
-    if (isExpand) {
-      _animationController.value = 1.0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(ListHeader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isExpand != widget.isExpand) {
-      if (isExpand) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
-    }
   }
 
   Widget _buildIcon() {
@@ -433,30 +403,40 @@ class _ListHeaderState extends State<ListHeader>
           },
           builder: (_, icon, __) {
             return switch (iconStyle) {
-              ProxiesIconStyle.standard => Container(
-                  height: 48,
-                  width: 48,
-                  margin: const EdgeInsets.only(
-                    right: 16,
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: context.colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: CommonIcon(
-                    src: icon,
-                    size: 32,
-                  ),
+              ProxiesIconStyle.standard => LayoutBuilder(
+                  builder: (_, constraints) {
+                    return Container(
+                      margin: const EdgeInsets.only(right: 16),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Container(
+                          height: constraints.maxHeight,
+                          width: constraints.maxWidth,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: context.colorScheme.secondaryContainer,
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: CommonTargetIcon(
+                            src: icon,
+                            size: constraints.maxHeight - 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ProxiesIconStyle.icon => Container(
-                  margin: const EdgeInsets.only(
-                    right: 16,
-                  ),
-                  child: CommonIcon(
-                    src: icon,
-                    size: 42,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: LayoutBuilder(
+                    builder: (_, constraints) {
+                      return CommonTargetIcon(
+                        src: icon,
+                        size: constraints.maxHeight - 8,
+                      );
+                    },
                   ),
                 ),
               ProxiesIconStyle.none => Container(),
@@ -470,14 +450,12 @@ class _ListHeaderState extends State<ListHeader>
   @override
   Widget build(BuildContext context) {
     return CommonCard(
+      enterAnimated: widget.enterAnimated,
       key: widget.key,
       radius: 18,
       type: CommonCardType.filled,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -490,13 +468,11 @@ class _ListHeaderState extends State<ListHeader>
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        EmojiText(
                           groupName,
                           style: context.textTheme.titleMedium,
                         ),
-                        const SizedBox(
-                          height: 4,
-                        ),
+                        const SizedBox(height: 4),
                         Flexible(
                           flex: 1,
                           child: Row(
@@ -515,8 +491,7 @@ class _ListHeaderState extends State<ListHeader>
                                   builder: (currentGroupName) {
                                     return Row(
                                       mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
@@ -526,8 +501,9 @@ class _ListHeaderState extends State<ListHeader>
                                             child: EmojiText(
                                               overflow: TextOverflow.ellipsis,
                                               " · $currentGroupName",
-                                              style: context.textTheme
-                                                  .labelMedium?.toLight,
+                                              style: context
+                                                  .textTheme.labelMedium
+                                                  ?.toLight,
                                             ),
                                           ),
                                         ]
@@ -539,12 +515,10 @@ class _ListHeaderState extends State<ListHeader>
                             ],
                           ),
                         ),
-                        const SizedBox(
-                          width: 4,
-                        ),
+                        const SizedBox(width: 4),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -552,43 +526,45 @@ class _ListHeaderState extends State<ListHeader>
               children: [
                 if (isExpand) ...[
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(2),
                     onPressed: () {
                       widget.onScrollToSelected(groupName);
                     },
-                    icon: const Icon(
-                      Icons.adjust,
+                    style: const ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    iconSize: 19,
+                    icon: const Icon(Icons.adjust),
                   ),
+                  const SizedBox(width: 2),
                   IconButton(
-                    onPressed: () {
-                      _delayTest(widget.group.all);
-                    },
-                    icon: const Icon(
-                      Icons.network_ping,
+                    iconSize: 20,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.all(2),
+                    onPressed: _delayTest,
+                    style: const ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    icon: const Icon(Icons.network_ping),
                   ),
-                  const SizedBox(
-                    width: 4,
+                  const SizedBox(width: 6),
+                ] else
+                  const SizedBox(width: 6),
+                IconButton.filledTonal(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(2),
+                  iconSize: 24,
+                  style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                ],
-                AnimatedBuilder(
-                  animation: _animationController.view,
-                  builder: (_, __) {
-                    return IconButton.filledTonal(
-                      onPressed: () {
-                        _handleChange(groupName);
-                      },
-                      icon: RotationTransition(
-                        turns: _iconTurns,
-                        child: const Icon(
-                          Icons.expand_more,
-                        ),
-                      ),
-                    );
+                  onPressed: () {
+                    _handleChange(groupName);
                   },
-                )
+                  icon: CommonExpandIcon(expand: isExpand),
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),

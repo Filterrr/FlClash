@@ -50,3 +50,52 @@ class CommonIcon extends StatelessWidget {
     );
   }
 }
+
+class CommonTargetIcon extends StatelessWidget {
+  final String src;
+  final double size;
+
+  const CommonTargetIcon({super.key, required this.src, required this.size});
+
+  Widget _defaultIcon() {
+    return Icon(IconsExt.target, size: size);
+  }
+
+  Widget _buildIcon() {
+    if (src.isEmpty) {
+      return _defaultIcon();
+    }
+
+    final base64 = src.getBase64;
+    if (base64 != null) {
+      return Image.memory(
+        base64,
+        gaplessPlayback: true,
+        errorBuilder: (_, error, _) {
+          return _defaultIcon();
+        },
+      );
+    }
+
+    return CommonIcon(src: src, size: size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(width: size, height: size, child: _buildIcon());
+  }
+}
+
+class CommonExpandIcon extends StatelessWidget {
+  final bool expand;
+
+  const CommonExpandIcon({super.key, required this.expand});
+
+  @override
+  Widget build(BuildContext context) {
+    return RotatedBox(
+      quarterTurns: expand ? 2 : 0,
+      child: const Icon(Icons.expand_more),
+    );
+  }
+}

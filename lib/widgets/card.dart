@@ -3,6 +3,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
+import 'fade_box.dart';
 import 'text.dart';
 
 class Info {
@@ -100,8 +101,10 @@ class CommonCard extends StatelessWidget {
     required this.child,
     this.info,
     this.onLongPress,
+    this.enterAnimated = false,
   }) : isSelected = isSelected ?? false;
 
+  final bool enterAnimated;
   final bool isSelected;
   final void Function()? onPressed;
   final void Function()? onLongPress;
@@ -192,7 +195,7 @@ class CommonCard extends StatelessWidget {
         children: children,
       );
     }
-    return OutlinedButton(
+    final card = OutlinedButton(
       onLongPress: onLongPress,
       clipBehavior: Clip.antiAlias,
       style: ButtonStyle(
@@ -217,6 +220,11 @@ class CommonCard extends StatelessWidget {
       onPressed: onPressed,
       child: childWidget,
     );
+
+    return switch (enterAnimated) {
+      true => FadeScaleEnterBox(child: card),
+      false => card,
+    };
   }
 }
 

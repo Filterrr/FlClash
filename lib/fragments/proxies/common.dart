@@ -24,15 +24,15 @@ Widget currentSelectedProxyNameBuilder({
 
 double get listHeaderHeight {
   final measure = globalState.measure;
-  return 24 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight;
+  return 20 + measure.titleMediumHeight + 4 + measure.bodyMediumHeight + 2;
 }
 
 double getItemHeight(ProxyCardType proxyCardType) {
   final measure = globalState.measure;
   final baseHeight =
-      12 * 2 + measure.bodyMediumHeight * 2 + measure.bodySmallHeight + 8;
+      16 + measure.bodyMediumHeight * 2 + measure.bodySmallHeight + 8 + 4;
   return switch (proxyCardType) {
-    ProxyCardType.expand => baseHeight + measure.labelSmallHeight + 8,
+    ProxyCardType.expand => baseHeight + measure.labelSmallHeight + 6,
     ProxyCardType.shrink => baseHeight,
     ProxyCardType.min => baseHeight - measure.bodyMediumHeight,
   };
