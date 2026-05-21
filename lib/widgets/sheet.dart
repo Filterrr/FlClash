@@ -6,6 +6,63 @@ import 'package:flutter/material.dart';
 
 import 'side_sheet.dart';
 
+showExtendBottomSheet(
+  BuildContext context, {
+  required Widget body,
+  required String title,
+}) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final screenHeight = MediaQuery.of(context).size.height;
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: colorScheme.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(24),
+      ),
+    ),
+    builder: (context) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: screenHeight * 0.85,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 12,
+                bottom: 4,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: body,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 showExtendPage(
   BuildContext context, {
   required Widget body,
@@ -24,12 +81,10 @@ showExtendPage(
   final isMobile =
       globalState.appController.appState.viewMode == ViewMode.mobile;
   if (isMobile) {
-    BaseNavigator.push(
+    showExtendBottomSheet(
       context,
-      CommonScaffold(
-        title: title,
-        body: uniqueBody,
-      ),
+      body: uniqueBody,
+      title: title,
     );
     return;
   }
@@ -73,9 +128,16 @@ showSheet({
   final viewMode = globalState.appController.appState.viewMode;
   final isMobile = viewMode == ViewMode.mobile;
   if (isMobile) {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: isScrollControlled,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24),
+        ),
+      ),
       builder: (context) {
         return SafeArea(
           child: builder(
