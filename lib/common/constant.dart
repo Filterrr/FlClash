@@ -94,6 +94,11 @@ const viewModeColumnsMap = {
 
 const defaultPrimaryColor = 0XFFD8C0C3;
 
+double getWidgetHeight(num lines) {
+  final space = 14.mAp;
+  return max(lines * (80.ap + space) - space, 0);
+}
+
 const defaultPrimaryColors = [
   0xFF795548,
   0xFF03A9F4,
