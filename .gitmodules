@@ -5,4 +5,4 @@
 [submodule "core/Clash.Meta"]
 	path = core/Clash.Meta
 	url = https://github.com/Filterrr/Clash.Meta.git
-	branch = Meta
+	branch = Alpha
