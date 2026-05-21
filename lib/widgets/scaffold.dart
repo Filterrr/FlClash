@@ -9,7 +9,6 @@ class CommonScaffold extends StatefulWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final bool automaticallyImplyLeading;
-  final bool inBottomSheet;
 
   const CommonScaffold({
     super.key,
@@ -18,7 +17,6 @@ class CommonScaffold extends StatefulWidget {
     required this.title,
     this.actions,
     this.automaticallyImplyLeading = true,
-    this.inBottomSheet = false,
   });
 
   CommonScaffold.open({
@@ -104,12 +102,10 @@ class CommonScaffoldState extends State<CommonScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final scaffold = ValueListenableBuilder(
+    return ValueListenableBuilder(
       valueListenable: _floatingActionButton,
       builder: (_, value, __) {
         return Scaffold(
-          backgroundColor:
-              widget.inBottomSheet ? Colors.transparent : null,
           resizeToAvoidBottomInset: true,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -122,10 +118,6 @@ class CommonScaffoldState extends State<CommonScaffold> {
                     final realActions =
                         actions.isNotEmpty ? actions : widget.actions;
                     return AppBar(
-                      backgroundColor:
-                          widget.inBottomSheet ? Colors.transparent : null,
-                      elevation: widget.inBottomSheet ? 0 : null,
-                      scrolledUnderElevation: widget.inBottomSheet ? 0 : null,
                       centerTitle: false,
                       systemOverlayStyle: SystemUiOverlayStyle(
                         statusBarColor: Colors.transparent,
@@ -170,14 +162,5 @@ class CommonScaffoldState extends State<CommonScaffold> {
         );
       },
     );
-    if (widget.inBottomSheet) {
-      return ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-        child: scaffold,
-      );
-    }
-    return scaffold;
   }
 }

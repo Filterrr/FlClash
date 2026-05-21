@@ -31,7 +31,6 @@ Future<T?> showExtendBottomSheet<T>(
         child: CommonScaffold(
           title: title,
           body: body,
-          inBottomSheet: true,
           automaticallyImplyLeading: false,
           leading: SizedBox(
             height: kToolbarHeight,
