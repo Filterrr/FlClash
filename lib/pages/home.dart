@@ -95,24 +95,15 @@ class HomePage extends StatelessWidget {
               ),
             );
           } else {
-            return Row(
-              children: [
-                AppSidebar(
-                  navigationItems: navigationItems,
-                  currentIndex: currentIndex,
-                  onDestinationSelected: globalState.appController.toPage,
-                ),
-                Expanded(
-                  flex: 1,
-                  child: ClipRect(
-                    child: CommonScaffold(
-                      key: globalState.homeScaffoldKey,
-                      title: Intl.message(currentLabel),
-                      body: child!,
-                    ),
-                  ),
-                ),
-              ],
+            return AppSidebarContainer(
+              navigationItems: navigationItems,
+              currentIndex: currentIndex,
+              onDestinationSelected: globalState.appController.toPage,
+              child: CommonScaffold(
+                key: globalState.homeScaffoldKey,
+                title: Intl.message(currentLabel),
+                body: child!,
+              ),
             );
           }
         },

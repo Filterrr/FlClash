@@ -1,103 +1,114 @@
-import 'dart:io';
-
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class AppSidebar extends StatelessWidget {
+class AppSidebarContainer extends StatelessWidget {
+  final Widget child;
   final List<NavigationItem> navigationItems;
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
 
-  const AppSidebar({
+  const AppSidebarContainer({
     super.key,
+    required this.child,
     required this.navigationItems,
     required this.currentIndex,
     required this.onDestinationSelected,
   });
 
+  Widget _buildBackground({required BuildContext context, required Widget child}) {
+    return Material(color: context.colorScheme.surfaceContainer, child: child);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: context.colorScheme.surfaceContainer,
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (Platform.isMacOS) const SizedBox(height: 22),
-            const SizedBox(height: 10),
-            if (!Platform.isMacOS) ...[
-              const ClipRect(child: AppIcon()),
-              const SizedBox(height: 12),
-            ],
-            Expanded(
-              child: Selector<Config, bool>(
-                selector: (_, config) => config.appSetting.showLabel,
-                builder: (_, showLabel, __) {
-                  return ScrollConfiguration(
-                    behavior: _HiddenBarScrollBehavior(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: NavigationRail(
-                            scrollable: true,
-                            minExtendedWidth: 200,
-                            backgroundColor: Colors.transparent,
-                            selectedLabelTextStyle: context
-                                .textTheme
-                                .labelLarge!
-                                .copyWith(
-                                    color: context.colorScheme.onSurface),
-                            unselectedLabelTextStyle: context
-                                .textTheme
-                                .labelLarge!
-                                .copyWith(
-                                    color: context.colorScheme.onSurface),
-                            destinations: navigationItems
-                                .map(
-                                  (e) => NavigationRailDestination(
-                                    icon: e.icon,
-                                    label: Text(Intl.message(e.label)),
-                                  ),
-                                )
-                                .toList(),
-                            onDestinationSelected: onDestinationSelected,
-                            extended: false,
-                            selectedIndex: currentIndex,
-                            labelType: showLabel
-                                ? NavigationRailLabelType.all
-                                : NavigationRailLabelType.none,
-                          ),
+    return Row(
+      children: [
+        _buildBackground(
+          context: context,
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (system.isMacOS) const SizedBox(height: 22),
+                const SizedBox(height: 10),
+                if (!system.isMacOS) ...[
+                  const ClipRect(child: AppIcon()),
+                  const SizedBox(height: 12),
+                ],
+                Expanded(
+                  child: Selector<Config, bool>(
+                    selector: (_, config) => config.appSetting.showLabel,
+                    builder: (_, showLabel, __) {
+                      return ScrollConfiguration(
+                        behavior: _HiddenBarScrollBehavior(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: NavigationRail(
+                                scrollable: true,
+                                minExtendedWidth: 200,
+                                backgroundColor: Colors.transparent,
+                                selectedLabelTextStyle: context
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(
+                                        color: context.colorScheme.onSurface),
+                                unselectedLabelTextStyle: context
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(
+                                        color: context.colorScheme.onSurface),
+                                destinations: navigationItems
+                                    .map(
+                                      (e) => NavigationRailDestination(
+                                        icon: e.icon,
+                                        label: Text(Intl.message(e.label)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onDestinationSelected: onDestinationSelected,
+                                extended: false,
+                                selectedIndex: currentIndex,
+                                labelType: showLabel
+                                    ? NavigationRailLabelType.all
+                                    : NavigationRailLabelType.none,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                IconButton(
+                  onPressed: () {
+                    final config = globalState.appController.config;
+                    final appSetting = config.appSetting;
+                    config.appSetting = appSetting.copyWith(
+                      showLabel: !appSetting.showLabel,
+                    );
+                  },
+                  icon: Icon(
+                    Icons.menu,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-            IconButton(
-              onPressed: () {
-                final config = globalState.appController.config;
-                final appSetting = config.appSetting;
-                config.appSetting = appSetting.copyWith(
-                  showLabel: !appSetting.showLabel,
-                );
-              },
-              icon: Icon(
-                Icons.menu,
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          flex: 1,
+          child: ClipRect(child: child),
+        ),
+      ],
     );
   }
 }

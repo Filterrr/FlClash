@@ -11,4 +11,8 @@ extension TextStyleExtension on TextStyle {
   TextStyle get toBold => copyWith(fontWeight: FontWeight.bold);
 
   TextStyle get toMinus => copyWith(fontSize: fontSize! - 2);
+
+  TextStyle adjustSize(int size) => copyWith(
+        fontSize: fontSize! + size,
+      );
 }

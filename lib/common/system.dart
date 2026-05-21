@@ -21,6 +21,12 @@ class System {
   bool get isDesktop =>
       Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
+  bool get isMacOS => Platform.isMacOS;
+
+  bool get isWindows => Platform.isWindows;
+
+  bool get isLinux => Platform.isLinux;
+
   Future<int> get version async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
     return switch (Platform.operatingSystem) {
