@@ -286,7 +286,7 @@ class _$AppSettingImpl implements _AppSetting {
       this.closeConnections = true,
       this.testUrl = defaultTestUrl,
       this.isAnimateToPage = true,
-      this.autoCheckUpdate = true,
+      this.autoCheckUpdate = false,
       this.showLabel = false,
       this.disclaimerAccepted = false,
       this.minimizeOnExit = true,
