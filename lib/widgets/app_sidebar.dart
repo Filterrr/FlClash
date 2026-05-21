@@ -82,42 +82,35 @@ class AppSidebarContainer extends StatelessWidget {
                   ),
                 ),
                 const Divider(height: 1, indent: 12, endIndent: 12),
-                _SidebarQuickSwitch(
-                  icon: Icons.shuffle,
-                  label: appLocalizations.systemProxy,
-                  selector: Selector<Config, bool>(
-                    selector: (_, config) => config.networkProps.systemProxy,
-                    builder: (_, value, __) {
-                      return Switch(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        value: value,
-                        onChanged: (v) {
-                          final config = globalState.appController.config;
-                          config.networkProps =
-                              config.networkProps.copyWith(systemProxy: v);
-                        },
-                      );
-                    },
-                  ),
+                Selector<Config, bool>(
+                  selector: (_, config) => config.networkProps.systemProxy,
+                  builder: (_, systemProxy, __) {
+                    return _SidebarQuickIcon(
+                      icon: Icons.shuffle,
+                      tooltip: appLocalizations.systemProxy,
+                      isActive: systemProxy,
+                      onPressed: () {
+                        final config = globalState.appController.config;
+                        config.networkProps =
+                            config.networkProps.copyWith(systemProxy: !systemProxy);
+                      },
+                    );
+                  },
                 ),
-                _SidebarQuickSwitch(
-                  icon: Icons.stacked_line_chart,
-                  label: appLocalizations.tun,
-                  selector: Selector<ClashConfig, bool>(
-                    selector: (_, clashConfig) => clashConfig.tun.enable,
-                    builder: (_, value, __) {
-                      return Switch(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        value: value,
-                        onChanged: (v) {
-                          final clashConfig =
-                              globalState.appController.clashConfig;
-                          clashConfig.tun =
-                              clashConfig.tun.copyWith(enable: v);
-                        },
-                      );
-                    },
-                  ),
+                Selector<ClashConfig, bool>(
+                  selector: (_, clashConfig) => clashConfig.tun.enable,
+                  builder: (_, tunEnable, __) {
+                    return _SidebarQuickIcon(
+                      icon: Icons.stacked_line_chart,
+                      tooltip: appLocalizations.tun,
+                      isActive: tunEnable,
+                      onPressed: () {
+                        final clashConfig = globalState.appController.clashConfig;
+                        clashConfig.tun =
+                            clashConfig.tun.copyWith(enable: !tunEnable);
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 8),
                 IconButton(
@@ -147,36 +140,31 @@ class AppSidebarContainer extends StatelessWidget {
   }
 }
 
-class _SidebarQuickSwitch extends StatelessWidget {
+class _SidebarQuickIcon extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final Widget selector;
+  final String tooltip;
+  final bool isActive;
+  final VoidCallback onPressed;
 
-  const _SidebarQuickSwitch({
+  const _SidebarQuickIcon({
     required this.icon,
-    required this.label,
-    required this.selector,
+    required this.tooltip,
+    required this.isActive,
+    required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: context.colorScheme.onSurfaceVariant),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: context.textTheme.labelSmall?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          selector,
-        ],
+    final activeColor = context.colorScheme.primary;
+    final inactiveColor = context.colorScheme.onSurfaceVariant;
+    return Tooltip(
+      message: tooltip,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          color: isActive ? activeColor : inactiveColor,
+        ),
       ),
     );
   }
