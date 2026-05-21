@@ -508,7 +508,18 @@ List<Widget> generateSection({
         title: title,
         actions: actions,
       ),
-    ...genItems,
+    if (items.isNotEmpty)
+      Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: genItems.toList(),
+        ),
+      ),
   ];
 }
 

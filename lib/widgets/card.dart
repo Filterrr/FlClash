@@ -258,7 +258,12 @@ class SettingsBlock extends StatelessWidget {
         children: [
           InfoHeader(info: Info(label: title)),
           Card(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
             color: context.colorScheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.antiAlias,
             child: Column(children: settings),
           ),
         ],
