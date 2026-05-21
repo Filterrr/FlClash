@@ -13,6 +13,28 @@ typedef OnSelected = void Function(int index);
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  _handleDestinationSelected(BuildContext context, int index) {
+    final navigationItems =
+        globalState.appController.appState.currentNavigationItems;
+    if (index > navigationItems.length - 1) return;
+    final item = navigationItems[index];
+    if (item.label == "dashboard") {
+      globalState.appController.toPage(index);
+      return;
+    }
+    final isMobile =
+        globalState.appController.appState.viewMode == ViewMode.mobile;
+    if (isMobile) {
+      showExtendBottomSheet(
+        context,
+        body: item.fragment,
+        title: Intl.message(item.label),
+      );
+    } else {
+      globalState.appController.toPage(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackScope(
@@ -49,7 +71,9 @@ class HomePage extends StatelessWidget {
                     ),
                   )
                   .toList(),
-              onDestinationSelected: globalState.appController.toPage,
+              onDestinationSelected: (index) {
+                _handleDestinationSelected(context, index);
+              },
               selectedIndex: currentIndex,
             ),
           );
