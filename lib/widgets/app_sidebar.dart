@@ -35,10 +35,6 @@ class AppSidebarContainer extends StatelessWidget {
               children: [
                 if (system.isMacOS) const SizedBox(height: 22),
                 const SizedBox(height: 10),
-                if (!system.isMacOS) ...[
-                  const ClipRect(child: AppIcon()),
-                  const SizedBox(height: 12),
-                ],
                 Expanded(
                   child: Selector<Config, bool>(
                     selector: (_, config) => config.appSetting.showLabel,
@@ -85,7 +81,45 @@ class AppSidebarContainer extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
+                const Divider(height: 1, indent: 12, endIndent: 12),
+                _SidebarQuickSwitch(
+                  icon: Icons.shuffle,
+                  label: appLocalizations.systemProxy,
+                  selector: Selector<Config, bool>(
+                    selector: (_, config) => config.networkProps.systemProxy,
+                    builder: (_, value, __) {
+                      return Switch(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        value: value,
+                        onChanged: (v) {
+                          final config = globalState.appController.config;
+                          config.networkProps =
+                              config.networkProps.copyWith(systemProxy: v);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                _SidebarQuickSwitch(
+                  icon: Icons.stacked_line_chart,
+                  label: appLocalizations.tun,
+                  selector: Selector<ClashConfig, bool>(
+                    selector: (_, clashConfig) => clashConfig.tun.enable,
+                    builder: (_, value, __) {
+                      return Switch(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        value: value,
+                        onChanged: (v) {
+                          final clashConfig =
+                              globalState.appController.clashConfig;
+                          clashConfig.tun =
+                              clashConfig.tun.copyWith(enable: v);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
                 IconButton(
                   onPressed: () {
                     final config = globalState.appController.config;
@@ -113,26 +147,36 @@ class AppSidebarContainer extends StatelessWidget {
   }
 }
 
-class AppIcon extends StatelessWidget {
-  const AppIcon({super.key});
+class _SidebarQuickSwitch extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Widget selector;
+
+  const _SidebarQuickSwitch({
+    required this.icon,
+    required this.label,
+    required this.selector,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerHighest,
-        shape: RoundedSuperellipseBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-      padding: const EdgeInsets.all(8),
-      child: Transform.translate(
-        offset: const Offset(0, -1),
-        child: Image.asset(
-          'assets/images/icon.png',
-          width: 34,
-          height: 34,
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: context.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: context.textTheme.labelSmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          selector,
+        ],
       ),
     );
   }
