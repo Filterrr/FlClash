@@ -25,11 +25,16 @@ class HomePage extends StatelessWidget {
     final isMobile =
         globalState.appController.appState.viewMode == ViewMode.mobile;
     if (isMobile) {
+      final previousLabel =
+          globalState.appController.appState.currentLabel;
+      globalState.appController.appState.currentLabel = item.label;
       showExtendBottomSheet(
         context,
         body: item.fragment,
         title: Intl.message(item.label),
-      );
+      ).whenComplete(() {
+        globalState.appController.appState.currentLabel = previousLabel;
+      });
     } else {
       globalState.appController.toPage(index);
     }
