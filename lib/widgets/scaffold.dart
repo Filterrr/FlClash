@@ -9,6 +9,7 @@ class CommonScaffold extends StatefulWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final bool automaticallyImplyLeading;
+  final bool transparentBackground;
 
   const CommonScaffold({
     super.key,
@@ -17,6 +18,7 @@ class CommonScaffold extends StatefulWidget {
     required this.title,
     this.actions,
     this.automaticallyImplyLeading = true,
+    this.transparentBackground = false,
   });
 
   CommonScaffold.open({
@@ -106,6 +108,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
       valueListenable: _floatingActionButton,
       builder: (_, value, __) {
         return Scaffold(
+          backgroundColor:
+              widget.transparentBackground ? Colors.transparent : null,
           resizeToAvoidBottomInset: true,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -118,6 +122,8 @@ class CommonScaffoldState extends State<CommonScaffold> {
                     final realActions =
                         actions.isNotEmpty ? actions : widget.actions;
                     return AppBar(
+                      backgroundColor:
+                          widget.transparentBackground ? Colors.transparent : null,
                       centerTitle: false,
                       systemOverlayStyle: SystemUiOverlayStyle(
                         statusBarColor: Colors.transparent,
