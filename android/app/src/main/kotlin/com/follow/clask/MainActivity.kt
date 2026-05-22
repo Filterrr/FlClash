@@ -1,6 +1,8 @@
 package com.follow.clask
 
 
+import android.os.Build
+import android.os.Bundle
 import com.follow.clask.plugins.AppPlugin
 import com.follow.clask.plugins.ServicePlugin
 import com.follow.clask.plugins.TilePlugin
@@ -9,6 +11,11 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestHighRefreshRate()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AppPlugin())
@@ -16,6 +23,26 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
         GlobalState.flutterEngine = flutterEngine
+    }
+
+    private fun requestHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val display = window.windowManager.defaultDisplay
+            val supportedModes = display.supportedModes
+            var preferredModeId = 0
+            var maxRefreshRate = 0f
+            for (mode in supportedModes) {
+                if (mode.refreshRate > maxRefreshRate) {
+                    maxRefreshRate = mode.refreshRate
+                    preferredModeId = mode.modeId
+                }
+            }
+            if (preferredModeId != 0) {
+                val params = window.attributes
+                params.preferredDisplayModeId = preferredModeId
+                window.attributes = params
+            }
+        }
     }
 
     override fun onDestroy() {
