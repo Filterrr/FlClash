@@ -1,6 +1,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/builder.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,7 @@ Future<T?> showExtendBottomSheet<T>(
   BuildContext context, {
   required Widget body,
   required String title,
+  String? activeLabel,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
   final screenHeight = MediaQuery.of(context).size.height;
@@ -24,23 +26,36 @@ Future<T?> showExtendBottomSheet<T>(
       ),
     ),
     builder: (context) {
-      return ConstrainedBox(
+      Widget child = ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: screenHeight * 0.85,
         ),
-        child: CommonScaffold(
-          title: title,
-          body: body,
-          automaticallyImplyLeading: false,
-          leading: SizedBox(
-            height: kToolbarHeight,
-            child: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(24),
+          ),
+          child: CommonScaffold(
+            transparentBackground: true,
+            title: title,
+            body: body,
+            automaticallyImplyLeading: false,
+            leading: SizedBox(
+              height: kToolbarHeight,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
           ),
         ),
       );
+      if (activeLabel != null) {
+        child = BottomSheetActiveScope(
+          activeLabel: activeLabel,
+          child: child,
+        );
+      }
+      return child;
     },
   );
 }
