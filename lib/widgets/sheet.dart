@@ -1,64 +1,10 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/builder.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 
 import 'side_sheet.dart';
-
-Future<T?> showExtendBottomSheet<T>(
-  BuildContext context, {
-  required Widget body,
-  required String title,
-  String? activeLabel,
-}) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final screenHeight = MediaQuery.of(context).size.height;
-  return showModalBottomSheet<T>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(24),
-      ),
-    ),
-    builder: (context) {
-      Widget child = ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.85,
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
-          child: CommonScaffold(
-            transparentBackground: true,
-            title: title,
-            body: body,
-            automaticallyImplyLeading: false,
-            leading: SizedBox(
-              height: kToolbarHeight,
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-          ),
-        ),
-      );
-      if (activeLabel != null) {
-        child = BottomSheetActiveScope(
-          activeLabel: activeLabel,
-          child: child,
-        );
-      }
-      return child;
-    },
-  );
-}
 
 showExtendPage(
   BuildContext context, {
@@ -78,10 +24,12 @@ showExtendPage(
   final isMobile =
       globalState.appController.appState.viewMode == ViewMode.mobile;
   if (isMobile) {
-    showExtendBottomSheet(
+    BaseNavigator.push(
       context,
-      body: uniqueBody,
-      title: title,
+      CommonScaffold(
+        title: title,
+        body: uniqueBody,
+      ),
     );
     return;
   }
@@ -125,16 +73,9 @@ showSheet({
   final viewMode = globalState.appController.appState.viewMode;
   final isMobile = viewMode == ViewMode.mobile;
   if (isMobile) {
-    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: isScrollControlled,
-      backgroundColor: colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
       builder: (context) {
         return SafeArea(
           child: builder(
