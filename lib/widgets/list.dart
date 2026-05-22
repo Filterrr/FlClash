@@ -279,30 +279,23 @@ class ListItem<T> extends StatelessWidget {
       final child = SafeArea(
         child: openDelegate.widget,
       );
-      final isMobile =
-          globalState.appController.appState.viewMode == ViewMode.mobile;
-      if (isMobile) {
-        return _buildListTile(
-          onTap: () {
-            showExtendBottomSheet(
-              context,
-              body: child,
-              title: openDelegate.title,
-            );
-          },
-        );
-      }
       return OpenContainer(
         closedBuilder: (_, action) {
           openAction() {
-            showExtendPage(
-              context,
-              body: child,
-              title: openDelegate.title,
-              extendPageWidth: openDelegate.extendPageWidth,
-              isBlur: openDelegate.isBlur,
-              isScaffold: openDelegate.isScaffold,
-            );
+            final isMobile =
+                globalState.appController.appState.viewMode == ViewMode.mobile;
+            if (!isMobile) {
+              showExtendPage(
+                context,
+                body: child,
+                title: openDelegate.title,
+                extendPageWidth: openDelegate.extendPageWidth,
+                isBlur: openDelegate.isBlur,
+                isScaffold: openDelegate.isScaffold,
+              );
+              return;
+            }
+            action();
           }
 
           return _buildListTile(
@@ -353,27 +346,27 @@ class ListItem<T> extends StatelessWidget {
     }
     if (delegate is NextDelegate) {
       final nextDelegate = delegate as NextDelegate;
-      final isMobile =
-          globalState.appController.appState.viewMode == ViewMode.mobile;
-      if (isMobile) {
-        return _buildListTile(
-          onTap: () {
-            showExtendBottomSheet(
-              context,
-              body: SafeArea(child: nextDelegate.widget),
-              title: nextDelegate.title,
-            );
-          },
-        );
-      }
       return _buildListTile(
         onTap: () {
-          showExtendPage(
-            context,
-            body: nextDelegate.widget,
-            title: nextDelegate.title,
-            extendPageWidth: nextDelegate.extendPageWidth,
-          );
+          final isMobile =
+              globalState.appController.appState.viewMode == ViewMode.mobile;
+          if (!isMobile) {
+            showExtendPage(
+              context,
+              body: nextDelegate.widget,
+              title: nextDelegate.title,
+              extendPageWidth: nextDelegate.extendPageWidth,
+            );
+            return;
+          }
+
+          BaseNavigator.push(
+              context,
+              CommonScaffold(
+                key: Key(nextDelegate.title),
+                body: nextDelegate.widget,
+                title: nextDelegate.title,
+              ));
         },
       );
     }

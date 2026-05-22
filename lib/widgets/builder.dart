@@ -2,27 +2,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BottomSheetActiveScope extends InheritedWidget {
-  final String activeLabel;
-
-  const BottomSheetActiveScope({
-    super.key,
-    required this.activeLabel,
-    required super.child,
-  });
-
-  static String? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<BottomSheetActiveScope>()
-        ?.activeLabel;
-  }
-
-  @override
-  bool updateShouldNotify(BottomSheetActiveScope oldWidget) {
-    return activeLabel != oldWidget.activeLabel;
-  }
-}
-
 class ScrollOverBuilder extends StatefulWidget {
   final Widget Function(bool isOver) builder;
 
@@ -76,11 +55,9 @@ class ProxiesActionsBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomSheetActiveLabel = BottomSheetActiveScope.of(context);
     return Selector<AppState, ProxiesActionsState>(
       selector: (_, appState) => ProxiesActionsState(
-        isCurrent: bottomSheetActiveLabel == "proxies" ||
-            appState.currentLabel == "proxies",
+        isCurrent: appState.currentLabel == "proxies",
         hasProvider: appState.providers.isNotEmpty,
       ),
       builder: (_, state, child) => builder(state, child),
@@ -126,10 +103,8 @@ class ActiveBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomSheetActiveLabel = BottomSheetActiveScope.of(context);
     return Selector<AppState, bool>(
-      selector: (_, appState) =>
-          bottomSheetActiveLabel == label || appState.currentLabel == label,
+      selector: (_, appState) => appState.currentLabel == label,
       builder: (_, state, child) {
         return builder(
           state,
