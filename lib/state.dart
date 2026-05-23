@@ -37,8 +37,8 @@ class GlobalState {
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
     final interval = isAppPaused
-        ? const Duration(seconds: 5)
-        : const Duration(seconds: 1);
+        ? const Duration(seconds: 10)
+        : const Duration(seconds: 2);
     timer = Timer.periodic(interval, (Timer t) {
       for (final function in updateFunctionLists) {
         function();
