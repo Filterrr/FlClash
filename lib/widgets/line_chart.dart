@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
 class Point {
@@ -63,7 +64,11 @@ class _LineChartState extends State<LineChart>
         prevPoints = nextPoints;
       }
       points = widget.points;
-      _controller.forward(from: 0);
+      if (globalState.isAppPaused) {
+        _controller.value = 1.0;
+      } else {
+        _controller.forward(from: 0);
+      }
     }
   }
 
@@ -167,14 +172,16 @@ class _LineChartState extends State<LineChart>
     return AnimatedBuilder(
         animation: _controller.view,
         builder: (_, __) {
+          final currentProgress = _controller.value;
           return CustomPaint(
             painter: LineChartPainter(
               color: widget.color,
               computedPath: getComputedPath(
                 prevPoints: prevPoints,
                 points: points,
-                progress: _controller.value,
+                progress: currentProgress,
               ),
+              hash: Object.hashAll(points) ^ currentProgress.hashCode,
             ),
             child: SizedBox(
               height: widget.height,
@@ -188,10 +195,12 @@ class _LineChartState extends State<LineChart>
 class LineChartPainter extends CustomPainter {
   final ComputedPath computedPath;
   final Color color;
+  final int hash;
 
   LineChartPainter({
     required this.computedPath,
     required this.color,
+    required this.hash,
   });
 
   @override
@@ -205,7 +214,7 @@ class LineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant LineChartPainter oldDelegate) {
+    return hash != oldDelegate.hash || color != oldDelegate.color;
   }
 }

@@ -30,12 +30,16 @@ class GlobalState {
   List<Function> updateFunctionLists = [];
   bool lastTunEnable = false;
   int? lastProfileModified;
+  bool isAppPaused = false;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+    final interval = isAppPaused
+        ? const Duration(seconds: 5)
+        : const Duration(seconds: 1);
+    timer = Timer.periodic(interval, (Timer t) {
       for (final function in updateFunctionLists) {
         function();
       }
@@ -45,6 +49,26 @@ class GlobalState {
   stopListenUpdate() {
     if (timer == null || timer?.isActive == false) return;
     timer?.cancel();
+  }
+
+  void onAppPaused() {
+    if (isAppPaused) return;
+    isAppPaused = true;
+    if (timer != null && timer!.isActive) {
+      timer?.cancel();
+      timer = null;
+      startListenUpdate();
+    }
+  }
+
+  void onAppResumed() {
+    if (!isAppPaused) return;
+    isAppPaused = false;
+    if (timer != null && timer!.isActive) {
+      timer?.cancel();
+      timer = null;
+      startListenUpdate();
+    }
   }
 
   Future<void> initCore({
