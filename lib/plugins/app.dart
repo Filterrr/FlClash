@@ -98,14 +98,6 @@ class App {
       "value": value,
     });
   }
-
-  Future<bool> isIgnoringBatteryOptimizations() async {
-    return await methodChannel.invokeMethod<bool>("isIgnoringBatteryOptimizations") ?? false;
-  }
-
-  Future<bool?> requestIgnoreBatteryOptimizations() async {
-    return await methodChannel.invokeMethod<bool>("requestIgnoreBatteryOptimizations");
-  }
 }
 
 final app = Platform.isAndroid ? App() : null;

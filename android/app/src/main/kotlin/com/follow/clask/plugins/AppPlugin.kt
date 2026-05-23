@@ -10,8 +10,6 @@ import android.content.pm.ComponentInfo
 import android.content.pm.PackageManager
 import android.net.VpnService
 import android.os.Build
-import android.os.PowerManager
-import android.provider.Settings
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -214,35 +212,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(true)
             }
 
-            "isIgnoringBatteryOptimizations" -> {
-                result.success(isIgnoringBatteryOptimizations())
-            }
-
-            "requestIgnoreBatteryOptimizations" -> {
-                requestIgnoreBatteryOptimizations()
-                result.success(true)
-            }
-
             else -> {
                 result.notImplemented()
             }
-        }
-    }
-
-    private fun isIgnoringBatteryOptimizations(): Boolean {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
-    }
-
-    private fun requestIgnoreBatteryOptimizations() {
-        if (isIgnoringBatteryOptimizations()) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            try {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                    data = android.net.Uri.parse("package:${context.packageName}")
-                }
-                activity?.startActivity(intent)
-            } catch (_: Exception) {}
         }
     }
 
