@@ -18,6 +18,8 @@ class AndroidManager extends StatefulWidget {
 }
 
 class _AndroidContainerState extends State<AndroidManager> {
+  bool _hasRequestedBatteryOptimization = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,10 +43,21 @@ class _AndroidContainerState extends State<AndroidManager> {
       ),
       builder: (__, state, child) {
         clashLib?.setState(state);
+        if (state.enable && !_hasRequestedBatteryOptimization) {
+          _hasRequestedBatteryOptimization = true;
+          _requestBatteryOptimization();
+        }
         return child!;
       },
       child: child,
     );
+  }
+
+  void _requestBatteryOptimization() async {
+    final isIgnoring = await app?.isIgnoringBatteryOptimizations() ?? false;
+    if (!isIgnoring) {
+      app?.requestIgnoreBatteryOptimizations();
+    }
   }
 
   Widget _excludeContainer(Widget child) {

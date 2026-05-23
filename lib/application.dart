@@ -58,7 +58,7 @@ class Application extends StatefulWidget {
   State<Application> createState() => ApplicationState();
 }
 
-class ApplicationState extends State<Application> {
+class ApplicationState extends State<Application> with WidgetsBindingObserver {
   late SystemColorSchemes systemColorSchemes;
   Timer? timer;
   StreamSubscription? connectivitySubscription;
@@ -98,6 +98,7 @@ class ApplicationState extends State<Application> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initTimer();
     globalState.appController = AppController(context);
     globalState.measure = Measure.of(context);
@@ -118,9 +119,19 @@ class ApplicationState extends State<Application> {
     });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.resumed) {
+      _initTimer();
+    }
+  }
+
   _initTimer() {
     _cancelTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
+    final interval = globalState.isAppPaused
+        ? const Duration(milliseconds: 60000)
+        : const Duration(milliseconds: 20000);
+    timer = Timer.periodic(interval, (_) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         globalState.appController.updateGroupDebounce();
       });
@@ -264,6 +275,7 @@ class ApplicationState extends State<Application> {
 
   @override
   Future<void> dispose() async {
+    WidgetsBinding.instance.removeObserver(this);
     linkManager.destroy();
     _cancelTimer();
     connectivitySubscription?.cancel();
