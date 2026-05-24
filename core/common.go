@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/metacubex/mihomo/adapter"
@@ -43,7 +44,8 @@ func (a ExternalProviders) Less(i, j int) bool { return a[i].Name < a[j].Name }
 func (a ExternalProviders) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func (message *Message) Json() (string, error) {
-	return marshalToString(message)
+	data, err := json.Marshal(message)
+	return string(data), err
 }
 
 func readFile(path string) ([]byte, error) {

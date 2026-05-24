@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
@@ -17,44 +17,9 @@ import (
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 	"runtime"
-	"runtime/debug"
 	"sort"
-	"sync"
 	"time"
 )
-
-var bufferPool = sync.Pool{
-	New: func() interface{} {
-		return new(bytes.Buffer)
-	},
-}
-
-func getBuffer() *bytes.Buffer {
-	buf := bufferPool.Get().(*bytes.Buffer)
-	buf.Reset()
-	return buf
-}
-
-func putBuffer(buf *bytes.Buffer) {
-	if buf.Cap() > 64*1024 {
-		return
-	}
-	bufferPool.Put(buf)
-}
-
-func marshalToString(v interface{}) (string, error) {
-	buf := getBuffer()
-	defer putBuffer(buf)
-	err := json.NewEncoder(buf).Encode(v)
-	if err != nil {
-		return "", err
-	}
-	s := buf.String()
-	if len(s) > 0 && s[len(s)-1] == '\n' {
-		s = s[:len(s)-1]
-	}
-	return s, nil
-}
 
 var (
 	isInit            = false
@@ -67,7 +32,6 @@ var (
 func handleInitClash(homeDirStr string) bool {
 	if !isInit {
 		constant.SetHomeDir(homeDirStr)
-		debug.SetMemoryLimit(128 * 1024 * 1024)
 		isInit = true
 	}
 	return isInit
@@ -135,11 +99,11 @@ func handleUpdateConfig(bytes []byte) string {
 func handleGetProxies() string {
 	runLock.Lock()
 	defer runLock.Unlock()
-	s, err := marshalToString(proxiesWithProviders())
+	data, err := json.Marshal(proxiesWithProviders())
 	if err != nil {
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleChangeProxy(data string, fn func(string string)) {
@@ -187,11 +151,12 @@ func handleGetTraffic(onlyProxy bool) string {
 		"up":   up,
 		"down": down,
 	}
-	s, err := marshalToString(traffic)
+	data, err := json.Marshal(traffic)
 	if err != nil {
+		fmt.Println("Error:", err)
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleGetTotalTraffic(onlyProxy bool) string {
@@ -200,11 +165,12 @@ func handleGetTotalTraffic(onlyProxy bool) string {
 		"up":   up,
 		"down": down,
 	}
-	s, err := marshalToString(traffic)
+	data, err := json.Marshal(traffic)
 	if err != nil {
+		fmt.Println("Error:", err)
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleResetTraffic() {
@@ -238,22 +204,22 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 
 		if proxy == nil {
 			delayData.Value = -1
-			s, _ := marshalToString(delayData)
-			fn(s)
+			data, _ := json.Marshal(delayData)
+			fn(string(data))
 			return false, nil
 		}
 
 		delay, err := proxy.URLTest(ctx, constant.DefaultTestURL, expectedStatus)
 		if err != nil || delay == 0 {
 			delayData.Value = -1
-			s, _ := marshalToString(delayData)
-			fn(s)
+			data, _ := json.Marshal(delayData)
+			fn(string(data))
 			return false, nil
 		}
 
 		delayData.Value = int32(delay)
-		s, _ := marshalToString(delayData)
-		fn(s)
+		data, _ := json.Marshal(delayData)
+		fn(string(data))
 		return false, nil
 	})
 }
@@ -262,11 +228,12 @@ func handleGetConnections() string {
 	runLock.Lock()
 	defer runLock.Unlock()
 	snapshot := statistic.DefaultManager.Snapshot()
-	s, err := marshalToString(snapshot)
+	data, err := json.Marshal(snapshot)
 	if err != nil {
+		fmt.Println("Error:", err)
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleCloseConnectionsUnLock() bool {
@@ -317,11 +284,11 @@ func handleGetExternalProviders() string {
 		eps = append(eps, *externalProvider)
 	}
 	sort.Sort(ExternalProviders(eps))
-	s, err := marshalToString(eps)
+	data, err := json.Marshal(eps)
 	if err != nil {
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleGetExternalProvider(externalProviderName string) string {
@@ -335,11 +302,11 @@ func handleGetExternalProvider(externalProviderName string) string {
 	if err != nil {
 		return ""
 	}
-	s, err := marshalToString(e)
+	data, err := json.Marshal(e)
 	if err != nil {
 		return ""
 	}
-	return s
+	return string(data)
 }
 
 func handleUpdateGeoData(geoType string, geoName string, fn func(value string)) {
