@@ -89,7 +89,14 @@ class _WindowContainerState extends State<WindowManager>
   @override
   void onWindowMinimize() async {
     globalState.appController.savePreferencesDebounce();
+    globalState.onAppPaused();
     super.onWindowMinimize();
+  }
+
+  @override
+  void onWindowRestore() async {
+    globalState.onAppResumed();
+    super.onWindowRestore();
   }
 
   @override
