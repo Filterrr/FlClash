@@ -33,18 +33,23 @@ class _LogsFragmentState extends State<LogsFragment> {
         timer?.cancel();
         timer = null;
       }
-      timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-        if (globalState.isAppPaused) return;
-        final logs = appFlowingState.logs;
-        if (!logListEquality.equals(
-          logsNotifier.value.logs,
-          logs,
-        )) {
-          logsNotifier.value = logsNotifier.value.copyWith(
-            logs: logs,
-          );
-        }
-      });
+      timer = Timer.periodic(
+        globalState.isAppPaused
+            ? const Duration(seconds: 5)
+            : const Duration(milliseconds: 500),
+        (timer) {
+          if (globalState.isAppPaused) return;
+          final logs = appFlowingState.logs;
+          if (!logListEquality.equals(
+            logsNotifier.value.logs,
+            logs,
+          )) {
+            logsNotifier.value = logsNotifier.value.copyWith(
+              logs: logs,
+            );
+          }
+        },
+      );
     });
   }
 
