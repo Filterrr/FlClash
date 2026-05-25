@@ -30,7 +30,6 @@ class _NetworkDetectionState extends State<NetworkDetection> {
   CancelToken? cancelToken;
 
   _checkIp() async {
-    if (globalState.isAppPaused) return;
     final appState = globalState.appController.appState;
     final appFlowingState = globalState.appController.appFlowingState;
     final isInit = appState.isInit;

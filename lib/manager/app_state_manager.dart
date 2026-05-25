@@ -78,8 +78,7 @@ class _AppStateManagerState extends State<AppStateManager>
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     final isPaused = state == AppLifecycleState.paused;
     final isResumed = state == AppLifecycleState.resumed;
-    final isHidden = state == AppLifecycleState.hidden;
-    if (isPaused || isHidden) {
+    if (isPaused) {
       globalState.appController.savePreferencesDebounce();
       if (Platform.isAndroid) {
         globalState.onAppPaused();

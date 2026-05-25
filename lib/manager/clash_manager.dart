@@ -112,10 +112,6 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onLog(Log log) {
-    if (globalState.isAppPaused) {
-      super.onLog(log);
-      return;
-    }
     globalState.appController.appFlowingState.addLog(log);
     if (log.logLevel == LogLevel.error) {
       globalState.appController.showSnackBar(log.payload ?? '');
@@ -131,10 +127,6 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onRequest(Connection connection) async {
-    if (globalState.isAppPaused) {
-      super.onRequest(connection);
-      return;
-    }
     globalState.appController.appState.addRequest(connection);
     super.onRequest(connection);
   }
