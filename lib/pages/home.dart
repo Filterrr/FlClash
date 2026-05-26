@@ -38,24 +38,10 @@ class HomePage extends StatelessWidget {
           final currentIndex = index == -1 ? 0 : index;
           final isMobile = viewMode == ViewMode.mobile;
 
-          final bottomNavigationBar = NavigationBarTheme(
-            data: _NavigationBarDefaultsM3(context),
-            child: NavigationBar(
-              destinations: navigationItems
-                  .map(
-                    (e) => NavigationDestination(
-                      icon: Tooltip(
-                        message: Intl.message(e.label),
-                        preferBelow: true,
-                        child: e.icon,
-                      ),
-                      label: Intl.message(e.label),
-                    ),
-                  )
-                  .toList(),
-              onDestinationSelected: globalState.appController.toPage,
-              selectedIndex: currentIndex,
-            ),
+          final bottomNavigationBar = _CustomNavigationBar(
+            items: navigationItems,
+            selectedIndex: currentIndex,
+            onDestinationSelected: globalState.appController.toPage,
           );
 
           if (isMobile) {
@@ -173,60 +159,137 @@ class _HomePageViewState extends State<_HomePageView> {
   }
 }
 
-class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
-  _NavigationBarDefaultsM3(this.context)
-      : super(
-          height: 56.0,
-          elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-        );
+class _CustomNavigationBar extends StatelessWidget {
+  final List<NavigationItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
 
-  final BuildContext context;
-
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
+  const _CustomNavigationBar({
+    required this.items,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+  });
 
   @override
-  Color? get backgroundColor => _colors.surfaceContainer;
-
-  @override
-  Color? get shadowColor => Colors.transparent;
-
-  @override
-  Color? get surfaceTintColor => Colors.transparent;
-
-  @override
-  WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      return IconThemeData(
-        size: 24.0,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-                ? _colors.onSecondaryContainer
-                : _colors.onSurfaceVariant,
-      );
-    });
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      height: 56.0,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, -1),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: Row(
+        children: List.generate(items.length, (index) {
+          return _CustomNavigationItem(
+            icon: items[index].icon,
+            label: Intl.message(items[index].label),
+            isSelected: index == selectedIndex,
+            colorScheme: colorScheme,
+            onTap: () => onDestinationSelected(index),
+          );
+        }),
+      ),
+    );
   }
+}
+
+class _CustomNavigationItem extends StatelessWidget {
+  final Icon icon;
+  final String label;
+  final bool isSelected;
+  final ColorScheme colorScheme;
+  final VoidCallback onTap;
+
+  const _CustomNavigationItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.colorScheme,
+    required this.onTap,
+  });
 
   @override
-  Color? get indicatorColor => _colors.secondaryContainer;
-
-  @override
-  ShapeBorder? get indicatorShape => const StadiumBorder();
-
-  @override
-  WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(
-        overflow: TextOverflow.ellipsis,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-                ? _colors.onSurface
-                : _colors.onSurfaceVariant,
-      );
-    });
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const StadiumBorder(),
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOutCubicEmphasized,
+              padding: EdgeInsets.symmetric(
+                horizontal: isSelected ? 16.0 : 12.0,
+                vertical: 8.0,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? colorScheme.secondaryContainer
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubicEmphasized,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconTheme(
+                      data: IconThemeData(
+                        size: 24.0,
+                        color: isSelected
+                            ? colorScheme.onSecondaryContainer
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                      child: icon,
+                    ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SizeTransition(
+                            sizeFactor: animation,
+                            axis: Axis.horizontal,
+                            axisAlignment: -1.0,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: isSelected
+                          ? Padding(
+                              key: ValueKey(label),
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSecondaryContainer,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            )
+                          : const SizedBox.shrink(key: ValueKey('empty')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
