@@ -35,19 +35,27 @@ class _RequestsFragmentState extends State<RequestsFragment> {
         timer?.cancel();
         timer = null;
       }
-      timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-        final maxLength = Platform.isAndroid ? 1000 : 60;
-        final requests = appState.requests.safeSublist(
-          appState.requests.length - maxLength,
-        );
-        if (!connectionListEquality.equals(
-          requestsNotifier.value.connections,
-          requests,
-        )) {
-          requestsNotifier.value =
-              requestsNotifier.value.copyWith(connections: requests);
-        }
-      });
+      timer = Timer.periodic(
+        globalState.isAppPaused
+            ? const Duration(seconds: 5)
+            : const Duration(milliseconds: 200),
+        (timer) {
+          if (!context.mounted || globalState.isAppPaused) {
+            return;
+          }
+          final maxLength = Platform.isAndroid ? 1000 : 60;
+          final requests = appState.requests.safeSublist(
+            appState.requests.length - maxLength,
+          );
+          if (!connectionListEquality.equals(
+            requestsNotifier.value.connections,
+            requests,
+          )) {
+            requestsNotifier.value =
+                requestsNotifier.value.copyWith(connections: requests);
+          }
+        },
+      );
     });
   }
 
