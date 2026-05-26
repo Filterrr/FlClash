@@ -228,8 +228,8 @@ class _CustomNavigationItem extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubicEmphasized,
               padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16.0 : 0.0,
-                vertical: 8.0,
+                horizontal: isSelected ? 12.0 : 0.0,
+                vertical: isSelected ? 4.0 : 8.0,
               ),
               decoration: BoxDecoration(
                 color: isSelected
