@@ -228,14 +228,14 @@ class _CustomNavigationItem extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubicEmphasized,
               padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 20.0 : 12.0,
-                vertical: 10.0,
+                horizontal: isSelected ? 16.0 : 12.0,
+                vertical: 8.0,
               ),
-              decoration: ShapeDecoration(
+              decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFFE2E8EC)
+                    ? colorScheme.secondaryContainer
                     : Colors.transparent,
-                shape: const StadiumBorder(),
+                borderRadius: BorderRadius.circular(16.0),
               ),
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 300),
@@ -249,8 +249,8 @@ class _CustomNavigationItem extends StatelessWidget {
                       data: IconThemeData(
                         size: 24.0,
                         color: isSelected
-                            ? const Color(0xFF5A666B)
-                            : const Color(0xFF9AA4AB),
+                            ? colorScheme.onSecondaryContainer
+                            : colorScheme.onSurfaceVariant,
                       ),
                       child: icon,
                     ),
@@ -270,14 +270,13 @@ class _CustomNavigationItem extends StatelessWidget {
                       child: isSelected
                           ? Padding(
                               key: ValueKey(label),
-                              padding: const EdgeInsets.only(left: 12.0),
+                              padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
                                 label,
-                                style: const TextStyle(
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF5A666B),
-                                  letterSpacing: 0.3,
+                                style: TextStyle(
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: colorScheme.onSecondaryContainer,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
