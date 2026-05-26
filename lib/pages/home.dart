@@ -44,7 +44,11 @@ class HomePage extends StatelessWidget {
               destinations: navigationItems
                   .map(
                     (e) => NavigationDestination(
-                      icon: e.icon,
+                      icon: Tooltip(
+                        message: Intl.message(e.label),
+                        preferBelow: true,
+                        child: e.icon,
+                      ),
                       label: Intl.message(e.label),
                     ),
                   )
@@ -172,9 +176,9 @@ class _HomePageViewState extends State<_HomePageView> {
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
       : super(
-          height: 80.0,
+          height: 56.0,
           elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowOnHover,
         );
 
   final BuildContext context;
