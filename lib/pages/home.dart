@@ -5,6 +5,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -38,19 +39,42 @@ class HomePage extends StatelessWidget {
           final currentIndex = index == -1 ? 0 : index;
           final isMobile = viewMode == ViewMode.mobile;
 
-          final bottomNavigationBar = NavigationBarTheme(
-            data: _NavigationBarDefaultsM3(context),
-            child: NavigationBar(
-              destinations: navigationItems
-                  .map(
-                    (e) => NavigationDestination(
-                      icon: e.icon,
-                      label: Intl.message(e.label),
-                    ),
-                  )
-                  .toList(),
-              onDestinationSelected: globalState.appController.toPage,
-              selectedIndex: currentIndex,
+          final bottomNavigationBar = Container(
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainer,
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 20,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+                child: GNav(
+                  rippleColor: context.colorScheme.onSurface.withOpacity(0.1),
+                  hoverColor: context.colorScheme.onSurface.withOpacity(0.05),
+                  gap: 8,
+                  activeColor: context.colorScheme.onSecondaryContainer,
+                  iconSize: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  duration: const Duration(milliseconds: 250),
+                  tabBackgroundColor: context.colorScheme.secondaryContainer,
+                  color: context.colorScheme.onSurfaceVariant,
+                  curve: Curves.easeInOut,
+                  tabs: navigationItems
+                      .map(
+                        (e) => GButton(
+                          icon: e.icon.icon ?? Icons.home,
+                          text: Intl.message(e.label),
+                        ),
+                      )
+                      .toList(),
+                  selectedIndex: currentIndex,
+                  onTabChange: globalState.appController.toPage,
+                ),
+              ),
             ),
           );
 
@@ -169,60 +193,4 @@ class _HomePageViewState extends State<_HomePageView> {
   }
 }
 
-class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
-  _NavigationBarDefaultsM3(this.context)
-      : super(
-          height: 80.0,
-          elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        );
 
-  final BuildContext context;
-
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
-
-  @override
-  Color? get backgroundColor => _colors.surfaceContainer;
-
-  @override
-  Color? get shadowColor => Colors.transparent;
-
-  @override
-  Color? get surfaceTintColor => Colors.transparent;
-
-  @override
-  WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      return IconThemeData(
-        size: 24.0,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-                ? _colors.onSecondaryContainer
-                : _colors.onSurfaceVariant,
-      );
-    });
-  }
-
-  @override
-  Color? get indicatorColor => _colors.secondaryContainer;
-
-  @override
-  ShapeBorder? get indicatorShape => const StadiumBorder();
-
-  @override
-  WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(
-        overflow: TextOverflow.ellipsis,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-                ? _colors.onSurface
-                : _colors.onSurfaceVariant,
-      );
-    });
-  }
-}
