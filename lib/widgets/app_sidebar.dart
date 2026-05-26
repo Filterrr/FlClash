@@ -20,7 +20,20 @@ class AppSidebarContainer extends StatelessWidget {
   });
 
   Widget _buildBackground({required BuildContext context, required Widget child}) {
-    return Material(color: context.colorScheme.surfaceContainer, child: child);
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainer,
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(16.0),
+          bottomRight: Radius.circular(16.0),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: child,
+      ),
+    );
   }
 
   @override

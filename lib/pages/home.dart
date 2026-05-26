@@ -177,6 +177,10 @@ class _CustomNavigationBar extends StatelessWidget {
       height: 68.0,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16.0),
+          topRight: Radius.circular(16.0),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -185,6 +189,7 @@ class _CustomNavigationBar extends StatelessWidget {
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Row(
         children: List.generate(items.length, (index) {
           return _CustomNavigationItem(
