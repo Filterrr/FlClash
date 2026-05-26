@@ -229,7 +229,7 @@ class _CustomNavigationItem extends StatelessWidget {
               curve: Curves.easeInOutCubicEmphasized,
               padding: EdgeInsets.symmetric(
                 horizontal: isSelected ? 16.0 : 0.0,
-                vertical: 8.0,
+                vertical: isSelected ? 6.0 : 0.0,
               ),
               decoration: BoxDecoration(
                 color: isSelected
@@ -243,7 +243,7 @@ class _CustomNavigationItem extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     IconTheme(
                       data: IconThemeData(
@@ -274,7 +274,8 @@ class _CustomNavigationItem extends StatelessWidget {
                               child: Text(
                                 label,
                                 style: TextStyle(
-                                  fontSize: 13.0,
+                                  fontSize: 14.0,
+                                  height: 1.0,
                                   fontWeight: FontWeight.w600,
                                   color: colorScheme.onSecondaryContainer,
                                 ),
