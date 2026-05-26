@@ -174,7 +174,7 @@ class _CustomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      height: 68.0,
+      height: 56.0,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainer,
         boxShadow: [
