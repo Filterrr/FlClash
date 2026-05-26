@@ -229,7 +229,7 @@ class _CustomNavigationItem extends StatelessWidget {
               curve: Curves.easeInOutCubicEmphasized,
               padding: EdgeInsets.symmetric(
                 horizontal: isSelected ? 16.0 : 0.0,
-                vertical: isSelected ? 6.0 : 0.0,
+                vertical: isSelected ? 4.0 : 0.0,
               ),
               decoration: BoxDecoration(
                 color: isSelected
