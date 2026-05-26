@@ -56,6 +56,7 @@ dependencies:
   connectivity_plus: ^6.1.0
   screen_retriever: ^0.2.0
   material_color_utilities: '>=0.11.0 <0.14.0'
+  google_nav_bar: ^5.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

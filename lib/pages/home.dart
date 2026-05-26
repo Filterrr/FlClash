@@ -5,6 +5,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -38,10 +39,43 @@ class HomePage extends StatelessWidget {
           final currentIndex = index == -1 ? 0 : index;
           final isMobile = viewMode == ViewMode.mobile;
 
-          final bottomNavigationBar = _CustomNavigationBar(
-            items: navigationItems,
-            selectedIndex: currentIndex,
-            onDestinationSelected: globalState.appController.toPage,
+          final bottomNavigationBar = Container(
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainer,
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 20,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+                child: GNav(
+                  rippleColor: context.colorScheme.onSurface.withOpacity(0.1),
+                  hoverColor: context.colorScheme.onSurface.withOpacity(0.05),
+                  gap: 8,
+                  activeColor: context.colorScheme.onSecondaryContainer,
+                  iconSize: 24,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  duration: const Duration(milliseconds: 250),
+                  tabBackgroundColor: context.colorScheme.secondaryContainer,
+                  color: context.colorScheme.onSurfaceVariant,
+                  curve: Curves.easeInOut,
+                  tabs: navigationItems
+                      .map(
+                        (e) => GButton(
+                          icon: e.icon.icon ?? Icons.home,
+                          text: Intl.message(e.label),
+                        ),
+                      )
+                      .toList(),
+                  selectedIndex: currentIndex,
+                  onTabChange: globalState.appController.toPage,
+                ),
+              ),
+            ),
           );
 
           if (isMobile) {
@@ -159,138 +193,4 @@ class _HomePageViewState extends State<_HomePageView> {
   }
 }
 
-class _CustomNavigationBar extends StatelessWidget {
-  final List<NavigationItem> items;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
 
-  const _CustomNavigationBar({
-    required this.items,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      height: 80.0,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, -1),
-            blurRadius: 3,
-          ),
-        ],
-      ),
-      child: Row(
-        children: List.generate(items.length, (index) {
-          return _CustomNavigationItem(
-            icon: items[index].icon,
-            label: Intl.message(items[index].label),
-            isSelected: index == selectedIndex,
-            colorScheme: colorScheme,
-            onTap: () => onDestinationSelected(index),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _CustomNavigationItem extends StatelessWidget {
-  final Icon icon;
-  final String label;
-  final bool isSelected;
-  final ColorScheme colorScheme;
-  final VoidCallback onTap;
-
-  const _CustomNavigationItem({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.colorScheme,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const StadiumBorder(),
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubicEmphasized,
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16.0 : 0.0,
-                vertical: isSelected ? 2.0 : 0.0,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? colorScheme.secondaryContainer
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(100.0),
-              ),
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubicEmphasized,
-                alignment: Alignment.centerLeft,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconTheme(
-                      data: IconThemeData(
-                        size: 24.0,
-                        color: isSelected
-                            ? colorScheme.onSecondaryContainer
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                      child: icon,
-                    ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SizeTransition(
-                            sizeFactor: animation,
-                            axis: Axis.horizontal,
-                            axisAlignment: -1.0,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: isSelected
-                          ? Padding(
-                              key: ValueKey(label),
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Text(
-                                label,
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  height: 1.0,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSecondaryContainer,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )
-                          : const SizedBox.shrink(key: ValueKey('empty')),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
