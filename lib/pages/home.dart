@@ -228,14 +228,14 @@ class _CustomNavigationItem extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOutCubicEmphasized,
               padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16.0 : 12.0,
+                horizontal: isSelected ? 16.0 : 0.0,
                 vertical: 8.0,
               ),
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.secondaryContainer
                     : Colors.transparent,
-                borderRadius: BorderRadius.circular(16.0),
+                borderRadius: BorderRadius.circular(100.0),
               ),
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 300),
@@ -255,7 +255,7 @@ class _CustomNavigationItem extends StatelessWidget {
                       child: icon,
                     ),
                     AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
+                      duration: const Duration(milliseconds: 300),
                       transitionBuilder: (child, animation) {
                         return FadeTransition(
                           opacity: animation,
