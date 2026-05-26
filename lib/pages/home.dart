@@ -178,7 +178,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
       : super(
           height: 56.0,
           elevation: 3.0,
-          labelBehavior: NavigationDestinationLabelBehavior.onlyShowOnHover,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
         );
 
   final BuildContext context;
