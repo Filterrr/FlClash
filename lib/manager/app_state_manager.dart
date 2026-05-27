@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -80,13 +78,9 @@ class _AppStateManagerState extends State<AppStateManager>
     final isResumed = state == AppLifecycleState.resumed;
     if (isPaused) {
       globalState.appController.savePreferencesDebounce();
-      if (Platform.isAndroid) {
-        globalState.onAppPaused();
-      }
+      globalState.onAppPaused();
     } else if (isResumed) {
-      if (Platform.isAndroid) {
-        globalState.onAppResumed();
-      }
+      globalState.onAppResumed();
     }
   }
 

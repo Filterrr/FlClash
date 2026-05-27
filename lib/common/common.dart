@@ -26,6 +26,7 @@ export 'picker.dart';
 export 'preferences.dart';
 export 'protocol.dart';
 export 'proxy.dart';
+export 'refresh_scheduler.dart';
 export 'request.dart';
 export 'scroll.dart';
 export 'string.dart';
