@@ -4,7 +4,7 @@ class RefreshTask {
   final String id;
   final int foregroundMs;
   final int backgroundMs;
-  final VoidCallback callback;
+  final void Function() callback;
   bool _isActive = true;
   Timer? _timer;
 
