@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
@@ -20,7 +19,8 @@ class _LogsFragmentState extends State<LogsFragment> {
     keepScrollOffset: false,
   );
 
-  Timer? timer;
+  static const _taskId = 'logs';
+  bool _isVisible = true;
 
   @override
   void initState() {
@@ -29,16 +29,11 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      if (timer != null) {
-        timer?.cancel();
-        timer = null;
-      }
-      timer = Timer.periodic(
-        globalState.isAppPaused
-            ? const Duration(seconds: 5)
-            : const Duration(milliseconds: 500),
-        (timer) {
-          if (globalState.isAppPaused) return;
+      globalState.scheduler.register(RefreshTask(
+        id: _taskId,
+        foregroundMs: 1000,
+        backgroundMs: 30000,
+        callback: () {
           final logs = appFlowingState.logs;
           if (!logListEquality.equals(
             logsNotifier.value.logs,
@@ -49,17 +44,16 @@ class _LogsFragmentState extends State<LogsFragment> {
             );
           }
         },
-      );
+      ));
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    timer?.cancel();
+    globalState.scheduler.unregister(_taskId);
     logsNotifier.dispose();
     scrollController.dispose();
-    timer = null;
   }
 
   _handleExport() async {
@@ -136,7 +130,16 @@ class _LogsFragmentState extends State<LogsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        if (isCurrent == null || isCurrent) {
+        final visible = isCurrent == true;
+        if (visible != _isVisible) {
+          _isVisible = visible;
+          if (_isVisible) {
+            globalState.scheduler.resume(_taskId);
+          } else {
+            globalState.scheduler.pause(_taskId);
+          }
+        }
+        if (visible) {
           _initActions();
         }
         return child!;

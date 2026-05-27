@@ -14,6 +14,7 @@ class NetworkSpeed extends StatefulWidget {
 
 class _NetworkSpeedState extends State<NetworkSpeed> {
   List<Point> initPoints = const [Point(0, 0), Point(1, 0)];
+  List<Traffic>? _cachedTraffics;
 
   List<Point> _getPoints(List<Traffic> traffics) {
     List<Point> trafficPoints = traffics
@@ -116,8 +117,15 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
         label: appLocalizations.networkSpeed,
         iconData: Icons.speed_sharp,
       ),
-      child: Selector<AppFlowingState, List<Traffic>>(
-        selector: (_, appFlowingState) => appFlowingState.traffics,
+      child: Selector2<AppFlowingState, AppState, List<Traffic>>(
+        selector: (_, appFlowingState, appState) {
+          final isDashboardVisible = appState.currentLabel == 'dashboard';
+          if (!isDashboardVisible && _cachedTraffics != null) {
+            return _cachedTraffics!;
+          }
+          _cachedTraffics = appFlowingState.traffics;
+          return appFlowingState.traffics;
+        },
         builder: (_, traffics, __) {
           return Container(
             padding: const EdgeInsets.all(16),
