@@ -152,7 +152,7 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
           group.all,
         );
         groupNameProxiesMap[groupName] = sortedProxies;
-        final chunks = sortedProxies.chunks(columns);
+        final chunks = sortedProxies.chunks(columns).toList();
         for (int rowIdx = 0; rowIdx < chunks.length; rowIdx++) {
           descriptors.add(_ListItemDescriptor(
             type: _ListItemType.proxyRow,
