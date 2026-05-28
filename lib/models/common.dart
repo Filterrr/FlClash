@@ -330,6 +330,17 @@ class SystemColorSchemes {
     this.darkColorScheme,
   });
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SystemColorSchemes &&
+        other.lightColorScheme == lightColorScheme &&
+        other.darkColorScheme == darkColorScheme;
+  }
+
+  @override
+  int get hashCode => Object.hash(lightColorScheme, darkColorScheme);
+
   getSystemColorSchemeForBrightness(Brightness? brightness) {
     if (brightness == Brightness.dark) {
       return darkColorScheme != null

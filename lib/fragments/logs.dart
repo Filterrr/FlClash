@@ -154,20 +154,7 @@ class _LogsFragmentState extends State<LogsFragment> {
             );
           }
           final reversedLogs = logs.reversed.toList();
-          final logWidgets = reversedLogs
-              .map<Widget>(
-                (log) => LogItem(
-                  key: Key(log.dateTime.toString()),
-                  log: log,
-                  onClick: _addKeyword,
-                ),
-              )
-              .separated(
-                const Divider(
-                  height: 0,
-                ),
-              )
-              .toList();
+          final totalItems = reversedLogs.length * 2 - 1;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -195,20 +182,17 @@ class _LogsFragmentState extends State<LogsFragment> {
               Expanded(
                 child: LayoutBuilder(
                   builder: (_, constraints) {
+                    final measure = globalState.measure;
+                    final bodyLargeSize = measure.bodyLargeSize;
+                    final bodySmallHeight = measure.bodySmallHeight;
+                    final bodyMediumHeight = measure.bodyMediumHeight;
                     return ScrollConfiguration(
                         behavior: ShowBarScrollBehavior(),
                         child: ListView.builder(
                           controller: scrollController,
                           itemExtentBuilder: (index, __) {
-                            final widget = logWidgets[index];
-                            if (widget.runtimeType == Divider) {
-                              return 0;
-                            }
-                            final measure = globalState.measure;
-                            final bodyLargeSize = measure.bodyLargeSize;
-                            final bodySmallHeight = measure.bodySmallHeight;
-                            final bodyMediumHeight = measure.bodyMediumHeight;
-                            final log = reversedLogs[(index / 2).floor()];
+                            if (index.isOdd) return 0;
+                            final log = reversedLogs[index ~/ 2];
                             final width = (log.payload?.length ?? 0) *
                                     bodyLargeSize.width +
                                 200;
@@ -220,9 +204,17 @@ class _LogsFragmentState extends State<LogsFragment> {
                                 40;
                           },
                           itemBuilder: (_, index) {
-                            return logWidgets[index];
+                            if (index.isOdd) {
+                              return const Divider(height: 0);
+                            }
+                            final log = reversedLogs[index ~/ 2];
+                            return LogItem(
+                              key: Key(log.dateTime.toString()),
+                              log: log,
+                              onClick: _addKeyword,
+                            );
                           },
-                          itemCount: logWidgets.length,
+                          itemCount: totalItems,
                         ));
                   },
                 ),

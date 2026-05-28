@@ -111,63 +111,65 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
-      onPressed: () {},
-      info: Info(
-        label: appLocalizations.networkSpeed,
-        iconData: Icons.speed_sharp,
-      ),
-      child: Selector2<AppFlowingState, AppState, List<Traffic>>(
-        selector: (_, appFlowingState, appState) {
-          final isDashboardVisible = appState.currentLabel == 'dashboard';
-          if (!isDashboardVisible && _cachedTraffics != null) {
-            return _cachedTraffics!;
-          }
-          _cachedTraffics = appFlowingState.traffics;
-          return appFlowingState.traffics;
-        },
-        builder: (_, traffics, __) {
-          return Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 0,
-                  child: LineChart(
-                    color: Theme.of(context).colorScheme.primary,
-                    points: _getPoints(traffics),
-                    height: 100,
+    return RepaintBoundary(
+      child: CommonCard(
+        onPressed: () {},
+        info: Info(
+          label: appLocalizations.networkSpeed,
+          iconData: Icons.speed_sharp,
+        ),
+        child: Selector2<AppFlowingState, AppState, List<Traffic>>(
+          selector: (_, appFlowingState, appState) {
+            final isDashboardVisible = appState.currentLabel == 'dashboard';
+            if (!isDashboardVisible && _cachedTraffics != null) {
+              return _cachedTraffics!;
+            }
+            _cachedTraffics = appFlowingState.traffics;
+            return appFlowingState.traffics;
+          },
+          builder: (_, traffics, __) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 0,
+                    child: LineChart(
+                      color: Theme.of(context).colorScheme.primary,
+                      points: _getPoints(traffics),
+                      height: 100,
+                    ),
                   ),
-                ),
-                const Flexible(child: SizedBox(height: 16)),
-                Flexible(
-                  flex: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: _getLabel(
-                          iconData: Icons.upload,
-                          label: appLocalizations.upload,
-                          value: _getLastTraffic(traffics).up,
+                  const Flexible(child: SizedBox(height: 16)),
+                  Flexible(
+                    flex: 0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: _getLabel(
+                            iconData: Icons.upload,
+                            label: appLocalizations.upload,
+                            value: _getLastTraffic(traffics).up,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child: _getLabel(
-                          iconData: Icons.download,
-                          label: appLocalizations.download,
-                          value: _getLastTraffic(traffics).down,
+                        Expanded(
+                          child: _getLabel(
+                            iconData: Icons.download,
+                            label: appLocalizations.download,
+                            value: _getLastTraffic(traffics).down,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-        },
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

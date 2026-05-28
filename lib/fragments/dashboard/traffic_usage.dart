@@ -50,45 +50,47 @@ class TrafficUsage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
-      onPressed: () {},
-      info: Info(
-        label: appLocalizations.trafficUsage,
-        iconData: Icons.data_saver_off,
-      ),
-      child: Selector<AppFlowingState, Traffic>(
-        selector: (_, appFlowingState) => appFlowingState.totalTraffic,
-        builder: (_, totalTraffic, __) {
-          final upTotalTrafficValue = totalTraffic.up;
-          final downTotalTrafficValue = totalTraffic.down;
-          return Padding(
-            padding: const EdgeInsets.all(16).copyWith(top: 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: getTrafficDataItem(
-                    context,
-                    Icons.arrow_upward,
-                    upTotalTrafficValue,
+    return RepaintBoundary(
+      child: CommonCard(
+        onPressed: () {},
+        info: Info(
+          label: appLocalizations.trafficUsage,
+          iconData: Icons.data_saver_off,
+        ),
+        child: Selector<AppFlowingState, Traffic>(
+          selector: (_, appFlowingState) => appFlowingState.totalTraffic,
+          builder: (_, totalTraffic, __) {
+            final upTotalTrafficValue = totalTraffic.up;
+            final downTotalTrafficValue = totalTraffic.down;
+            return Padding(
+              padding: const EdgeInsets.all(16).copyWith(top: 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: getTrafficDataItem(
+                      context,
+                      Icons.arrow_upward,
+                      upTotalTrafficValue,
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 4,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: getTrafficDataItem(
-                    context,
-                    Icons.arrow_downward,
-                    downTotalTrafficValue,
+                  const SizedBox(
+                    height: 4,
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  Flexible(
+                    flex: 1,
+                    child: getTrafficDataItem(
+                      context,
+                      Icons.arrow_downward,
+                      downTotalTrafficValue,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

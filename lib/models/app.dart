@@ -100,17 +100,23 @@ class AppState with ChangeNotifier {
     }
   }
 
-  String getRealProxyName(String proxyName) {
-    if (proxyName.isEmpty) return proxyName;
+  String _getRealProxyName(String proxyName, Set<String> visited) {
+    if (proxyName.isEmpty || visited.contains(proxyName)) return proxyName;
+    visited.add(proxyName);
     final index = groups.indexWhere((element) => element.name == proxyName);
     if (index == -1) return proxyName;
     final group = groups[index];
     final currentSelectedName =
         group.getCurrentSelectedName(selectedMap[proxyName] ?? '');
     if (currentSelectedName.isEmpty) return proxyName;
-    return getRealProxyName(
+    return _getRealProxyName(
       currentSelectedName,
+      visited,
     );
+  }
+
+  String getRealProxyName(String proxyName) {
+    return _getRealProxyName(proxyName, {});
   }
 
   String? get showProxyName {
@@ -145,9 +151,10 @@ class AppState with ChangeNotifier {
   }
 
   addRequest(Connection value) {
-    _requests = List.from(_requests)..add(value);
-    const maxLength = 1000;
-    _requests = _requests.safeSublist(_requests.length - maxLength);
+    _requests.add(value);
+    if (_requests.length > 1000) {
+      _requests = _requests.sublist(_requests.length - 1000);
+    }
     notifyListeners();
   }
 
@@ -250,6 +257,21 @@ class AppState with ChangeNotifier {
     }
   }
 
+  setDelays(List<Delay> delays) {
+    var changed = false;
+    final newMap = Map<String, int?>.from(_delayMap);
+    for (final delay in delays) {
+      if (newMap[delay.name] != delay.value) {
+        newMap[delay.name] = delay.value;
+        changed = true;
+      }
+    }
+    if (changed) {
+      _delayMap = newMap;
+      notifyListeners();
+    }
+  }
+
   List<Package> get packages => _packages;
 
   set packages(List<Package> value) {
@@ -333,9 +355,10 @@ class AppFlowingState with ChangeNotifier {
   }
 
   addLog(Log log) {
-    _logs = List.from(_logs)..add(log);
-    const maxLength = 1000;
-    _logs = _logs.safeSublist(_logs.length - maxLength);
+    _logs.add(log);
+    if (_logs.length > 1000) {
+      _logs = _logs.sublist(_logs.length - 1000);
+    }
     notifyListeners();
   }
 
@@ -349,9 +372,10 @@ class AppFlowingState with ChangeNotifier {
   }
 
   addTraffic(Traffic traffic) {
-    _traffics = List.from(_traffics)..add(traffic);
-    const maxLength = 60;
-    _traffics = _traffics.safeSublist(_traffics.length - maxLength);
+    _traffics.add(traffic);
+    if (_traffics.length > 60) {
+      _traffics = _traffics.sublist(_traffics.length - 60);
+    }
     notifyListeners();
   }
 
