@@ -503,9 +503,7 @@ class AppController {
   }
 
   updateViewWidth(double width) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      appState.viewWidth = width;
-    });
+    appState.viewWidth = width;
   }
 
   List<Proxy> _sortOfName(List<Proxy> proxies) {
@@ -519,7 +517,7 @@ class AppController {
   }
 
   List<Proxy> _sortOfDelay(List<Proxy> proxies) {
-    return proxies = List.of(proxies)
+    return List.of(proxies)
       ..sort(
         (a, b) {
           final aDelay = appState.getDelay(a.name);

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'chip.dart';
 import 'list.dart';
 
-class ConnectionItem extends StatelessWidget {
+class ConnectionItem extends StatefulWidget {
   final Connection connection;
   final Function(String)? onClick;
   final Widget? trailing;
@@ -22,8 +22,29 @@ class ConnectionItem extends StatelessWidget {
     this.trailing,
   });
 
-  Future<ImageProvider?> _getPackageIcon(Connection connection) async {
-    return await app?.getPackageIcon(connection.metadata.process);
+  @override
+  State<ConnectionItem> createState() => _ConnectionItemState();
+}
+
+class _ConnectionItemState extends State<ConnectionItem> {
+  Future<ImageProvider?>? _iconFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _iconFuture = _getPackageIcon();
+  }
+
+  @override
+  void didUpdateWidget(ConnectionItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.connection.metadata.process != oldWidget.connection.metadata.process) {
+      _iconFuture = _getPackageIcon();
+    }
+  }
+
+  Future<ImageProvider?> _getPackageIcon() async {
+    return await app?.getPackageIcon(widget.connection.metadata.process);
   }
 
   String _getRequestText(Metadata metadata) {
@@ -47,6 +68,7 @@ class ConnectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final connection = widget.connection;
     if (!Platform.isAndroid) {
       return ListItem(
         padding: const EdgeInsets.symmetric(
@@ -77,15 +99,15 @@ class ConnectionItem extends StatelessWidget {
                   CommonChip(
                     label: chain,
                     onPressed: () {
-                      if (onClick == null) return;
-                      onClick!(chain);
+                      if (widget.onClick == null) return;
+                      widget.onClick!(chain);
                     },
                   ),
               ],
             ),
           ],
         ),
-        trailing: trailing,
+        trailing: widget.trailing,
       );
     }
     return Selector<ClashConfig, bool>(
@@ -101,17 +123,17 @@ class ConnectionItem extends StatelessWidget {
           leading: value
               ? GestureDetector(
             onTap: () {
-              if (onClick == null) return;
+              if (widget.onClick == null) return;
               final process = connection.metadata.process;
               if(process.isEmpty)  return;
-              onClick!(process);
+              widget.onClick!(process);
             },
             child: Container(
               margin: const EdgeInsets.only(top: 4),
               width: 48,
               height: 48,
               child: FutureBuilder<ImageProvider?>(
-                future: _getPackageIcon(connection),
+                future: _iconFuture,
                 builder: (_, snapshot) {
                   if (!snapshot.hasData && snapshot.data == null) {
                     return Container();
@@ -151,15 +173,15 @@ class ConnectionItem extends StatelessWidget {
                     CommonChip(
                       label: chain,
                       onPressed: () {
-                        if (onClick == null) return;
-                        onClick!(chain);
+                        if (widget.onClick == null) return;
+                        widget.onClick!(chain);
                       },
                     ),
                 ],
               ),
             ],
           ),
-          trailing: trailing,
+          trailing: widget.trailing,
         );
       },
     );

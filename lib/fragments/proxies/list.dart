@@ -13,6 +13,28 @@ import 'common.dart';
 
 typedef GroupNameProxiesMap = Map<String, List<Proxy>>;
 
+enum _ListItemType { header, spacer, proxyRow }
+
+class _ListItemDescriptor {
+  final _ListItemType type;
+  final String? groupName;
+  final int? rowIndex;
+  final int? totalRows;
+  final List<Proxy>? rowProxies;
+  final GroupType? groupType;
+  final bool? isExpand;
+
+  const _ListItemDescriptor({
+    required this.type,
+    this.groupName,
+    this.rowIndex,
+    this.totalRows,
+    this.rowProxies,
+    this.groupType,
+    this.isExpand,
+  });
+}
+
 class ProxiesListFragment extends StatefulWidget {
   const ProxiesListFragment({super.key});
 
@@ -55,11 +77,11 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
     );
   }
 
-  double _getListItemHeight(Type type, ProxyCardType proxyCardType) {
-    return switch (type) {
-      const (SizedBox) => 8,
-      const (ListHeader) => listHeaderHeight,
-      Type() => getItemHeight(proxyCardType),
+  double _getItemHeight(_ListItemDescriptor item, ProxyCardType proxyCardType) {
+    return switch (item.type) {
+      _ListItemType.spacer => 8,
+      _ListItemType.header => listHeaderHeight,
+      _ListItemType.proxyRow => getItemHeight(proxyCardType),
     };
   }
 
@@ -86,102 +108,114 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
     });
   }
 
-  List<double> _getItemHeightList(
-    List<Widget> items,
+  List<double> _computeItemHeights(
+    List<_ListItemDescriptor> descriptors,
     ProxyCardType proxyCardType,
   ) {
     final itemHeightList = <double>[];
     List<double> headerOffset = [];
     double currentHeight = 0;
-    for (final item in items) {
-      if (item.runtimeType == ListHeader) {
+    for (int i = 0; i < descriptors.length; i++) {
+      final item = descriptors[i];
+      if (item.type == _ListItemType.header) {
         headerOffset.add(currentHeight);
       }
-      final itemHeight = _getListItemHeight(item.runtimeType, proxyCardType);
+      final itemHeight = _getItemHeight(item, proxyCardType);
       itemHeightList.add(itemHeight);
-      currentHeight = currentHeight + itemHeight;
+      currentHeight += itemHeight;
     }
     _headerOffset = headerOffset;
     return itemHeightList;
   }
 
-  List<Widget> _buildItems({
+  List<_ListItemDescriptor> _buildDescriptors({
     required List<String> groupNames,
     required int columns,
     required Set<String> currentUnfoldSet,
     required ProxyCardType type,
   }) {
-    final items = <Widget>[];
+    final descriptors = <_ListItemDescriptor>[];
     final GroupNameProxiesMap groupNameProxiesMap = {};
     for (final groupName in groupNames) {
       final group =
           globalState.appController.appState.getGroupWithName(groupName)!;
       final isExpand = currentUnfoldSet.contains(groupName);
-      items.addAll([
-        ListHeader(
-          onScrollToSelected: _scrollToGroupSelected,
-          key: Key(groupName),
-          isExpand: isExpand,
-          group: group,
-          onChange: (String groupName) {
-            _handleChange(currentUnfoldSet, groupName);
-          },
-        ),
-        const SizedBox(
-          height: 8,
-        ),
-      ]);
+      descriptors.add(_ListItemDescriptor(
+        type: _ListItemType.header,
+        groupName: groupName,
+        isExpand: isExpand,
+        groupType: group.type,
+      ));
+      descriptors.add(const _ListItemDescriptor(type: _ListItemType.spacer));
       if (isExpand) {
         final sortedProxies = globalState.appController.getSortProxies(
           group.all,
         );
         groupNameProxiesMap[groupName] = sortedProxies;
         final chunks = sortedProxies.chunks(columns);
-        final rows = chunks.map<Widget>((proxies) {
-          final children = proxies
-              .map<Widget>(
-                (proxy) => Flexible(
-                  child: ProxyCard(
-                    type: type,
-                    groupType: group.type,
-                    key: ValueKey('$groupName.${proxy.name}'),
-                    proxy: proxy,
-                    groupName: groupName,
-                  ),
-                ),
-              )
-              .fill(
-                columns,
-                filler: (_) => const Flexible(
-                  child: SizedBox(),
-                ),
-              )
-              .separated(
-                const SizedBox(
-                  width: 8,
-                ),
-              );
-
-          return Row(
-            children: children.toList(),
-          );
-        }).separated(
-          const SizedBox(
-            height: 8,
-          ),
-        );
-        items.addAll(
-          [
-            ...rows,
-            const SizedBox(
-              height: 8,
-            ),
-          ],
-        );
+        for (int rowIdx = 0; rowIdx < chunks.length; rowIdx++) {
+          descriptors.add(_ListItemDescriptor(
+            type: _ListItemType.proxyRow,
+            groupName: groupName,
+            rowIndex: rowIdx,
+            totalRows: chunks.length,
+            rowProxies: chunks[rowIdx],
+            groupType: group.type,
+          ));
+          if (rowIdx < chunks.length - 1) {
+            descriptors.add(const _ListItemDescriptor(type: _ListItemType.spacer));
+          }
+        }
+        descriptors.add(const _ListItemDescriptor(type: _ListItemType.spacer));
       }
     }
     _lastGroupNameProxiesMap = groupNameProxiesMap;
-    return items;
+    return descriptors;
+  }
+
+  Widget _buildItemFromDescriptor(
+    _ListItemDescriptor descriptor,
+    int columns,
+    ProxyCardType type,
+    Set<String> currentUnfoldSet,
+  ) {
+    switch (descriptor.type) {
+      case _ListItemType.header:
+        return ListHeader(
+          onScrollToSelected: _scrollToGroupSelected,
+          key: Key(descriptor.groupName!),
+          isExpand: descriptor.isExpand!,
+          group: globalState.appController.appState
+              .getGroupWithName(descriptor.groupName!)!,
+          onChange: (String groupName) {
+            _handleChange(currentUnfoldSet, groupName);
+          },
+        );
+      case _ListItemType.spacer:
+        return const SizedBox(height: 8);
+      case _ListItemType.proxyRow:
+        final proxies = descriptor.rowProxies!;
+        final groupName = descriptor.groupName!;
+        final groupType = descriptor.groupType!;
+        final children = proxies
+            .map<Widget>(
+              (proxy) => Flexible(
+                child: ProxyCard(
+                  type: type,
+                  groupType: groupType,
+                  key: ValueKey('$groupName.${proxy.name}'),
+                  proxy: proxy,
+                  groupName: groupName,
+                ),
+              ),
+            )
+            .fill(
+              columns,
+              filler: (_) => const Flexible(child: SizedBox()),
+            )
+            .separated(const SizedBox(width: 8));
+        return Row(children: children.toList());
+    }
   }
 
   _buildHeader({
@@ -259,13 +293,13 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
         return prev != next;
       },
       builder: (_, state, __) {
-        final items = _buildItems(
+        final descriptors = _buildDescriptors(
           groupNames: state.groupNames,
           currentUnfoldSet: state.currentUnfoldSet,
           columns: state.columns,
           type: state.proxyCardType,
         );
-        final itemsOffset = _getItemHeightList(items, state.proxyCardType);
+        final itemsOffset = _computeItemHeights(descriptors, state.proxyCardType);
         return Scrollbar(
           controller: _controller,
           thumbVisibility: true,
@@ -284,9 +318,14 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
                     itemExtentBuilder: (index, __) {
                       return itemsOffset[index];
                     },
-                    itemCount: items.length,
+                    itemCount: descriptors.length,
                     itemBuilder: (_, index) {
-                      return items[index];
+                      return _buildItemFromDescriptor(
+                        descriptors[index],
+                        state.columns,
+                        state.proxyCardType,
+                        state.currentUnfoldSet,
+                      );
                     },
                   ),
                 ),
