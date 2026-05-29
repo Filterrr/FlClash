@@ -33,7 +33,41 @@ env:
   IS_STABLE: ${{ (startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')) || (inputs.tag_name != '' && !contains(inputs.tag_name, '-')) }}
 
 jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.version.outputs.new_version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Calculate New Version
+        id: version
+        run: |
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "Current version: $CURRENT_VERSION"
+
+          VERSION_PART=$(echo "$CURRENT_VERSION" | cut -d'+' -f1)
+          BUILD_PART=$(echo "$CURRENT_VERSION" | cut -d'+' -f2)
+
+          MAJOR=$(echo "$VERSION_PART" | cut -d'.' -f1)
+          MINOR=$(echo "$VERSION_PART" | cut -d'.' -f2)
+          PATCH=$(echo "$VERSION_PART" | cut -d'.' -f3)
+
+          NEW_BUILD=$(date +'%Y%m%d')
+
+          if [ "$BUILD_PART" = "$NEW_BUILD" ]; then
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}+${NEW_BUILD}"
+          else
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}+${NEW_BUILD}"
+          fi
+
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
   check-update:
+    needs: update-version
     # 仅在定时触发，或者手动触发且未指定发布 tag_name 时，执行内核更新检查
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.tag_name == '')
     runs-on: ubuntu-latest
@@ -108,7 +142,7 @@ jobs:
           echo "Current commit: ${{ needs.check-update.outputs.old_commit_short }} (${{ needs.check-update.outputs.old_commit }})"
 
   update-and-test:
-    needs: check-update
+    needs: [check-update, update-version]
     if: needs.check-update.outputs.has_update == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -171,9 +205,14 @@ jobs:
           cd core
           go build -v ./...
 
+      - name: Update Version
+        run: |
+          sed -i "s/^version:.*/version: ${{ needs.update-version.outputs.new_version }}/" pubspec.yaml
+          echo "Updated pubspec.yaml version to ${{ needs.update-version.outputs.new_version }}"
+
       - name: Commit and Push Changes
         run: |
-          git add ${{ env.SUBMODULE_PATH }} core/go.mod core/go.sum
+          git add ${{ env.SUBMODULE_PATH }} core/go.mod core/go.sum pubspec.yaml
           git commit -m 'chore: update Clash.Meta core to ${{ needs.check-update.outputs.new_commit_short }}' || echo "No changes to commit"
           git push origin HEAD:${{ needs.check-update.outputs.branch_name }} --force
 
@@ -206,10 +245,11 @@ jobs:
             || echo "PR already exists or failed to create"
 
   build:
-    needs: [check-update, update-and-test]
+    needs: [check-update, update-and-test, update-version]
     # 触发构建的情况：1. 推送 tag； 2. 手动触发且填了 tag_name； 3. 定时或手动更新内核成功后测试新分支编译
     if: >-
       always() &&
+      needs.update-version.result == 'success' &&
       (
         (github.event_name == 'push') ||
         (github.event_name == 'workflow_dispatch' && inputs.tag_name != '') ||
@@ -269,6 +309,22 @@ jobs:
           ref: ${{ ((github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.check-update.outputs.has_update == 'true') && needs.check-update.outputs.branch_name || github.ref }}
           submodules: recursive
           fetch-depth: 1
+
+      - name: Update Version
+        shell: bash
+        env:
+          NEW_VERSION: ${{ needs.update-version.outputs.new_version }}
+        run: |
+          python3 << 'EOF'
+          import re, os
+          v = os.environ['NEW_VERSION']
+          with open('pubspec.yaml', 'r') as f:
+              c = f.read()
+          c = re.sub(r'^version:.*', 'version: ' + v, c, flags=re.MULTILINE)
+          with open('pubspec.yaml', 'w') as f:
+              f.write(c)
+          print('Updated pubspec.yaml version to ' + v)
+          EOF
 
       - name: Setup Java
         if: matrix.is_android == true
