@@ -406,7 +406,7 @@ jobs:
 
   upload:
     permissions: write-all
-    needs: [build, check-update, update-and-test]
+    needs: [build, check-update, update-and-test, update-version]
     if: always() && needs.build.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -415,13 +415,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set Build Time Tag if Empty
+      - name: Set Release Tag
         run: |
-          if [ -z "$RELEASE_TAG" ]; then
-            BUILD_TAG="v$(date +'%Y%m%d-%H%M%S')"
-            echo "RELEASE_TAG=${BUILD_TAG}" >> $GITHUB_ENV
+          if [ -n "$RELEASE_TAG" ]; then
+            echo "Using specified tag: $RELEASE_TAG"
+          else
+            NEW_VERSION="${{ needs.update-version.outputs.new_version }}"
+            echo "RELEASE_TAG=v${NEW_VERSION}" >> $GITHUB_ENV
             echo "IS_STABLE=true" >> $GITHUB_ENV
-            echo "⚠️ 检测到未指定标签，已自动生成构建时间标签: ${BUILD_TAG}"
+            echo "Using version tag: v${NEW_VERSION}"
           fi
 
       - name: Download
