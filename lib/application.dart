@@ -124,6 +124,7 @@ class ApplicationState extends State<Application> {
       id: 'groups',
       foregroundMs: 20000,
       backgroundMs: 60000,
+      isCore: true,
       callback: () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           globalState.appController.updateGroupDebounce();

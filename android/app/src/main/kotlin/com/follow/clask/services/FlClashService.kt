@@ -38,6 +38,11 @@ class FlClashService : Service(), BaseServiceInterface {
         return super.onUnbind(intent)
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        GlobalState.getCurrentAppPlugin()?.clearCaches()
+    }
+
     private val CHANNEL = "FlClash"
 
     private val notificationId: Int = 1
