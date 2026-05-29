@@ -212,6 +212,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(true)
             }
 
+            "clearCaches" -> {
+                clearCaches()
+                result.success(true)
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -269,6 +274,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             false -> task?.setExcludeFromRecents(value)
             null -> task?.setExcludeFromRecents(false)
         }
+    }
+
+    fun clearCaches() {
+        iconMap.clear()
+        packages.clear()
     }
 
     private suspend fun getPackageIcon(packageName: String): String? {
