@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -21,8 +23,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     keepScrollOffset: false,
   );
 
-  static const _taskId = 'connections';
-  bool _isVisible = true;
+  Timer? timer;
 
   @override
   void initState() {
@@ -31,17 +32,23 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       connectionsNotifier.value = connectionsNotifier.value.copyWith(
         connections: await clashCore.getConnections(),
       );
-      globalState.scheduler.register(RefreshTask(
-        id: _taskId,
-        foregroundMs: 2000,
-        backgroundMs: 30000,
-        callback: () async {
-          if (!context.mounted) return;
+      if (timer != null) {
+        timer?.cancel();
+        timer = null;
+      }
+      timer = Timer.periodic(
+        globalState.isAppPaused
+            ? const Duration(seconds: 10)
+            : const Duration(seconds: 2),
+        (timer) async {
+          if (!context.mounted || globalState.isAppPaused) {
+            return;
+          }
           connectionsNotifier.value = connectionsNotifier.value.copyWith(
             connections: await clashCore.getConnections(),
           );
         },
-      ));
+      );
     });
   }
 
@@ -109,9 +116,10 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
   @override
   void dispose() {
     super.dispose();
-    globalState.scheduler.unregister(_taskId);
+    timer?.cancel();
     connectionsNotifier.dispose();
     _scrollController.dispose();
+    timer = null;
   }
 
   @override
@@ -122,16 +130,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        final visible = isCurrent == true;
-        if (visible != _isVisible) {
-          _isVisible = visible;
-          if (_isVisible) {
-            globalState.scheduler.resume(_taskId);
-          } else {
-            globalState.scheduler.pause(_taskId);
-          }
-        }
-        if (visible) {
+        if (isCurrent == null || isCurrent) {
           _initActions();
         }
         return child!;

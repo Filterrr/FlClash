@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
@@ -19,8 +20,7 @@ class _LogsFragmentState extends State<LogsFragment> {
     keepScrollOffset: false,
   );
 
-  static const _taskId = 'logs';
-  bool _isVisible = true;
+  Timer? timer;
 
   @override
   void initState() {
@@ -29,11 +29,16 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      globalState.scheduler.register(RefreshTask(
-        id: _taskId,
-        foregroundMs: 1000,
-        backgroundMs: 30000,
-        callback: () {
+      if (timer != null) {
+        timer?.cancel();
+        timer = null;
+      }
+      timer = Timer.periodic(
+        globalState.isAppPaused
+            ? const Duration(seconds: 5)
+            : const Duration(milliseconds: 500),
+        (timer) {
+          if (globalState.isAppPaused) return;
           final logs = appFlowingState.logs;
           if (!logListEquality.equals(
             logsNotifier.value.logs,
@@ -44,16 +49,17 @@ class _LogsFragmentState extends State<LogsFragment> {
             );
           }
         },
-      ));
+      );
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    globalState.scheduler.unregister(_taskId);
+    timer?.cancel();
     logsNotifier.dispose();
     scrollController.dispose();
+    timer = null;
   }
 
   _handleExport() async {
@@ -130,16 +136,7 @@ class _LogsFragmentState extends State<LogsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        final visible = isCurrent == true;
-        if (visible != _isVisible) {
-          _isVisible = visible;
-          if (_isVisible) {
-            globalState.scheduler.resume(_taskId);
-          } else {
-            globalState.scheduler.pause(_taskId);
-          }
-        }
-        if (visible) {
+        if (isCurrent == null || isCurrent) {
           _initActions();
         }
         return child!;

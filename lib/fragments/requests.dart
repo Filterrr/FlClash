@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -21,8 +22,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
     keepScrollOffset: false,
   );
 
-  static const _taskId = 'requests';
-  bool _isVisible = true;
+  Timer? timer;
 
   @override
   void initState() {
@@ -31,12 +31,18 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      globalState.scheduler.register(RefreshTask(
-        id: _taskId,
-        foregroundMs: 500,
-        backgroundMs: 30000,
-        callback: () {
-          if (!context.mounted) return;
+      if (timer != null) {
+        timer?.cancel();
+        timer = null;
+      }
+      timer = Timer.periodic(
+        globalState.isAppPaused
+            ? const Duration(seconds: 5)
+            : const Duration(milliseconds: 200),
+        (timer) {
+          if (!context.mounted || globalState.isAppPaused) {
+            return;
+          }
           final maxLength = Platform.isAndroid ? 1000 : 60;
           final requests = appState.requests.safeSublist(
             appState.requests.length - maxLength,
@@ -49,7 +55,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
                 requestsNotifier.value.copyWith(connections: requests);
           }
         },
-      ));
+      );
     });
   }
 
@@ -98,8 +104,9 @@ class _RequestsFragmentState extends State<RequestsFragment> {
   @override
   void dispose() {
     super.dispose();
-    globalState.scheduler.unregister(_taskId);
+    timer?.cancel();
     _scrollController.dispose();
+    timer = null;
   }
 
   @override
@@ -110,16 +117,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        final visible = isCurrent == true;
-        if (visible != _isVisible) {
-          _isVisible = visible;
-          if (_isVisible) {
-            globalState.scheduler.resume(_taskId);
-          } else {
-            globalState.scheduler.pause(_taskId);
-          }
-        }
-        if (visible) {
+        if (isCurrent == null || isCurrent) {
           _initActions();
         }
         return child!;
