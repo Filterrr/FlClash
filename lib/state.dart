@@ -58,14 +58,22 @@ class GlobalState {
     if (isAppPaused) return;
     isAppPaused = true;
     scheduler.setBackground(true);
-    stopListenUpdate();
+    if (timer != null && timer!.isActive) {
+      timer?.cancel();
+      timer = null;
+      startListenUpdate();
+    }
   }
 
   void onAppResumed() {
     if (!isAppPaused) return;
     isAppPaused = false;
     scheduler.setBackground(false);
-    startListenUpdate();
+    if (timer != null && timer!.isActive) {
+      timer?.cancel();
+      timer = null;
+      startListenUpdate();
+    }
   }
 
   Future<void> initCore({

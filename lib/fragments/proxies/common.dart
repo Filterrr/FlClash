@@ -57,17 +57,19 @@ delayTest(List<Proxy> proxies) async {
       .toSet()
       .toList();
 
-  final initialDelays = proxyNames
-      .map((name) => Delay(name: name, value: 0))
-      .toList();
-  appController.appState.setDelays(initialDelays);
-
-  final batches = proxyNames.batch(100);
-  for (final batch in batches) {
-    final results = await Future.wait(
-      batch.map((name) => clashCore.getDelay(name)),
+  final delayProxies = proxyNames.map<Future>((proxyName) async {
+    globalState.appController.setDelay(
+      Delay(
+        name: proxyName,
+        value: 0,
+      ),
     );
-    appController.appState.setDelays(results);
+    globalState.appController.setDelay(await clashCore.getDelay(proxyName));
+  }).toList();
+
+  final batchesDelayProxies = delayProxies.batch(100);
+  for (final batchDelayProxies in batchesDelayProxies) {
+    await Future.wait(batchDelayProxies);
   }
   appController.appState.sortNum++;
 }
