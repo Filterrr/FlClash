@@ -1,4 +1,3 @@
-import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -77,14 +76,11 @@ class _AppStateManagerState extends State<AppStateManager>
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     final isPaused = state == AppLifecycleState.paused;
     final isResumed = state == AppLifecycleState.resumed;
-    final isInactive = state == AppLifecycleState.inactive;
     if (isPaused) {
       globalState.appController.savePreferencesDebounce();
       globalState.onAppPaused();
     } else if (isResumed) {
       globalState.onAppResumed();
-    } else if (isInactive) {
-      clashCore.requestGc();
     }
   }
 

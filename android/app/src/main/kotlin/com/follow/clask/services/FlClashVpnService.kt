@@ -190,7 +190,6 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         GlobalState.getCurrentVPNPlugin()?.requestGc()
-        GlobalState.getCurrentAppPlugin()?.clearCaches()
     }
 
     private val binder = LocalBinder()

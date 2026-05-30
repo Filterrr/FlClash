@@ -98,10 +98,6 @@ class App {
       "value": value,
     });
   }
-
-  Future<bool?> clearCaches() async {
-    return await methodChannel.invokeMethod<bool>("clearCaches");
-  }
 }
 
 final app = Platform.isAndroid ? App() : null;
