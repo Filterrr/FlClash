@@ -354,7 +354,8 @@ class ProxyGroupViewState extends State<ProxyGroupView> {
           },
           child: Align(
             alignment: Alignment.topCenter,
-            child: GridView.builder(
+            child: RepaintBoundary(
+              child: GridView.builder(
               controller: _controller,
               padding: const EdgeInsets.only(
                 top: 16,
@@ -380,6 +381,7 @@ class ProxyGroupViewState extends State<ProxyGroupView> {
                 );
               },
             ),
+              ),
           ),
         );
       },

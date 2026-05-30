@@ -29,14 +29,12 @@ class ProxyCard extends StatelessWidget {
     proxyDelayTest(proxy);
   }
 
-  Widget _buildDelayText() {
+  Widget _buildDelayText(BuildContext context) {
     return SizedBox(
       height: measure.labelSmallHeight,
       child: Selector<AppState, int?>(
-        selector: (context, appState) => appState.getDelay(
-          proxy.name,
-        ),
-        builder: (context, delay, __) {
+        selector: (_, appState) => appState.getDelay(proxy.name),
+        builder: (_, delay, __) {
           return FadeThroughBox(
             alignment: type == ProxyCardType.expand
                 ? Alignment.centerLeft
@@ -49,16 +47,14 @@ class ProxyCard extends StatelessWidget {
                         ? const CircularProgressIndicator(strokeWidth: 2)
                         : IconButton(
                             icon: const Icon(Icons.bolt),
-                            iconSize: globalState.measure.labelSmallHeight,
+                            iconSize: measure.labelSmallHeight,
                             padding: EdgeInsets.zero,
                             onPressed: _handleTestCurrentDelay,
                           ),
                   )
                 : GestureDetector(
                     onTap: _handleTestCurrentDelay,
-                    child: DelayChip(
-                      delay: delay,
-                    ),
+                    child: DelayChip(delay: delay),
                   ),
           );
         },
@@ -67,16 +63,17 @@ class ProxyCard extends StatelessWidget {
   }
 
   Widget _buildProxyNameText(BuildContext context) {
+    final style = context.textTheme.bodyMedium?.copyWith(
+      fontWeight: FontWeight.w500,
+    );
     if (type == ProxyCardType.min) {
       return SizedBox(
-        height: measure.bodyMediumHeight * 1,
+        height: measure.bodyMediumHeight,
         child: EmojiText(
           proxy.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: style,
         ),
       );
     } else {
@@ -86,9 +83,7 @@ class ProxyCard extends StatelessWidget {
           proxy.name,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: style,
         ),
       );
     }
@@ -124,7 +119,7 @@ class ProxyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final measure = globalState.measure;
-    final delayText = _buildDelayText();
+    final delayText = _buildDelayText(context);
     final proxyNameText = _buildProxyNameText(context);
     return Stack(
       children: [

@@ -32,10 +32,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       connectionsNotifier.value = connectionsNotifier.value.copyWith(
         connections: await clashCore.getConnections(),
       );
-      if (timer != null) {
-        timer?.cancel();
-        timer = null;
-      }
+      timer?.cancel();
       timer = Timer.periodic(
         globalState.isAppPaused
             ? const Duration(seconds: 10)
@@ -138,13 +135,13 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       child: ValueListenableBuilder<ConnectionsAndKeywords>(
         valueListenable: connectionsNotifier,
         builder: (_, state, __) {
-          var connections = state.filteredConnections;
+          final connections = state.filteredConnections;
           if (connections.isEmpty) {
             return NullStatus(
               label: appLocalizations.nullConnectionsDesc,
             );
           }
-          connections = connections.reversed.toList();
+          final count = connections.length;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -170,28 +167,33 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
                   ),
                 ),
               Expanded(
-                child: ListView.separated(
-                  controller: _scrollController,
-                  itemBuilder: (_, index) {
-                    final connection = connections[index];
-                    return ConnectionItem(
-                      key: Key(connection.id),
-                      connection: connection,
-                      onClick: _addKeyword,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.block),
-                        onPressed: () {
-                          _handleBlockConnection(connection.id);
-                        },
-                      ),
-                    );
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider(
-                      height: 0,
-                    );
-                  },
-                  itemCount: connections.length,
+                child: RepaintBoundary(
+                  child: ListView.separated(
+                    controller: _scrollController,
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: true,
+                    addSemanticIndexes: false,
+                    itemBuilder: (_, index) {
+                      final connection = connections[count - 1 - index];
+                      return ConnectionItem(
+                        key: ValueKey(connection.id),
+                        connection: connection,
+                        onClick: _addKeyword,
+                        trailing: IconButton(
+                          icon: const Icon(Icons.block),
+                          onPressed: () {
+                            _handleBlockConnection(connection.id);
+                          },
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return const Divider(
+                        height: 0,
+                      );
+                    },
+                    itemCount: count,
+                  ),
                 ),
               )
             ],
@@ -204,6 +206,8 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
 
 class ConnectionsSearchDelegate extends SearchDelegate {
   ValueNotifier<ConnectionsAndKeywords> connectionsNotifier;
+  List<Connection> _cachedResults = [];
+  String _cachedQuery = '';
 
   ConnectionsSearchDelegate({
     required ConnectionsAndKeywords state,
@@ -213,7 +217,10 @@ class ConnectionsSearchDelegate extends SearchDelegate {
 
   List<Connection> get _results {
     final lowerQuery = query.toLowerCase().trim();
-    return connectionsNotifier.value.filteredConnections.where((request) {
+    if (lowerQuery == _cachedQuery) return _cachedResults;
+    _cachedQuery = lowerQuery;
+    _cachedResults = connectionsNotifier.value.filteredConnections
+        .where((request) {
       final lowerNetwork = request.metadata.network.toLowerCase();
       final lowerHost = request.metadata.host.toLowerCase();
       final lowerDestinationIP = request.metadata.destinationIP.toLowerCase();
@@ -225,6 +232,7 @@ class ConnectionsSearchDelegate extends SearchDelegate {
           lowerProcess.contains(lowerQuery) ||
           lowerChains.contains(lowerQuery);
     }).toList();
+    return _cachedResults;
   }
 
   _addKeyword(String keyword) {
@@ -264,6 +272,7 @@ class ConnectionsSearchDelegate extends SearchDelegate {
             return;
           }
           query = '';
+          _cachedQuery = '';
         },
         icon: const Icon(Icons.clear),
       ),
@@ -325,10 +334,13 @@ class ConnectionsSearchDelegate extends SearchDelegate {
               ),
             Expanded(
               child: ListView.separated(
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: true,
+                addSemanticIndexes: false,
                 itemBuilder: (_, index) {
                   final connection = _results[index];
                   return ConnectionItem(
-                    key: Key(connection.id),
+                    key: ValueKey(connection.id),
                     connection: connection,
                     onClick: _addKeyword,
                     trailing: IconButton(

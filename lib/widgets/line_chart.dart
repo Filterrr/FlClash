@@ -39,10 +39,18 @@ class _LineChartState extends State<LineChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  double progress = 0;
-  List<Point> prevPoints = [];
-  List<Point> nextPoints = [];
-  List<Point> points = [];
+  List<Point> _prevPoints = [];
+  List<Point> _points = [];
+  List<Point> _prevRenderPoints = [];
+  List<Point> _renderPoints = [];
+  Path? _cachedPrevFullPath;
+  Path? _cachedNextFullPath;
+  Size? _cachedSize;
+  int _pointsHash = 0;
+
+  static final Paint _paint = Paint()
+    ..strokeWidth = 2.0
+    ..style = PaintingStyle.stroke;
 
   @override
   void initState() {
@@ -51,114 +59,114 @@ class _LineChartState extends State<LineChart>
       vsync: this,
       duration: widget.duration,
     );
-    points = widget.points;
-    prevPoints = points;
+    _points = widget.points;
+    _prevPoints = _points;
+    _pointsHash = _computePointsHash(_points);
+    _prevRenderPoints = _normalizePoints(_prevPoints);
+    _renderPoints = _prevRenderPoints;
   }
 
-  @override
-  void didUpdateWidget(LineChart oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.points != points) {
-      prevPoints = points;
-      if (!_controller.isCompleted) {
-        prevPoints = nextPoints;
-      }
-      points = widget.points;
-      if (globalState.isAppPaused) {
-        _controller.value = 1.0;
-      } else {
-        _controller.forward(from: 0);
-      }
-    }
+  static int _computePointsHash(List<Point> pts) {
+    return Object.hashAll(pts);
   }
 
-  List<Point> getRenderPoints(List<Point> points) {
+  static List<Point> _normalizePoints(List<Point> points) {
     if (points.isEmpty) return [];
     double maxX = points[0].x;
     double minX = points[0].x;
     double maxY = points[0].y;
     double minY = points[0].y;
-    for (var point in points) {
+    for (final point in points) {
       if (point.x > maxX) maxX = point.x;
       if (point.x < minX) minX = point.x;
       if (point.y > maxY) maxY = point.y;
       if (point.y < minY) minY = point.y;
     }
-    return points.map((e) {
-      var x = (e.x - minX) / (maxX - minX);
-      if (x.isNaN) {
-        x = 0.5;
-      }
-
-      var y = (e.y - minY) / (maxY - minY);
-      if (y.isNaN) {
-        y = 0.5;
-      }
-
-      return Point(
-        x,
-        y,
-      );
-    }).toList();
-  }
-
-  List<Point> getInterpolatePoints(
-    List<Point> prevPoints,
-    List<Point> points,
-    double t,
-  ) {
-    var renderPrevPoints = getRenderPoints(prevPoints);
-    var renderPotions = getRenderPoints(points);
-    return List.generate(renderPotions.length, (i) {
-      if (i > renderPrevPoints.length - 1) {
-        return renderPotions[i];
-      }
-      var x = lerpDouble(renderPrevPoints[i].x, renderPotions[i].x, t)!;
-      var y = lerpDouble(renderPrevPoints[i].y, renderPotions[i].y, t)!;
-      return Point(
-        x,
-        y,
-      );
+    final double xRange = maxX - minX;
+    final double yRange = maxY - minY;
+    final bool xFlat = xRange == 0;
+    final bool yFlat = yRange == 0;
+    return List.generate(points.length, (i) {
+      final e = points[i];
+      final x = xFlat ? 0.5 : (e.x - minX) / xRange;
+      final y = yFlat ? 0.5 : (e.y - minY) / yRange;
+      return Point(x, y);
     });
   }
 
-  Path getPath(List<Point> points, Size size) {
+  static Path _buildPath(List<Point> points, Size size) {
     final path = Path()
       ..moveTo(points[0].x * size.width, (1 - points[0].y) * size.height);
-
     for (var i = 1; i < points.length - 1; i++) {
       final nextPoint = points[i + 1];
       final currentPoint = points[i];
       final midX = (currentPoint.x + nextPoint.x) / 2;
       final midY = (currentPoint.y + nextPoint.y) / 2;
       path.quadraticBezierTo(
-        currentPoint.x * size.width, (1 - currentPoint.y) * size.height,
-        midX * size.width, (1 - midY) * size.height,
+        currentPoint.x * size.width,
+        (1 - currentPoint.y) * size.height,
+        midX * size.width,
+        (1 - midY) * size.height,
       );
     }
-    path.lineTo(points.last.x * size.width, (1 - points.last.y) * size.height);
-
+    path.lineTo(
+      points.last.x * size.width,
+      (1 - points.last.y) * size.height,
+    );
     return path;
   }
 
-  ComputedPath getComputedPath({
-    required List<Point> prevPoints,
-    required List<Point> points,
-    required progress,
-  }) {
-    nextPoints = getInterpolatePoints(prevPoints, points, progress);
-    return (size) {
-      final prevPath = getPath(prevPoints, size);
-      final nextPath = getPath(nextPoints, size);
-      final prevMetric = prevPath.computeMetrics().first;
-      final nextMetric = nextPath.computeMetrics().first;
-      final prevLength = prevMetric.length;
-      final nextLength = nextMetric.length;
-      return nextMetric.extractPath(
-        0,
-        prevLength + (nextLength - prevLength) * progress,
-      );
-    };
+  @override
+  void didUpdateWidget(LineChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.points != _points) {
+      final newHash = _computePointsHash(widget.points);
+      if (newHash != _pointsHash) {
+        _prevPoints = _points;
+        _prevRenderPoints = _renderPoints;
+        _points = widget.points;
+        _pointsHash = newHash;
+        _renderPoints = _normalizePoints(_points);
+        _cachedPrevFullPath = null;
+        _cachedNextFullPath = null;
+        if (globalState.isAppPaused) {
+          _controller.value = 1.0;
+        } else {
+          _controller.forward(from: 0);
+        }
+      }
+    }
+  }
+
+  void _drawChart(Canvas canvas, Size size) {
+    if (_prevRenderPoints.isEmpty || _renderPoints.isEmpty) return;
+
+    if (_cachedSize != size) {
+      _cachedPrevFullPath = null;
+      _cachedNextFullPath = null;
+      _cachedSize = size;
+    }
+
+    final progress = _controller.value;
+
+    _paint.color = widget.color;
+
+    if (progress >= 1.0) {
+      _cachedNextFullPath ??= _buildPath(_renderPoints, size);
+      canvas.drawPath(_cachedNextFullPath!, _paint);
+      return;
+    }
+
+    _cachedPrevFullPath ??= _buildPath(_prevRenderPoints, size);
+    _cachedNextFullPath ??= _buildPath(_renderPoints, size);
+
+    final prevMetric = _cachedPrevFullPath!.computeMetrics().first;
+    final nextMetric = _cachedNextFullPath!.computeMetrics().first;
+    final targetLength = prevMetric.length +
+        (nextMetric.length - prevMetric.length) * progress;
+    final extractedPath =
+        nextMetric.extractPath(0, targetLength.clamp(0.0, nextMetric.length));
+    canvas.drawPath(extractedPath, _paint);
   }
 
   @override
@@ -169,52 +177,52 @@ class _LineChartState extends State<LineChart>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
+    return RepaintBoundary(
+      child: AnimatedBuilder(
         animation: _controller.view,
         builder: (_, __) {
-          final currentProgress = _controller.value;
           return CustomPaint(
-            painter: LineChartPainter(
+            painter: _LineChartPainter(
+              painter: this,
+              pointsHash: _pointsHash,
+              progress: _controller.value,
               color: widget.color,
-              computedPath: getComputedPath(
-                prevPoints: prevPoints,
-                points: points,
-                progress: currentProgress,
-              ),
-              hash: Object.hashAll(points) ^ currentProgress.hashCode,
             ),
+            isComplex: true,
+            willChange: true,
             child: SizedBox(
               height: widget.height,
               width: double.infinity,
             ),
           );
-        });
+        },
+      ),
+    );
   }
 }
 
-class LineChartPainter extends CustomPainter {
-  final ComputedPath computedPath;
+class _LineChartPainter extends CustomPainter {
+  final _LineChartState painter;
+  final int pointsHash;
+  final double progress;
   final Color color;
-  final int hash;
 
-  LineChartPainter({
-    required this.computedPath,
+  _LineChartPainter({
+    required this.painter,
+    required this.pointsHash,
+    required this.progress,
     required this.color,
-    required this.hash,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawPath(computedPath(size), paint);
+    painter._drawChart(canvas, size);
   }
 
   @override
-  bool shouldRepaint(covariant LineChartPainter oldDelegate) {
-    return hash != oldDelegate.hash || color != oldDelegate.color;
+  bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
+    return pointsHash != oldDelegate.pointsHash ||
+        progress != oldDelegate.progress ||
+        color != oldDelegate.color;
   }
 }
