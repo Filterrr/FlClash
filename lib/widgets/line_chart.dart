@@ -138,7 +138,7 @@ class _LineChartState extends State<LineChart>
     }
   }
 
-  void _paint(Canvas canvas, Size size) {
+  void _drawChart(Canvas canvas, Size size) {
     if (_prevRenderPoints.isEmpty || _renderPoints.isEmpty) return;
 
     if (_cachedSize != size) {
@@ -216,7 +216,7 @@ class _LineChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    painter._paint(canvas, size);
+    painter._drawChart(canvas, size);
   }
 
   @override
