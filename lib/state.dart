@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/plugins/service.dart';
 import 'package:fl_clash/plugins/vpn.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
@@ -60,7 +59,6 @@ class GlobalState {
     isAppPaused = true;
     scheduler.setBackground(true);
     stopListenUpdate();
-    _freezeNonCore();
   }
 
   void onAppResumed() {
@@ -68,29 +66,6 @@ class GlobalState {
     isAppPaused = false;
     scheduler.setBackground(false);
     startListenUpdate();
-    _restoreFromBackground();
-  }
-
-  void _freezeNonCore() {
-    clashCore.requestGc();
-    final appController = this.appController;
-    if (appController != null) {
-      appController.appState.requests = [];
-      final logs = appController.appFlowingState.logs;
-      if (logs.length > 50) {
-        appController.appFlowingState.logs = logs.sublist(logs.length - 50);
-      }
-      appController.appFlowingState.traffics = [];
-    }
-    app?.clearCaches();
-  }
-
-  void _restoreFromBackground() {
-    final appController = this.appController;
-    if (appController != null && isStart) {
-      appController.updateGroups();
-      appController.updateTraffic();
-    }
   }
 
   Future<void> initCore({

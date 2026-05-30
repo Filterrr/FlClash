@@ -4,7 +4,6 @@ class RefreshTask {
   final String id;
   final int foregroundMs;
   final int backgroundMs;
-  final bool isCore;
   final void Function() callback;
   bool _isActive = true;
   Timer? _timer;
@@ -13,7 +12,6 @@ class RefreshTask {
     required this.id,
     required this.foregroundMs,
     required this.backgroundMs,
-    this.isCore = false,
     required this.callback,
   });
 
@@ -26,7 +24,6 @@ class RefreshTask {
   void _start() {
     _cancel();
     if (!_isActive) return;
-    if (RefreshScheduler.instance._isBackground && !isCore) return;
     _timer = Timer.periodic(Duration(milliseconds: currentMs), (_) {
       callback();
     });
