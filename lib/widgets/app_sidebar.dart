@@ -108,7 +108,7 @@ class AppSidebarContainer extends StatelessWidget {
                     );
                   },
                 ),
-
+                const SizedBox(height: 72),
               ],
             ),
           ),
