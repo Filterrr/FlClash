@@ -58,8 +58,9 @@ class Application extends StatefulWidget {
   State<Application> createState() => ApplicationState();
 }
 
-class ApplicationState extends State<Application> {
+class ApplicationState extends State<Application> with WidgetsBindingObserver {
   late SystemColorSchemes systemColorSchemes;
+  Timer? timer;
   StreamSubscription? connectivitySubscription;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
@@ -97,7 +98,8 @@ class ApplicationState extends State<Application> {
   @override
   void initState() {
     super.initState();
-    _initScheduler();
+    WidgetsBinding.instance.addObserver(this);
+    _initTimer();
     globalState.appController = AppController(context);
     globalState.measure = Measure.of(context);
     connectivitySubscription = Connectivity().onConnectivityChanged.listen((_) {
@@ -117,18 +119,31 @@ class ApplicationState extends State<Application> {
     });
   }
 
-  _initScheduler() {
-    final scheduler = globalState.scheduler;
-    scheduler.register(RefreshTask(
-      id: 'groups',
-      foregroundMs: 20000,
-      backgroundMs: 60000,
-      callback: () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          globalState.appController.updateGroupDebounce();
-        });
-      },
-    ));
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.resumed) {
+      _initTimer();
+    }
+  }
+
+  _initTimer() {
+    _cancelTimer();
+    final interval = globalState.isAppPaused
+        ? const Duration(minutes: 5)
+        : const Duration(milliseconds: 20000);
+    timer = Timer.periodic(interval, (_) {
+      if (globalState.isAppPaused) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        globalState.appController.updateGroupDebounce();
+      });
+    });
+  }
+
+  _cancelTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
   }
 
   _buildApp(Widget app) {
@@ -261,8 +276,9 @@ class ApplicationState extends State<Application> {
 
   @override
   Future<void> dispose() async {
+    WidgetsBinding.instance.removeObserver(this);
     linkManager.destroy();
-    globalState.scheduler.dispose();
+    _cancelTimer();
     connectivitySubscription?.cancel();
     await clashService?.destroy();
     await globalState.appController.savePreferences();

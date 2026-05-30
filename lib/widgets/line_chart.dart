@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +64,7 @@ class _LineChartState extends State<LineChart>
         prevPoints = nextPoints;
       }
       points = widget.points;
-      if (globalState.isAppPaused || globalState.scheduler.isBackground) {
+      if (globalState.isAppPaused) {
         _controller.value = 1.0;
       } else {
         _controller.forward(from: 0);
@@ -170,8 +169,7 @@ class _LineChartState extends State<LineChart>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: AnimatedBuilder(
+    return AnimatedBuilder(
         animation: _controller.view,
         builder: (_, __) {
           final currentProgress = _controller.value;
@@ -190,9 +188,7 @@ class _LineChartState extends State<LineChart>
               width: double.infinity,
             ),
           );
-        },
-      ),
-    );
+        });
   }
 }
 

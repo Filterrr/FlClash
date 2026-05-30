@@ -32,14 +32,12 @@ class GlobalState {
   int? lastProfileModified;
   bool isAppPaused = false;
 
-  final scheduler = RefreshScheduler.instance;
-
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
     final interval = isAppPaused
-        ? const Duration(seconds: 5)
+        ? const Duration(seconds: 10)
         : const Duration(seconds: 1);
     timer = Timer.periodic(interval, (Timer t) {
       if (isAppPaused) return;
@@ -57,7 +55,6 @@ class GlobalState {
   void onAppPaused() {
     if (isAppPaused) return;
     isAppPaused = true;
-    scheduler.setBackground(true);
     if (timer != null && timer!.isActive) {
       timer?.cancel();
       timer = null;
@@ -68,7 +65,6 @@ class GlobalState {
   void onAppResumed() {
     if (!isAppPaused) return;
     isAppPaused = false;
-    scheduler.setBackground(false);
     if (timer != null && timer!.isActive) {
       timer?.cancel();
       timer = null;
