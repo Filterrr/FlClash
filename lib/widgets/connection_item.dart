@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'chip.dart';
 import 'list.dart';
 
-class ConnectionItem extends StatefulWidget {
+class ConnectionItem extends StatelessWidget {
   final Connection connection;
   final Function(String)? onClick;
   final Widget? trailing;
@@ -22,29 +22,8 @@ class ConnectionItem extends StatefulWidget {
     this.trailing,
   });
 
-  @override
-  State<ConnectionItem> createState() => _ConnectionItemState();
-}
-
-class _ConnectionItemState extends State<ConnectionItem> {
-  Future<ImageProvider?>? _iconFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _iconFuture = _getPackageIcon();
-  }
-
-  @override
-  void didUpdateWidget(ConnectionItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.connection.metadata.process != oldWidget.connection.metadata.process) {
-      _iconFuture = _getPackageIcon();
-    }
-  }
-
-  Future<ImageProvider?> _getPackageIcon() async {
-    return await app?.getPackageIcon(widget.connection.metadata.process);
+  Future<ImageProvider?> _getPackageIcon(Connection connection) async {
+    return await app?.getPackageIcon(connection.metadata.process);
   }
 
   String _getRequestText(Metadata metadata) {
@@ -68,7 +47,6 @@ class _ConnectionItemState extends State<ConnectionItem> {
 
   @override
   Widget build(BuildContext context) {
-    final connection = widget.connection;
     if (!Platform.isAndroid) {
       return ListItem(
         padding: const EdgeInsets.symmetric(
@@ -99,15 +77,15 @@ class _ConnectionItemState extends State<ConnectionItem> {
                   CommonChip(
                     label: chain,
                     onPressed: () {
-                      if (widget.onClick == null) return;
-                      widget.onClick!(chain);
+                      if (onClick == null) return;
+                      onClick!(chain);
                     },
                   ),
               ],
             ),
           ],
         ),
-        trailing: widget.trailing,
+        trailing: trailing,
       );
     }
     return Selector<ClashConfig, bool>(
@@ -123,17 +101,17 @@ class _ConnectionItemState extends State<ConnectionItem> {
           leading: value
               ? GestureDetector(
             onTap: () {
-              if (widget.onClick == null) return;
+              if (onClick == null) return;
               final process = connection.metadata.process;
               if(process.isEmpty)  return;
-              widget.onClick!(process);
+              onClick!(process);
             },
             child: Container(
               margin: const EdgeInsets.only(top: 4),
               width: 48,
               height: 48,
               child: FutureBuilder<ImageProvider?>(
-                future: _iconFuture,
+                future: _getPackageIcon(connection),
                 builder: (_, snapshot) {
                   if (!snapshot.hasData && snapshot.data == null) {
                     return Container();
@@ -173,15 +151,15 @@ class _ConnectionItemState extends State<ConnectionItem> {
                     CommonChip(
                       label: chain,
                       onPressed: () {
-                        if (widget.onClick == null) return;
-                        widget.onClick!(chain);
+                        if (onClick == null) return;
+                        onClick!(chain);
                       },
                     ),
                 ],
               ),
             ],
           ),
-          trailing: widget.trailing,
+          trailing: trailing,
         );
       },
     );

@@ -66,80 +66,78 @@ class _StartButtonState extends State<StartButton>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: Selector2<AppState, Config, StartButtonSelectorState>(
-        selector: (_, appState, config) => StartButtonSelectorState(
-          isInit: appState.isInit,
-          hasProfile: config.profiles.isNotEmpty,
-        ),
-        builder: (_, state, child) {
-          if (!state.isInit || !state.hasProfile) {
-            return Container();
-          }
-          final textWidth = globalState.measure
-                  .computeTextSize(
-                    Text(
-                      other.getTimeDifference(
-                        DateTime.now(),
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium?.toSoftBold,
+    return Selector2<AppState, Config, StartButtonSelectorState>(
+      selector: (_, appState, config) => StartButtonSelectorState(
+        isInit: appState.isInit,
+        hasProfile: config.profiles.isNotEmpty,
+      ),
+      builder: (_, state, child) {
+        if (!state.isInit || !state.hasProfile) {
+          return Container();
+        }
+        final textWidth = globalState.measure
+                .computeTextSize(
+                  Text(
+                    other.getTimeDifference(
+                      DateTime.now(),
                     ),
-                  )
-                  .width +
-              16;
-          return _updateControllerContainer(
-            AnimatedBuilder(
-              animation: _controller.view,
-              builder: (_, child) {
-                return SizedBox(
-                  width: 56 + textWidth * _controller.value,
-                  height: 56,
-                  child: FloatingActionButton(
-                    heroTag: null,
-                    onPressed: () {
-                      handleSwitchStart();
-                    },
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          alignment: Alignment.center,
-                          child: AnimatedIcon(
-                            icon: AnimatedIcons.play_pause,
-                            progress: _controller,
-                          ),
+                    style: Theme.of(context).textTheme.titleMedium?.toSoftBold,
+                  ),
+                )
+                .width +
+            16;
+        return _updateControllerContainer(
+          AnimatedBuilder(
+            animation: _controller.view,
+            builder: (_, child) {
+              return SizedBox(
+                width: 56 + textWidth * _controller.value,
+                height: 56,
+                child: FloatingActionButton(
+                  heroTag: null,
+                  onPressed: () {
+                    handleSwitchStart();
+                  },
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        alignment: Alignment.center,
+                        child: AnimatedIcon(
+                          icon: AnimatedIcons.play_pause,
+                          progress: _controller,
                         ),
-                        Expanded(
-                          child: ClipRect(
-                            child: OverflowBox(
-                              maxWidth: textWidth,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                child: child!,
-                              ),
+                      ),
+                      Expanded(
+                        child: ClipRect(
+                          child: OverflowBox(
+                            maxWidth: textWidth,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              child: child!,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              },
-              child: child,
-            ),
+                ),
+              );
+            },
+            child: child,
+          ),
+        );
+      },
+      child: Selector<AppFlowingState, int?>(
+        selector: (_, appFlowingState) => appFlowingState.runTime,
+        builder: (_, int? value, __) {
+          final text = other.getTimeText(value);
+          return Text(
+            text,
+            style: Theme.of(context).textTheme.titleMedium?.toSoftBold,
           );
         },
-        child: Selector<AppFlowingState, int?>(
-          selector: (_, appFlowingState) => appFlowingState.runTime,
-          builder: (_, int? value, __) {
-            final text = other.getTimeText(value);
-            return Text(
-              text,
-              style: Theme.of(context).textTheme.titleMedium?.toSoftBold,
-            );
-          },
-        ),
       ),
     );
   }

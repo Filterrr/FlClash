@@ -443,8 +443,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _controller.view,
       builder: (_, child) {
         return SizedBox(
@@ -461,7 +460,6 @@ class _DelayTestButtonState extends State<DelayTestButton>
         onPressed: _healthcheck,
         child: const Icon(Icons.network_ping),
       ),
-    ),
     );
   }
 }

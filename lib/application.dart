@@ -61,7 +61,6 @@ class Application extends StatefulWidget {
 class ApplicationState extends State<Application> {
   late SystemColorSchemes systemColorSchemes;
   StreamSubscription? connectivitySubscription;
-  SystemColorSchemes? _lastNotifiedColorSchemes;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -166,13 +165,10 @@ class ApplicationState extends State<Application> {
     ColorScheme? lightDynamic,
     ColorScheme? darkDynamic,
   ) {
-    final newSchemes = SystemColorSchemes(
+    systemColorSchemes = SystemColorSchemes(
       lightColorScheme: lightDynamic,
       darkColorScheme: darkDynamic,
     );
-    if (_lastNotifiedColorSchemes == newSchemes) return;
-    systemColorSchemes = newSchemes;
-    _lastNotifiedColorSchemes = newSchemes;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       globalState.appController.updateSystemColorSchemes(systemColorSchemes);
     });
