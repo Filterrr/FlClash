@@ -129,10 +129,9 @@ class ApplicationState extends State<Application> with WidgetsBindingObserver {
   _initTimer() {
     _cancelTimer();
     final interval = globalState.isAppPaused
-        ? const Duration(minutes: 5)
+        ? const Duration(milliseconds: 60000)
         : const Duration(milliseconds: 20000);
     timer = Timer.periodic(interval, (_) {
-      if (globalState.isAppPaused) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         globalState.appController.updateGroupDebounce();
       });

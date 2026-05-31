@@ -37,9 +37,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
         timer = null;
       }
       timer = Timer.periodic(
-        globalState.isAppPaused
-            ? const Duration(seconds: 10)
-            : const Duration(seconds: 2),
+        const Duration(seconds: 2),
         (timer) async {
           if (!context.mounted || globalState.isAppPaused) {
             return;
