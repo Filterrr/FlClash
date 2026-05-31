@@ -9,6 +9,7 @@ import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -601,8 +602,10 @@ class AppController {
     final visible = await window?.isVisible();
     if (visible != null && !visible) {
       window?.show();
+      backgroundMemoryManager.onWindowShown();
     } else {
       window?.hide();
+      backgroundMemoryManager.onWindowHidden();
     }
   }
 

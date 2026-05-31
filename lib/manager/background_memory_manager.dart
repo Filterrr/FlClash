@@ -1,9 +1,7 @@
-import 'dart:io';
-
+import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/common/resource_controller.dart';
 import 'package:fl_clash/state.dart';
-import 'package:flutter/material.dart';
 
 class BackgroundMemoryManager {
   static final BackgroundMemoryManager _instance =
