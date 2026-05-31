@@ -34,6 +34,13 @@ env:
 
 jobs:
   update-version:
+    needs: [check-update, update-and-test]
+    if: >-
+      always() &&
+      (
+        needs.update-and-test.result == 'success' ||
+        needs.check-update.result == 'skipped'
+      )
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
@@ -75,6 +82,7 @@ jobs:
 
       - name: Update pubspec.yaml and Commit
         run: |
+          git pull --rebase origin main
           sed -i "s/^version:.*/version: ${{ steps.version.outputs.new_version }}/" pubspec.yaml
           git add pubspec.yaml
           git diff --cached --quiet && echo "No version changes to commit" && exit 0
@@ -82,7 +90,6 @@ jobs:
           git push
 
   check-update:
-    needs: update-version
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.tag_name == '')
     runs-on: ubuntu-latest
     outputs:
@@ -152,7 +159,7 @@ jobs:
           echo "Current commit: ${{ needs.check-update.outputs.old_commit_short }} (${{ needs.check-update.outputs.old_commit }})"
 
   update-and-test:
-    needs: [check-update, update-version]
+    needs: [check-update]
     if: needs.check-update.outputs.has_update == 'true'
     runs-on: ubuntu-latest
     permissions:
