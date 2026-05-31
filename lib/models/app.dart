@@ -1,4 +1,5 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/material.dart';
 
@@ -148,7 +149,9 @@ class AppState with ChangeNotifier {
     _requests = List.from(_requests)..add(value);
     const maxLength = 1000;
     _requests = _requests.safeSublist(_requests.length - maxLength);
-    notifyListeners();
+    if (!isLowMemoryMode) {
+      notifyListeners();
+    }
   }
 
   SystemColorSchemes get systemColorSchemes => _systemColorSchemes;
@@ -334,9 +337,11 @@ class AppFlowingState with ChangeNotifier {
 
   addLog(Log log) {
     _logs = List.from(_logs)..add(log);
-    const maxLength = 1000;
+    final maxLength = isLowMemoryMode ? 50 : 1000;
     _logs = _logs.safeSublist(_logs.length - maxLength);
-    notifyListeners();
+    if (!isLowMemoryMode) {
+      notifyListeners();
+    }
   }
 
   List<Traffic> get traffics => _traffics;
@@ -352,7 +357,9 @@ class AppFlowingState with ChangeNotifier {
     _traffics = List.from(_traffics)..add(traffic);
     const maxLength = 60;
     _traffics = _traffics.safeSublist(_traffics.length - maxLength);
-    notifyListeners();
+    if (!isLowMemoryMode) {
+      notifyListeners();
+    }
   }
 
   Traffic get totalTraffic => _totalTraffic;

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -31,22 +32,42 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       connectionsNotifier.value = connectionsNotifier.value.copyWith(
         connections: await clashCore.getConnections(),
       );
-      if (timer != null) {
-        timer?.cancel();
-        timer = null;
-      }
-      timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) async {
-          if (!context.mounted) {
-            return;
-          }
-          connectionsNotifier.value = connectionsNotifier.value.copyWith(
-            connections: await clashCore.getConnections(),
-          );
-        },
-      );
+      _startTimer();
     });
+    lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
+  }
+
+  void _onLowMemoryModeChanged() {
+    if (isLowMemoryMode) {
+      _stopTimer();
+    } else {
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) async {
+        if (!context.mounted) {
+          return;
+        }
+        connectionsNotifier.value = connectionsNotifier.value.copyWith(
+          connections: await clashCore.getConnections(),
+        );
+      },
+    );
+  }
+
+  void _stopTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
   }
 
   _initActions() {
@@ -116,6 +137,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     timer?.cancel();
     connectionsNotifier.dispose();
     _scrollController.dispose();
+    lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
     timer = null;
   }
 

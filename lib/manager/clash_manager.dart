@@ -1,4 +1,5 @@
 import 'package:fl_clash/clash/clash.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -113,7 +114,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   @override
   void onLog(Log log) {
     globalState.appController.appFlowingState.addLog(log);
-    if (log.logLevel == LogLevel.error) {
+    if (log.logLevel == LogLevel.error && !isLowMemoryMode) {
       globalState.appController.showSnackBar(log.payload ?? '');
     }
     super.onLog(log);

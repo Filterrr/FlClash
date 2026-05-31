@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:flutter/material.dart';
 
 class Point {
@@ -63,7 +64,11 @@ class _LineChartState extends State<LineChart>
         prevPoints = nextPoints;
       }
       points = widget.points;
-      _controller.forward(from: 0);
+      if (isLowMemoryMode) {
+        _controller.value = 1.0;
+      } else {
+        _controller.forward(from: 0);
+      }
     }
   }
 

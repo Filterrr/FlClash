@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -29,22 +30,42 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      if (timer != null) {
-        timer?.cancel();
-        timer = null;
-      }
-      timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-        final logs = appFlowingState.logs;
-        if (!logListEquality.equals(
-          logsNotifier.value.logs,
-          logs,
-        )) {
-          logsNotifier.value = logsNotifier.value.copyWith(
-            logs: logs,
-          );
-        }
-      });
+      _startTimer();
     });
+    lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
+  }
+
+  void _onLowMemoryModeChanged() {
+    if (isLowMemoryMode) {
+      _stopTimer();
+    } else {
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
+    timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      final logs = globalState.appController.appFlowingState.logs;
+      if (!logListEquality.equals(
+        logsNotifier.value.logs,
+        logs,
+      )) {
+        logsNotifier.value = logsNotifier.value.copyWith(
+          logs: logs,
+        );
+      }
+    });
+  }
+
+  void _stopTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
   }
 
   @override
@@ -53,6 +74,7 @@ class _LogsFragmentState extends State<LogsFragment> {
     timer?.cancel();
     logsNotifier.dispose();
     scrollController.dispose();
+    lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
     timer = null;
   }
 

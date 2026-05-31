@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
@@ -121,6 +122,7 @@ class ApplicationState extends State<Application> {
   _initTimer() {
     _cancelTimer();
     timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
+      if (isLowMemoryMode) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         globalState.appController.updateGroupDebounce();
       });

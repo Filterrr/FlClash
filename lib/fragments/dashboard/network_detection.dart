@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -30,6 +31,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
   CancelToken? cancelToken;
 
   _checkIp() async {
+    if (isLowMemoryMode) return;
     final appState = globalState.appController.appState;
     final appFlowingState = globalState.appController.appFlowingState;
     final isInit = appState.isInit;

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animations/animations.dart';
 import 'package:fl_clash/clash/clash.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/service.dart';
 import 'package:fl_clash/plugins/vpn.dart';
@@ -36,6 +37,7 @@ class GlobalState {
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      if (isLowMemoryMode) return;
       for (final function in updateFunctionLists) {
         function();
       }
