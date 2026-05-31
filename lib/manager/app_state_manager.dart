@@ -4,6 +4,8 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'background_memory_manager.dart';
+
 class AppStateManager extends StatefulWidget {
   final Widget child;
 
@@ -64,6 +66,7 @@ class _AppStateManagerState extends State<AppStateManager>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    backgroundMemoryManager.init();
   }
 
   @override
@@ -77,6 +80,9 @@ class _AppStateManagerState extends State<AppStateManager>
     final isPaused = state == AppLifecycleState.paused;
     if (isPaused) {
       globalState.appController.savePreferencesDebounce();
+      backgroundMemoryManager.onAppPaused();
+    } else if (state == AppLifecycleState.resumed) {
+      backgroundMemoryManager.onAppResumed();
     }
   }
 

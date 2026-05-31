@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -31,24 +32,45 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      if (timer != null) {
-        timer?.cancel();
-        timer = null;
-      }
-      timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-        final maxLength = Platform.isAndroid ? 1000 : 60;
-        final requests = appState.requests.safeSublist(
-          appState.requests.length - maxLength,
-        );
-        if (!connectionListEquality.equals(
-          requestsNotifier.value.connections,
-          requests,
-        )) {
-          requestsNotifier.value =
-              requestsNotifier.value.copyWith(connections: requests);
-        }
-      });
+      _startTimer();
     });
+    lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
+  }
+
+  void _onLowMemoryModeChanged() {
+    if (isLowMemoryMode) {
+      _stopTimer();
+    } else {
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
+    timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      final maxLength = Platform.isAndroid ? 1000 : 60;
+      final appState = globalState.appController.appState;
+      final requests = appState.requests.safeSublist(
+        appState.requests.length - maxLength,
+      );
+      if (!connectionListEquality.equals(
+        requestsNotifier.value.connections,
+        requests,
+      )) {
+        requestsNotifier.value =
+            requestsNotifier.value.copyWith(connections: requests);
+      }
+    });
+  }
+
+  void _stopTimer() {
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
   }
 
   _initActions() {
@@ -98,6 +120,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
     super.dispose();
     timer?.cancel();
     _scrollController.dispose();
+    lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
     timer = null;
   }
 

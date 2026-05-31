@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:window_ext/window_ext.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'background_memory_manager.dart';
+
 class WindowManager extends StatefulWidget {
   final Widget child;
 
@@ -89,7 +91,14 @@ class _WindowContainerState extends State<WindowManager>
   @override
   void onWindowMinimize() async {
     globalState.appController.savePreferencesDebounce();
+    backgroundMemoryManager.onWindowHidden();
     super.onWindowMinimize();
+  }
+
+  @override
+  void onWindowRestore() async {
+    backgroundMemoryManager.onWindowShown();
+    super.onWindowRestore();
   }
 
   @override

@@ -1,3 +1,4 @@
+export 'background_memory_manager.dart';
 export 'tray_manager.dart';
 export 'window_manager.dart';
 export 'android_manager.dart';
