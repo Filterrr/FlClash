@@ -4,7 +4,6 @@ import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +36,9 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
         timer = null;
       }
       timer = Timer.periodic(
-        const Duration(seconds: 2),
+        const Duration(seconds: 1),
         (timer) async {
-          if (!context.mounted || globalState.isAppPaused) {
+          if (!context.mounted) {
             return;
           }
           connectionsNotifier.value = connectionsNotifier.value.copyWith(
