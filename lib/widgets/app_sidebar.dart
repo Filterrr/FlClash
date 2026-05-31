@@ -36,45 +36,49 @@ class AppSidebarContainer extends StatelessWidget {
                 if (system.isMacOS) const SizedBox(height: 22),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: ScrollConfiguration(
-                    behavior: _HiddenBarScrollBehavior(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: NavigationRail(
-                            scrollable: true,
-                            minExtendedWidth: 200,
-                            backgroundColor: Colors.transparent,
-                            selectedLabelTextStyle: context
-                                .textTheme
-                                .labelLarge!
-                                .copyWith(
-                                    color: context.colorScheme.onSurface),
-                            unselectedLabelTextStyle: context
-                                .textTheme
-                                .labelLarge!
-                                .copyWith(
-                                    color: context.colorScheme.onSurface),
-                            destinations: navigationItems
-                                .map(
-                                  (e) => NavigationRailDestination(
-                                    icon: Tooltip(
-                                      message: Intl.message(e.label),
-                                      child: e.icon,
-                                    ),
-                                    label: Text(Intl.message(e.label)),
-                                  ),
-                                )
-                                .toList(),
-                            onDestinationSelected: onDestinationSelected,
-                            extended: false,
-                            selectedIndex: currentIndex,
-                            labelType: NavigationRailLabelType.none,
-                          ),
+                  child: Selector<Config, bool>(
+                    selector: (_, config) => config.appSetting.showLabel,
+                    builder: (_, showLabel, __) {
+                      return ScrollConfiguration(
+                        behavior: _HiddenBarScrollBehavior(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: NavigationRail(
+                                scrollable: true,
+                                minExtendedWidth: 200,
+                                backgroundColor: Colors.transparent,
+                                selectedLabelTextStyle: context
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(
+                                        color: context.colorScheme.onSurface),
+                                unselectedLabelTextStyle: context
+                                    .textTheme
+                                    .labelLarge!
+                                    .copyWith(
+                                        color: context.colorScheme.onSurface),
+                                destinations: navigationItems
+                                    .map(
+                                      (e) => NavigationRailDestination(
+                                        icon: e.icon,
+                                        label: Text(Intl.message(e.label)),
+                                      ),
+                                    )
+                                    .toList(),
+                                onDestinationSelected: onDestinationSelected,
+                                extended: false,
+                                selectedIndex: currentIndex,
+                                labelType: showLabel
+                                    ? NavigationRailLabelType.all
+                                    : NavigationRailLabelType.none,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
                 const Divider(height: 1, indent: 12, endIndent: 12),
@@ -108,7 +112,21 @@ class AppSidebarContainer extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 72),
+                const SizedBox(height: 8),
+                IconButton(
+                  onPressed: () {
+                    final config = globalState.appController.config;
+                    final appSetting = config.appSetting;
+                    config.appSetting = appSetting.copyWith(
+                      showLabel: !appSetting.showLabel,
+                    );
+                  },
+                  icon: Icon(
+                    Icons.menu,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
