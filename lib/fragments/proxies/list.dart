@@ -273,8 +273,7 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
           thickness: 8,
           radius: const Radius.circular(8),
           interactive: true,
-          child: RepaintBoundary(
-            child: Stack(
+          child: Stack(
             children: [
               Positioned.fill(
                 child: ScrollConfiguration(
@@ -328,7 +327,6 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
                 );
               }),
             ],
-          ),
           ),
         );
       },

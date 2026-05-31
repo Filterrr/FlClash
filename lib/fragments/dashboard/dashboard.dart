@@ -59,7 +59,7 @@ class _DashboardFragmentState extends State<DashboardFragment> {
                 children: [
                   const GridItem(
                     crossAxisCellCount: 8,
-                    child: RepaintBoundary(child: NetworkSpeed()),
+                    child: NetworkSpeed(),
                   ),
                   // if (Platform.isAndroid)
                   //   GridItem(
