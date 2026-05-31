@@ -29,7 +29,10 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      timer?.cancel();
+      if (timer != null) {
+        timer?.cancel();
+        timer = null;
+      }
       timer = Timer.periodic(
         globalState.isAppPaused
             ? const Duration(seconds: 5)
@@ -147,7 +150,21 @@ class _LogsFragmentState extends State<LogsFragment> {
               label: appLocalizations.nullLogsDesc,
             );
           }
-          final count = logs.length;
+          final reversedLogs = logs.reversed.toList();
+          final logWidgets = reversedLogs
+              .map<Widget>(
+                (log) => LogItem(
+                  key: Key(log.dateTime.toString()),
+                  log: log,
+                  onClick: _addKeyword,
+                ),
+              )
+              .separated(
+                const Divider(
+                  height: 0,
+                ),
+              )
+              .toList();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -173,28 +190,26 @@ class _LogsFragmentState extends State<LogsFragment> {
                   ),
                 ),
               Expanded(
-                child: RepaintBoundary(
-                  child: LayoutBuilder(
-                    builder: (_, constraints) {
-                      return ScrollConfiguration(
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    return ScrollConfiguration(
                         behavior: ShowBarScrollBehavior(),
                         child: ListView.builder(
                           controller: scrollController,
-                          addAutomaticKeepAlives: false,
-                          addRepaintBoundaries: true,
-                          addSemanticIndexes: false,
                           itemExtentBuilder: (index, __) {
-                            if (index % 2 == 1) return 0;
-                            final log = logs[count - 1 - (index ~/ 2)];
+                            final widget = logWidgets[index];
+                            if (widget.runtimeType == Divider) {
+                              return 0;
+                            }
                             final measure = globalState.measure;
                             final bodyLargeSize = measure.bodyLargeSize;
                             final bodySmallHeight = measure.bodySmallHeight;
                             final bodyMediumHeight = measure.bodyMediumHeight;
+                            final log = reversedLogs[(index / 2).floor()];
                             final width = (log.payload?.length ?? 0) *
                                     bodyLargeSize.width +
                                 200;
-                            final lines =
-                                (width / constraints.maxWidth).ceil();
+                            final lines = (width / constraints.maxWidth).ceil();
                             return lines * bodyLargeSize.height +
                                 bodySmallHeight +
                                 8 +
@@ -202,21 +217,11 @@ class _LogsFragmentState extends State<LogsFragment> {
                                 40;
                           },
                           itemBuilder: (_, index) {
-                            if (index % 2 == 1) {
-                              return const Divider(height: 0);
-                            }
-                            final log = logs[count - 1 - (index ~/ 2)];
-                            return LogItem(
-                              key: ValueKey(log.dateTime.toString()),
-                              log: log,
-                              onClick: _addKeyword,
-                            );
+                            return logWidgets[index];
                           },
-                          itemCount: count * 2 - 1,
-                        ),
-                      );
-                    },
-                  ),
+                          itemCount: logWidgets.length,
+                        ));
+                  },
                 ),
               )
             ],
@@ -229,8 +234,6 @@ class _LogsFragmentState extends State<LogsFragment> {
 
 class LogsSearchDelegate extends SearchDelegate {
   ValueNotifier<LogsAndKeywords> logsNotifier;
-  List<Log> _cachedResults = [];
-  String _cachedQuery = '';
 
   LogsSearchDelegate({
     required LogsAndKeywords logs,
@@ -246,16 +249,13 @@ class LogsSearchDelegate extends SearchDelegate {
 
   List<Log> get _results {
     final lowQuery = query.toLowerCase();
-    if (lowQuery == _cachedQuery) return _cachedResults;
-    _cachedQuery = lowQuery;
-    _cachedResults = logsNotifier.value.filteredLogs
+    return logsNotifier.value.filteredLogs
         .where(
           (log) =>
               (log.payload?.toLowerCase().contains(lowQuery) ?? false) ||
               log.logLevel.name.contains(lowQuery),
         )
         .toList();
-    return _cachedResults;
   }
 
   @override
@@ -268,7 +268,6 @@ class LogsSearchDelegate extends SearchDelegate {
             return;
           }
           query = '';
-          _cachedQuery = '';
         },
         icon: const Icon(Icons.clear),
       ),
@@ -318,8 +317,6 @@ class LogsSearchDelegate extends SearchDelegate {
     return ValueListenableBuilder(
       valueListenable: logsNotifier,
       builder: (_, __, ___) {
-        final results = _results;
-        final count = results.length;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -346,13 +343,10 @@ class LogsSearchDelegate extends SearchDelegate {
               ),
             Expanded(
               child: ListView.separated(
-                addAutomaticKeepAlives: false,
-                addRepaintBoundaries: true,
-                addSemanticIndexes: false,
                 itemBuilder: (_, index) {
-                  final log = results[index];
+                  final log = _results[index];
                   return LogItem(
-                    key: ValueKey(log.dateTime.toString()),
+                    key: Key(log.dateTime.toString()),
                     log: log,
                     onClick: (value) {
                       _addKeyword(value);
@@ -364,7 +358,7 @@ class LogsSearchDelegate extends SearchDelegate {
                     height: 0,
                   );
                 },
-                itemCount: count,
+                itemCount: _results.length,
               ),
             )
           ],
