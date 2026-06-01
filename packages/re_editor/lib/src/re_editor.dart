@@ -49,4 +49,3 @@ part 'code_scroll.dart';
 part 'code_span.dart';
 part 'code_theme.dart';
 part 'code_toolbar.dart';
-part 'debug/_trace.dart';

@@ -48,7 +48,7 @@ class _CommonPopupMenuState<T> extends State<CommonPopupMenu<T>> {
 
   handleSelect(T value) {
     if (widget.selectedValue != null) {
-      this.groupValue.value = value;
+      groupValue.value = value;
     }
     widget.onSelected(value);
   }
@@ -104,8 +104,7 @@ class _CommonPopupMenuState<T> extends State<CommonPopupMenu<T>> {
                       child: ValueListenableBuilder<T?>(
                         valueListenable: groupValue,
                         builder: (_, groupValue, __) {
-                          return Radio<T>(
-                            value: item.action,
+                          return RadioGroup<T>(
                             groupValue: groupValue,
                             onChanged: (T? value) {
                               if (value != null) {
@@ -113,6 +112,10 @@ class _CommonPopupMenuState<T> extends State<CommonPopupMenu<T>> {
                                 Navigator.of(context).pop();
                               }
                             },
+                            child: Radio<T>(
+                              value: item.action,
+                              toggleable: true,
+                            ),
                           );
                         },
                       ),

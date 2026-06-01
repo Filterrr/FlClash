@@ -530,11 +530,11 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildModalBarrier() {
-    if (barrierColor.alpha != 0 && !offstage) {
-      assert(barrierColor != barrierColor.withOpacity(0.0));
+    if ((barrierColor.a * 255.0).round().clamp(0, 255) != 0 && !offstage) {
+      assert(barrierColor != barrierColor.withValues(alpha: 0.0));
       final Animation<Color?> color = animation!.drive(
         ColorTween(
-          begin: barrierColor.withOpacity(0.0),
+          begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor,
         ).chain(
           CurveTween(curve: barrierCurve),

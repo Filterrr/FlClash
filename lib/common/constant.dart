@@ -68,7 +68,7 @@ final commonFilter = ImageFilter.blur(
   sigmaY: 5,
   tileMode: TileMode.mirror,
 );
-@deprecated
+@Deprecated('Use commonFilter instead')
 final filter = commonFilter;
 
 const navigationItemListEquality = ListEquality<NavigationItem>();

@@ -146,7 +146,6 @@ class ClashService with ClashInterface {
       case ActionMethod.forceGc:
       case ActionMethod.startLog:
       case ActionMethod.stopLog:
-      default:
         return;
     }
   }

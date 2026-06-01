@@ -16,8 +16,8 @@ class ThrottledTimer {
   final void Function() callback;
   Timer? _timer;
   int _tickCount = 0;
-  int _reducedSkipFactor = 3;
-  int _lowSkipFactor = 5;
+  final int _reducedSkipFactor;
+  final int _lowSkipFactor;
 
   ThrottledTimer({
     required this.normalDuration,

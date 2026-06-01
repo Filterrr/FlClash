@@ -443,11 +443,8 @@ class _ReorderableProfilesState extends State<ReorderableProfiles> {
             buildDefaultDragHandles: false,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             proxyDecorator: proxyDecorator,
-            onReorder: (oldIndex, newIndex) {
+            onReorderItem: (oldIndex, newIndex) {
               setState(() {
-                if (oldIndex < newIndex) {
-                  newIndex -= 1;
-                }
                 final profile = profiles.removeAt(oldIndex);
                 profiles.insert(newIndex, profile);
               });

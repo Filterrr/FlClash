@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   blurRadius: 20,
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                 ),
               ],
             ),
@@ -53,8 +53,8 @@ class HomePage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
                 child: GNav(
-                  rippleColor: context.colorScheme.onSurface.withOpacity(0.1),
-                  hoverColor: context.colorScheme.onSurface.withOpacity(0.05),
+                  rippleColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
+                  hoverColor: context.colorScheme.onSurface.withValues(alpha: 0.05),
                   gap: 8,
                   activeColor: context.colorScheme.onSecondaryContainer,
                   iconSize: 24,
@@ -145,8 +145,6 @@ class _HomePageView extends StatefulWidget {
 }
 
 class _HomePageViewState extends State<_HomePageView> {
-  List<NavigationItem> _navigationItems = [];
-
   _updatePageController(List<NavigationItem> navigationItems) {
     final currentLabel = globalState.appController.appState.currentLabel;
     final index = navigationItems.lastIndexWhere(
@@ -174,7 +172,6 @@ class _HomePageViewState extends State<_HomePageView> {
       },
       builder: (_, navigationItems, __) {
         _updatePageController(navigationItems);
-        _navigationItems = navigationItems;
         return PageView.builder(
           controller: globalState.pageController,
           physics: const NeverScrollableScrollPhysics(),

@@ -409,10 +409,13 @@ class ListItem<T> extends StatelessWidget {
         leading: SizedBox(
           width: 32,
           height: 32,
-          child: Radio<T>(
-            value: radioDelegate.value,
+          child: RadioGroup<T>(
             groupValue: radioDelegate.groupValue,
-            onChanged: radioDelegate.onChanged,
+            onChanged: radioDelegate.onChanged ?? (_) {},
+            child: Radio<T>(
+              value: radioDelegate.value,
+              toggleable: true,
+            ),
           ),
         ),
         trailing: trailing,

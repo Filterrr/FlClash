@@ -230,7 +230,7 @@ class ProxiesTabFragmentState extends State<ProxiesTabFragment>
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          context.colorScheme.surface.withOpacity(0.1),
+                          context.colorScheme.surface.withValues(alpha: 0.1),
                           context.colorScheme.surface,
                         ],
                         stops: const [

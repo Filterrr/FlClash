@@ -5,7 +5,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
@@ -104,6 +103,7 @@ class ApplicationState extends State<Application> {
     globalState.appController = AppController(context);
     globalState.measure = Measure.of(context);
     connectivitySubscription = Connectivity().onConnectivityChanged.listen((_) {
+      if (!mounted) return;
       final config = Provider.of<Config>(context, listen: false);
       if (config.appSetting.closeConnections) {
         clashCore.closeConnections();

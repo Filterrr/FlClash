@@ -42,22 +42,22 @@ extension ColorExtension on Color {
     return withAlpha(0);
   }
 
-  @deprecated
+  @Deprecated('Use opacity60 instead')
   Color toLight() {
     return opacity60;
   }
 
-  @deprecated
+  @Deprecated('Use opacity38 instead')
   Color toLighter() {
     return opacity38;
   }
 
-  @deprecated
+  @Deprecated('Use opacity12 instead')
   Color toSoft() {
     return opacity12;
   }
 
-  @deprecated
+  @Deprecated('Use opacity3 instead')
   Color toLittle() {
     return opacity3;
   }

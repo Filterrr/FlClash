@@ -44,7 +44,7 @@ class OptionsDialog<T> extends StatelessWidget {
                   },
                 ),
                 title: Text(
-                  this.textBuilder(option),
+                  textBuilder(option),
                 ),
               ),
           ],
@@ -174,13 +174,13 @@ class ListPage<T> extends StatelessWidget {
       child: AddDialog(
         keyField: isMap
             ? Field(
-                label: this.keyLabel ?? appLocalizations.key,
+                label: keyLabel ?? appLocalizations.key,
                 value:
                     item == null ? "" : (item as MapEntry<String, String>).key,
               )
             : null,
         valueField: Field(
-          label: this.valueLabel ?? appLocalizations.value,
+          label: valueLabel ?? appLocalizations.value,
           value: item == null
               ? ""
               : isMap
@@ -233,8 +233,8 @@ class ListPage<T> extends StatelessWidget {
   }
 
   Widget _buildList() {
-    final items = this.items.toList();
-    if (this.keyBuilder != null) {
+    final itemList = items.toList();
+    if (keyBuilder != null) {
       return ReorderableListView.builder(
         padding: const EdgeInsets.only(
           bottom: 16 + 64,
@@ -242,9 +242,9 @@ class ListPage<T> extends StatelessWidget {
           right: 16,
         ),
         buildDefaultDragHandles: false,
-        itemCount: items.length,
+        itemCount: itemList.length,
         itemBuilder: (_, index) {
-          final e = items[index];
+          final e = itemList[index];
           return Padding(
             key: keyBuilder!(e),
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -269,11 +269,8 @@ class ListPage<T> extends StatelessWidget {
             ),
           );
         },
-        onReorder: (oldIndex, newIndex) {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final nextItems = List<T>.from(items);
+        onReorderItem: (oldIndex, newIndex) {
+          final nextItems = List<T>.from(itemList);
           final item = nextItems.removeAt(oldIndex);
           nextItems.insert(newIndex, item);
           onChange(nextItems);
@@ -286,9 +283,9 @@ class ListPage<T> extends StatelessWidget {
           left: 16,
           right: 16,
         ),
-        itemCount: items.length,
+        itemCount: itemList.length,
         itemBuilder: (_, index) {
-          final e = items[index];
+          final e = itemList[index];
           return Padding(
             key: ObjectKey(e.toString()),
             padding: const EdgeInsets.symmetric(vertical: 8),

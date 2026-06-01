@@ -143,7 +143,7 @@ class _ThemeColorsBoxState extends State<ThemeColorsBox> {
         final appController = globalState.appController;
         appController.config.themeProps =
             appController.config.themeProps.copyWith(
-          primaryColor: color?.value,
+          primaryColor: color?.toARGB32(),
         );
       },
     );
@@ -299,7 +299,7 @@ class _ThemeColorsBoxState extends State<ThemeColorsBox> {
                   itemBuilder: (_, index) {
                     final primaryColor = primaryColors[index];
                     return _primaryColorCheckBox(
-                      isSelected: currentPrimaryColor == primaryColor?.value,
+                      isSelected: currentPrimaryColor == primaryColor?.toARGB32(),
                       color: primaryColor,
                     );
                   },
