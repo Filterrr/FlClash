@@ -88,6 +88,32 @@ class AllowBypassItem extends StatelessWidget {
   }
 }
 
+class DozeSuspendItem extends StatelessWidget {
+  const DozeSuspendItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.vpnProps.dozeSuspend,
+      builder: (_, dozeSuspend, __) {
+        return ListItem.switchItem(
+          title: Text(appLocalizations.dozeSuspend),
+          subtitle: Text(appLocalizations.dozeSuspendDesc),
+          delegate: SwitchDelegate(
+            value: dozeSuspend,
+            onChanged: (bool value) async {
+              final config = globalState.appController.config;
+              config.vpnProps = config.vpnProps.copyWith(
+                dozeSuspend: value,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class VpnSystemProxyItem extends StatelessWidget {
   const VpnSystemProxyItem({super.key});
 
@@ -350,6 +376,7 @@ final networkItems = [
       items: [
         const SystemProxyItem(),
         const AllowBypassItem(),
+        const DozeSuspendItem(),
       ],
     ),
   if (system.isDesktop)

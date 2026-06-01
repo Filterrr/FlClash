@@ -146,6 +146,7 @@ _$VpnPropsImpl _$$VpnPropsImplFromJson(Map<String, dynamic> json) =>
       systemProxy: json['systemProxy'] as bool? ?? true,
       ipv6: json['ipv6'] as bool? ?? false,
       allowBypass: json['allowBypass'] as bool? ?? true,
+      dozeSuspend: json['dozeSuspend'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$$VpnPropsImplToJson(_$VpnPropsImpl instance) =>
@@ -154,6 +155,7 @@ Map<String, dynamic> _$$VpnPropsImplToJson(_$VpnPropsImpl instance) =>
       'systemProxy': instance.systemProxy,
       'ipv6': instance.ipv6,
       'allowBypass': instance.allowBypass,
+      'dozeSuspend': instance.dozeSuspend,
     };
 
 _$NetworkPropsImpl _$$NetworkPropsImplFromJson(Map<String, dynamic> json) =>

@@ -14,6 +14,7 @@ class Vpn {
   late MethodChannel methodChannel;
   ReceivePort? receiver;
   ServiceMessageListener? _serviceMessageHandler;
+  Function(bool)? onSuspended;
 
   Vpn._internal() {
     methodChannel = const MethodChannel("vpn");
@@ -28,6 +29,9 @@ class Vpn {
         case "dnsChanged":
           final dns = call.arguments as String;
           clashLib?.updateDns(dns);
+        case "suspended":
+          final suspended = call.arguments as bool;
+          onSuspended?.call(suspended);
         default:
           throw MissingPluginException();
       }
@@ -68,6 +72,14 @@ class Vpn {
       'title': title,
       'content': content,
     });
+  }
+
+  Future<bool?> installSuspendModule() async {
+    return await methodChannel.invokeMethod<bool?>("installSuspendModule");
+  }
+
+  Future<bool?> uninstallSuspendModule() async {
+    return await methodChannel.invokeMethod<bool?>("uninstallSuspendModule");
   }
 
   onStarted(int fd) {

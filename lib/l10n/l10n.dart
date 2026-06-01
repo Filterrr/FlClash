@@ -1690,6 +1690,24 @@ class AppLocalizations {
     );
   }
 
+  String get dozeSuspend {
+    return Intl.message(
+      'Doze Suspend',
+      name: 'dozeSuspend',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get dozeSuspendDesc {
+    return Intl.message(
+      'Close connections and suspend traffic updates when device enters Doze mode to save power',
+      name: 'dozeSuspendDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ExternalController`
   String get externalController {
     return Intl.message(

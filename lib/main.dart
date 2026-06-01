@@ -137,6 +137,12 @@ Future<void> vpnService() async {
       },
     ),
   );
+
+  vpn?.onSuspended = (bool suspended) {
+    if (config.vpnProps.dozeSuspend) {
+      globalState.handleSuspended(suspended);
+    }
+  };
 }
 
 @immutable

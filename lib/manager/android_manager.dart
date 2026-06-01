@@ -1,6 +1,8 @@
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/plugins/app.dart';
+import 'package:fl_clash/plugins/vpn.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -61,9 +63,26 @@ class _AndroidContainerState extends State<AndroidManager> {
   @override
   Widget build(BuildContext context) {
     return _updateCoreState(
-      _excludeContainer(
-        widget.child,
+      _updateDozeSuspend(
+        _excludeContainer(
+          widget.child,
+        ),
       ),
+    );
+  }
+
+  Widget _updateDozeSuspend(Widget child) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.vpnProps.dozeSuspend,
+      builder: (_, dozeSuspend, child) {
+        if (globalState.isStart && dozeSuspend) {
+          vpn?.installSuspendModule();
+        } else {
+          vpn?.uninstallSuspendModule();
+        }
+        return child!;
+      },
+      child: child,
     );
   }
 }

@@ -56,6 +56,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Allow applications to bypass VPN"),
         "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
             "Some apps can bypass VPN when turned on"),
+        "dozeSuspend": MessageLookupByLibrary.simpleMessage("Doze Suspend"),
+        "dozeSuspendDesc": MessageLookupByLibrary.simpleMessage(
+            "Close connections and suspend traffic updates when device enters Doze mode to save power"),
         "allowLan": MessageLookupByLibrary.simpleMessage("AllowLan"),
         "allowLanDesc": MessageLookupByLibrary.simpleMessage(
             "Allow access proxy through the LAN"),

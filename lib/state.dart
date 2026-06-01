@@ -31,6 +31,7 @@ class GlobalState {
   List<Function> updateFunctionLists = [];
   bool lastTunEnable = false;
   int? lastProfileModified;
+  bool _isSuspended = false;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
@@ -125,11 +126,14 @@ class GlobalState {
     if (globalState.isVpnService) {
       await vpn?.startVpn();
       startListenUpdate();
-      return;
+    } else {
+      startTime ??= DateTime.now();
+      await service?.init();
+      startListenUpdate();
     }
-    startTime ??= DateTime.now();
-    await service?.init();
-    startListenUpdate();
+    if (globalState.appController.config.vpnProps.dozeSuspend) {
+      await vpn?.installSuspendModule();
+    }
   }
 
   restartCore({
@@ -155,10 +159,24 @@ class GlobalState {
 
   Future handleStop() async {
     startTime = null;
+    await vpn?.uninstallSuspendModule();
     await clashCore.stopListener();
     clashLib?.stopTun();
     await service?.destroy();
     stopListenUpdate();
+  }
+
+  handleSuspended(bool suspended) async {
+    if (_isSuspended == suspended) return;
+    _isSuspended = suspended;
+    if (suspended) {
+      clashCore.closeConnections();
+      stopListenUpdate();
+    } else {
+      if (isStart) {
+        startListenUpdate();
+      }
+    }
   }
 
   Future applyProfile({

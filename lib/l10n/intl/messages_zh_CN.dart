@@ -50,6 +50,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowBypass": MessageLookupByLibrary.simpleMessage("允许应用绕过VPN"),
         "allowBypassDesc":
             MessageLookupByLibrary.simpleMessage("开启后部分应用可绕过VPN"),
+        "dozeSuspend": MessageLookupByLibrary.simpleMessage("休眠挂起"),
+        "dozeSuspendDesc":
+            MessageLookupByLibrary.simpleMessage("设备进入Doze休眠模式时关闭连接并暂停流量更新以节省电量"),
         "allowLan": MessageLookupByLibrary.simpleMessage("局域网代理"),
         "allowLanDesc": MessageLookupByLibrary.simpleMessage("允许通过局域网访问代理"),
         "app": MessageLookupByLibrary.simpleMessage("应用"),

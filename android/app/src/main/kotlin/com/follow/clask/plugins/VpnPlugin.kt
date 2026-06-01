@@ -18,6 +18,7 @@ import com.follow.clask.extensions.getProtocol
 import com.follow.clask.extensions.resolveDns
 import com.follow.clask.models.Process
 import com.follow.clask.models.VpnOptions
+import com.follow.clask.modules.SuspendModule
 import com.follow.clask.services.FlClashService
 import com.follow.clask.services.FlClashVpnService
 import com.google.gson.Gson
@@ -38,6 +39,7 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private var flClashService: BaseServiceInterface? = null
     private lateinit var options: VpnOptions
     private lateinit var scope: CoroutineScope
+    private var suspendModule: SuspendModule? = null
 
     private val connectivity by lazy {
         context.getSystemService<ConnectivityManager>()
@@ -66,9 +68,11 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         }
         flutterMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "vpn")
         flutterMethodChannel.setMethodCallHandler(this)
+        suspendModule = SuspendModule(context, flutterMethodChannel)
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        uninstallSuspendModule()
         unRegisterNetworkCallback()
         flutterMethodChannel.setMethodCallHandler(null)
     }
@@ -106,6 +110,16 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 val title = call.argument<String>("title") as String
                 val content = call.argument<String>("content") as String
                 startForeground(title, content)
+                result.success(true)
+            }
+
+            "installSuspendModule" -> {
+                installSuspendModule()
+                result.success(true)
+            }
+
+            "uninstallSuspendModule" -> {
+                uninstallSuspendModule()
                 result.success(true)
             }
 
@@ -255,6 +269,14 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             false -> Intent(context, FlClashService::class.java)
         }
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+    }
+
+    fun installSuspendModule() {
+        suspendModule?.install()
+    }
+
+    fun uninstallSuspendModule() {
+        suspendModule?.uninstall()
     }
 
 }
