@@ -124,13 +124,12 @@ class ApplicationState extends State<Application> {
     _cancelTimer();
     timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
       if (isLowMemoryMode) return;
+      _timerTickCount++;
       if (isReducedMemoryMode) {
         if (_timerTickCount % 3 != 0) {
-          _timerTickCount++;
           return;
         }
       }
-      _timerTickCount++;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         globalState.appController.updateGroupDebounce();
       });
