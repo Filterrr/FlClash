@@ -67,23 +67,34 @@ class _AppStateManagerState extends State<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     backgroundMemoryManager.init();
+    backgroundMemoryManager.startMemoryMonitor();
   }
 
   @override
   void dispose() {
+    backgroundMemoryManager.stopMemoryMonitor();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    final isPaused = state == AppLifecycleState.paused;
-    if (isPaused) {
-      globalState.appController.savePreferencesDebounce();
-      backgroundMemoryManager.onAppPaused();
-    } else if (state == AppLifecycleState.resumed) {
-      backgroundMemoryManager.onAppResumed();
+    switch (state) {
+      case AppLifecycleState.paused:
+        globalState.appController.savePreferencesDebounce();
+        backgroundMemoryManager.onAppPaused();
+      case AppLifecycleState.resumed:
+        backgroundMemoryManager.onAppResumed();
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        break;
     }
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    backgroundMemoryManager.onMemoryPressureMedium();
   }
 
   @override

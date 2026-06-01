@@ -64,7 +64,7 @@ class _LineChartState extends State<LineChart>
         prevPoints = nextPoints;
       }
       points = widget.points;
-      if (isLowMemoryMode) {
+      if (isLowMemoryMode || isReducedMemoryMode) {
         _controller.value = 1.0;
       } else {
         _controller.forward(from: 0);

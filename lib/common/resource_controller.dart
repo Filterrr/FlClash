@@ -3,15 +3,74 @@ import 'dart:async';
 import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:flutter/painting.dart';
 
+enum ResourcePriority {
+  critical,
+  normal,
+  low,
+}
+
+class ThrottledTimer {
+  final Duration normalDuration;
+  final Duration reducedDuration;
+  final Duration lowDuration;
+  final void Function() callback;
+  Timer? _timer;
+  int _tickCount = 0;
+  int _reducedSkipFactor = 3;
+  int _lowSkipFactor = 5;
+
+  ThrottledTimer({
+    required this.normalDuration,
+    Duration? reducedDuration,
+    Duration? lowDuration,
+    required this.callback,
+    int reducedSkipFactor = 3,
+    int lowSkipFactor = 5,
+  })  : reducedDuration = reducedDuration ?? normalDuration,
+        lowDuration = lowDuration ?? normalDuration,
+        _reducedSkipFactor = reducedSkipFactor,
+        _lowSkipFactor = lowSkipFactor;
+
+  bool get isActive => _timer != null && _timer!.isActive;
+
+  void start() {
+    cancel();
+    _timer = Timer.periodic(normalDuration, (_) {
+      _tickCount++;
+      final mode = lowMemoryModeNotifier.value;
+      switch (mode) {
+        case LowMemoryMode.normal:
+          callback();
+        case LowMemoryMode.reduced:
+          if (_tickCount % _reducedSkipFactor == 0) {
+            callback();
+          }
+        case LowMemoryMode.low:
+          if (_tickCount % _lowSkipFactor == 0) {
+            callback();
+          }
+      }
+    });
+  }
+
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+    _tickCount = 0;
+  }
+}
+
 class PausableTimer {
   final Duration duration;
   final void Function() callback;
+  final ResourcePriority priority;
   Timer? _timer;
   bool _isPaused = false;
 
   PausableTimer({
     required this.duration,
     required this.callback,
+    this.priority = ResourcePriority.normal,
   });
 
   bool get isActive => _timer != null && _timer!.isActive;
@@ -42,29 +101,58 @@ class PausableTimer {
   }
 }
 
+class PausableSubscription {
+  final StreamSubscription subscription;
+  final ResourcePriority priority;
+  final String? label;
+
+  PausableSubscription(
+    this.subscription, {
+    this.priority = ResourcePriority.normal,
+    this.label,
+  });
+}
+
 class ResourceController {
   static final ResourceController _instance = ResourceController._internal();
   factory ResourceController() => _instance;
   ResourceController._internal();
 
   final List<PausableTimer> _pausableTimers = [];
-  final List<StreamSubscription> _pausableSubscriptions = [];
+  final List<ThrottledTimer> _throttledTimers = [];
+  final List<PausableSubscription> _pausableSubscriptions = [];
   final List<VoidCallback> _onEnterLowMemory = [];
   final List<VoidCallback> _onExitLowMemory = [];
+  final List<VoidCallback> _onEnterReducedMemory = [];
+  final List<VoidCallback> _onExitReducedMemory = [];
   bool _isInitialized = false;
+
+  static const int _normalImageCacheLimit = 100;
+  static const int _reducedImageCacheLimit = 30;
+  static const int _lowImageCacheLimit = 10;
+  static const int _normalImageCacheBytes = 100 * 1024 * 1024;
+  static const int _reducedImageCacheBytes = 30 * 1024 * 1024;
+  static const int _lowImageCacheBytes = 10 * 1024 * 1024;
 
   void init() {
     if (_isInitialized) return;
     _isInitialized = true;
+    _setImageCacheLimits(_normalImageCacheLimit, _normalImageCacheBytes);
     lowMemoryModeNotifier.addListener(_handleModeChange);
   }
 
   void _handleModeChange() {
-    final isLow = lowMemoryModeNotifier.value == LowMemoryMode.low;
-    if (isLow) {
-      _enterLowMemory();
-    } else {
-      _exitLowMemory();
+    final mode = lowMemoryModeNotifier.value;
+    switch (mode) {
+      case LowMemoryMode.normal:
+        _exitLowMemory();
+        break;
+      case LowMemoryMode.reduced:
+        _enterReducedMemory();
+        break;
+      case LowMemoryMode.low:
+        _enterLowMemory();
+        break;
     }
   }
 
@@ -76,12 +164,26 @@ class ResourceController {
     _pausableTimers.remove(timer);
   }
 
-  void registerPausableSubscription(StreamSubscription sub) {
-    _pausableSubscriptions.add(sub);
+  void registerThrottledTimer(ThrottledTimer timer) {
+    _throttledTimers.add(timer);
+  }
+
+  void unregisterThrottledTimer(ThrottledTimer timer) {
+    _throttledTimers.remove(timer);
+  }
+
+  void registerPausableSubscription(
+    StreamSubscription sub, {
+    ResourcePriority priority = ResourcePriority.normal,
+    String? label,
+  }) {
+    _pausableSubscriptions.add(
+      PausableSubscription(sub, priority: priority, label: label),
+    );
   }
 
   void unregisterPausableSubscription(StreamSubscription sub) {
-    _pausableSubscriptions.remove(sub);
+    _pausableSubscriptions.removeWhere((s) => s.subscription == sub);
   }
 
   void onEnterLowMemory(VoidCallback callback) {
@@ -92,6 +194,14 @@ class ResourceController {
     _onExitLowMemory.add(callback);
   }
 
+  void onEnterReducedMemory(VoidCallback callback) {
+    _onEnterReducedMemory.add(callback);
+  }
+
+  void onExitReducedMemory(VoidCallback callback) {
+    _onExitReducedMemory.add(callback);
+  }
+
   void removeOnEnterLowMemory(VoidCallback callback) {
     _onEnterLowMemory.remove(callback);
   }
@@ -100,18 +210,52 @@ class ResourceController {
     _onExitLowMemory.remove(callback);
   }
 
-  void _enterLowMemory() {
+  void removeOnEnterReducedMemory(VoidCallback callback) {
+    _onEnterReducedMemory.remove(callback);
+  }
+
+  void removeOnExitReducedMemory(VoidCallback callback) {
+    _onExitReducedMemory.remove(callback);
+  }
+
+  void _enterReducedMemory() {
+    for (final callback in _onExitLowMemory) {
+      callback();
+    }
     for (final timer in _pausableTimers) {
-      timer.pause();
+      if (timer.priority == ResourcePriority.low) {
+        timer.pause();
+      }
     }
     for (final sub in _pausableSubscriptions) {
-      sub.pause();
+      if (sub.priority == ResourcePriority.low) {
+        sub.subscription.pause();
+      }
     }
+    _setImageCacheLimits(_reducedImageCacheLimit, _reducedImageCacheBytes);
+    _clearImageCache();
+    for (final callback in _onEnterReducedMemory) {
+      callback();
+    }
+  }
+
+  void _enterLowMemory() {
+    for (final timer in _pausableTimers) {
+      if (timer.priority != ResourcePriority.critical) {
+        timer.pause();
+      }
+    }
+    for (final sub in _pausableSubscriptions) {
+      if (sub.priority != ResourcePriority.critical) {
+        sub.subscription.pause();
+      }
+    }
+    _setImageCacheLimits(_lowImageCacheLimit, _lowImageCacheBytes);
+    _clearImageCache();
+    _clearListViewCache();
     for (final callback in _onEnterLowMemory) {
       callback();
     }
-    _clearImageCache();
-    _clearListViewCache();
   }
 
   void _exitLowMemory() {
@@ -119,26 +263,53 @@ class ResourceController {
       timer.resume();
     }
     for (final sub in _pausableSubscriptions) {
-      sub.resume();
+      if (sub.subscription.isPaused) {
+        sub.subscription.resume();
+      }
+    }
+    _setImageCacheLimits(_normalImageCacheLimit, _normalImageCacheBytes);
+    for (final callback in _onExitReducedMemory) {
+      callback();
     }
     for (final callback in _onExitLowMemory) {
       callback();
     }
   }
 
+  void _setImageCacheLimits(int count, int bytes) {
+    final cache = PaintingBinding.instance.imageCache;
+    cache.maximumSize = count;
+    cache.maximumSizeBytes = bytes;
+  }
+
   void _clearImageCache() {
-    PaintingBinding.instance.imageCache.clear();
+    final cache = PaintingBinding.instance.imageCache;
+    cache.clear();
+    cache.clearLiveImages();
+  }
+
+  void _clearListViewCache() {
     PaintingBinding.instance.imageCache.clearLiveImages();
   }
 
-  void _clearListViewCache() {}
+  void forceClearImageCache() {
+    _clearImageCache();
+  }
+
+  void forceClearAllCaches() {
+    _clearImageCache();
+    _clearListViewCache();
+  }
 
   void dispose() {
     lowMemoryModeNotifier.removeListener(_handleModeChange);
     _pausableTimers.clear();
+    _throttledTimers.clear();
     _pausableSubscriptions.clear();
     _onEnterLowMemory.clear();
     _onExitLowMemory.clear();
+    _onEnterReducedMemory.clear();
+    _onExitReducedMemory.clear();
     _isInitialized = false;
   }
 }

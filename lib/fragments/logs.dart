@@ -38,17 +38,31 @@ class _LogsFragmentState extends State<LogsFragment> {
   void _onLowMemoryModeChanged() {
     if (isLowMemoryMode) {
       _stopTimer();
+    } else if (isReducedMemoryMode) {
+      _startReducedTimer();
     } else {
       _startTimer();
     }
   }
 
   void _startTimer() {
-    if (timer != null) {
-      timer?.cancel();
-      timer = null;
-    }
+    _stopTimer();
     timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      final logs = globalState.appController.appFlowingState.logs;
+      if (!logListEquality.equals(
+        logsNotifier.value.logs,
+        logs,
+      )) {
+        logsNotifier.value = logsNotifier.value.copyWith(
+          logs: logs,
+        );
+      }
+    });
+  }
+
+  void _startReducedTimer() {
+    _stopTimer();
+    timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
       final logs = globalState.appController.appFlowingState.logs;
       if (!logListEquality.equals(
         logsNotifier.value.logs,

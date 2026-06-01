@@ -40,18 +40,32 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
   void _onLowMemoryModeChanged() {
     if (isLowMemoryMode) {
       _stopTimer();
+    } else if (isReducedMemoryMode) {
+      _startReducedTimer();
     } else {
       _startTimer();
     }
   }
 
   void _startTimer() {
-    if (timer != null) {
-      timer?.cancel();
-      timer = null;
-    }
+    _stopTimer();
     timer = Timer.periodic(
       const Duration(seconds: 1),
+      (timer) async {
+        if (!context.mounted) {
+          return;
+        }
+        connectionsNotifier.value = connectionsNotifier.value.copyWith(
+          connections: await clashCore.getConnections(),
+        );
+      },
+    );
+  }
+
+  void _startReducedTimer() {
+    _stopTimer();
+    timer = Timer.periodic(
+      const Duration(seconds: 5),
       (timer) async {
         if (!context.mounted) {
           return;

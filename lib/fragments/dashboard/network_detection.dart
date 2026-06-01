@@ -32,6 +32,10 @@ class _NetworkDetectionState extends State<NetworkDetection> {
 
   _checkIp() async {
     if (isLowMemoryMode) return;
+    if (isReducedMemoryMode) {
+      final appFlowingState = globalState.appController.appFlowingState;
+      if (!appFlowingState.isStart) return;
+    }
     final appState = globalState.appController.appState;
     final appFlowingState = globalState.appController.appFlowingState;
     final isInit = appState.isInit;

@@ -147,9 +147,11 @@ class AppState with ChangeNotifier {
 
   addRequest(Connection value) {
     _requests = List.from(_requests)..add(value);
-    const maxLength = 1000;
+    final maxLength = isLowMemoryMode ? 200 : 1000;
     _requests = _requests.safeSublist(_requests.length - maxLength);
-    if (!isLowMemoryMode) {
+    if (!isLowMemoryMode && !isReducedMemoryMode) {
+      notifyListeners();
+    } else if (isReducedMemoryMode && _requests.length % 10 == 0) {
       notifyListeners();
     }
   }
@@ -337,9 +339,11 @@ class AppFlowingState with ChangeNotifier {
 
   addLog(Log log) {
     _logs = List.from(_logs)..add(log);
-    final maxLength = isLowMemoryMode ? 50 : 1000;
+    final maxLength = isLowMemoryMode ? 50 : (isReducedMemoryMode ? 200 : 1000);
     _logs = _logs.safeSublist(_logs.length - maxLength);
-    if (!isLowMemoryMode) {
+    if (isNormalMemoryMode) {
+      notifyListeners();
+    } else if (isReducedMemoryMode && _logs.length % 20 == 0) {
       notifyListeners();
     }
   }
@@ -355,7 +359,7 @@ class AppFlowingState with ChangeNotifier {
 
   addTraffic(Traffic traffic) {
     _traffics = List.from(_traffics)..add(traffic);
-    const maxLength = 60;
+    final maxLength = isLowMemoryMode ? 20 : 60;
     _traffics = _traffics.safeSublist(_traffics.length - maxLength);
     if (!isLowMemoryMode) {
       notifyListeners();

@@ -63,6 +63,7 @@ class ApplicationState extends State<Application> {
   late SystemColorSchemes systemColorSchemes;
   Timer? timer;
   StreamSubscription? connectivitySubscription;
+  int _timerTickCount = 0;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -123,6 +124,13 @@ class ApplicationState extends State<Application> {
     _cancelTimer();
     timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
       if (isLowMemoryMode) return;
+      if (isReducedMemoryMode) {
+        if (_timerTickCount % 3 != 0) {
+          _timerTickCount++;
+          return;
+        }
+      }
+      _timerTickCount++;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         globalState.appController.updateGroupDebounce();
       });
