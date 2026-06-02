@@ -236,7 +236,7 @@ jobs:
         (github.event_name == 'workflow_dispatch' && inputs.tag_name != '') ||
         ((github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.update-and-test.result == 'success')
       )
-    name: Build ${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
+    name: Build ${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -255,6 +255,7 @@ jobs:
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
+
           - platform: windows
             os: windows-2022
             arch: arm64
@@ -268,6 +269,7 @@ jobs:
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
+
           - platform: macos
             os: macos-15
             arch: amd64
@@ -281,7 +283,7 @@ jobs:
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.x'
-            
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -379,7 +381,8 @@ jobs:
         run: echo "CGO_LDFLAGS=-Wl,-z,max-page-size=16384" >> $GITHUB_ENV
 
       - name: Build Platform
-        run: dart setup.dart ${{ matrix.platform }} ${{ matrix.arch && format('--arch {0}', matrix.arch) || '' }}
+        run: |
+          dart setup.dart ${{ matrix.platform }} --arch ${{ matrix.arch }}
 
       - name: Sign Android APKs with Fixed Keystore
         if: matrix.is_android == true
@@ -407,7 +410,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: FlClash-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
+          name: FlClash-${{ matrix.platform }}-${{ matrix.arch }}
           path: ./dist
           overwrite: true
 
