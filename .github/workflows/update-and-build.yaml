@@ -250,37 +250,30 @@ jobs:
             flutter_channel: 'stable'
 
           - platform: windows
-            os: windows-2022
+            os: windows-latest
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
           - platform: windows
-            os: windows-2022
+            os: windows-latest
             arch: arm64
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
 
           - platform: macos
-            os: macos-15
+            os: macos-latest
             arch: arm64
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
           - platform: macos
-            os: macos-15
+            os: macos-latest
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.38.10'
-
-          - platform: linux
-            os: ubuntu-22.04
-            arch: amd64
-            go_version: '1.25.x'
-            flutter_channel: 'stable'
-            flutter_version: '3.x'
             
     steps:
       - name: Checkout
