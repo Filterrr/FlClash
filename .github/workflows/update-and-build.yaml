@@ -236,7 +236,7 @@ jobs:
         (github.event_name == 'workflow_dispatch' && inputs.tag_name != '') ||
         ((github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.update-and-test.result == 'success')
       )
-    name: name: Build ${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
+    name: Build ${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
