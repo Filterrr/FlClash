@@ -64,14 +64,6 @@ jobs:
             flutter_channel: 'stable'
             flutter_version: '3.x'
 
-          # --- linux 平台 ---
-          - platform: linux
-            os: ubuntu-latest
-            arch: amd64
-            go_version: '1.25.x'
-            flutter_channel: 'stable'
-            flutter_version: '3.x'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
