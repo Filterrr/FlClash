@@ -102,6 +102,19 @@ class _WindowContainerState extends State<WindowManager>
   }
 
   @override
+  void onWindowHide() async {
+    globalState.appController.savePreferencesDebounce();
+    backgroundMemoryManager.onWindowHidden();
+    super.onWindowHide();
+  }
+
+  @override
+  void onWindowShow() async {
+    backgroundMemoryManager.onWindowShown();
+    super.onWindowShow();
+  }
+
+  @override
   Future<void> onTaskbarCreated() async {
     globalState.appController.updateTray(true);
     await globalState.appController.restartCore();

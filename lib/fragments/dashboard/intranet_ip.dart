@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/resource_controller.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,12 @@ class _IntranetIPState extends State<IntranetIP> {
       debugPrint("[App] Connection change");
       ipNotifier.value = await getLocalIpAddress() ?? "";
     });
+    // 注册到ResourceController，低内存模式下自动暂停
+    resourceController.registerPausableSubscription(
+      subscription,
+      priority: ResourcePriority.low,
+      label: 'intranet_ip_connectivity',
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       ipNotifier.value = await getLocalIpAddress() ?? "";
     });
@@ -133,8 +140,9 @@ class _IntranetIPState extends State<IntranetIP> {
 
   @override
   void dispose() {
-    super.dispose();
+    resourceController.unregisterPausableSubscription(subscription);
     subscription.cancel();
     ipNotifier.dispose();
+    super.dispose();
   }
 }

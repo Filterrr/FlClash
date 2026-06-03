@@ -64,7 +64,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
   void _startReducedTimer() {
     _stopTimer();
     timer = Timer.periodic(
-      const Duration(seconds: 5),
+      const Duration(seconds: 10),
       (timer) async {
         if (!context.mounted) {
           return;

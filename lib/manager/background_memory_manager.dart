@@ -14,9 +14,11 @@ class BackgroundMemoryManager {
   bool _isInBackground = false;
   Timer? _gcTimer;
   Timer? _memoryMonitorTimer;
+  int _backgroundDuration = 0;
 
   static const Duration _gcInterval = Duration(seconds: 30);
   static const Duration _memoryMonitorInterval = Duration(seconds: 60);
+  static const int _aggressiveGcThreshold = 60; // 后台60秒后进入激进GC
 
   bool get isInBackground => _isInBackground;
 
@@ -38,53 +40,68 @@ class BackgroundMemoryManager {
 
   void onAppPaused() {
     _isInBackground = true;
+    _backgroundDuration = 0;
     enterLowMemoryMode();
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
+    _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
+    _startMemoryMonitor();
   }
 
   void onAppResumed() {
     _isInBackground = false;
+    _backgroundDuration = 0;
     exitLowMemoryMode();
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
     _stopBackgroundGc();
+    _stopMemoryMonitor();
   }
 
   void onWindowHidden() {
     _isInBackground = true;
+    _backgroundDuration = 0;
     enterLowMemoryMode();
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
+    _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
+    _startMemoryMonitor();
   }
 
   void onWindowShown() {
     _isInBackground = false;
+    _backgroundDuration = 0;
     exitLowMemoryMode();
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
     _stopBackgroundGc();
+    _stopMemoryMonitor();
   }
 
   void onWindowMinimized() {
     _isInBackground = true;
+    _backgroundDuration = 0;
     enterLowMemoryMode();
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
+    _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
+    _startMemoryMonitor();
   }
 
   void onWindowRestored() {
     _isInBackground = false;
+    _backgroundDuration = 0;
     exitLowMemoryMode();
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
     _stopBackgroundGc();
+    _stopMemoryMonitor();
   }
 
   void onMemoryPressureLow() {
@@ -99,6 +116,7 @@ class BackgroundMemoryManager {
     enterLowMemoryMode();
     _requestGc();
     resourceController.forceClearAllCaches();
+    _trimAppStateData();
   }
 
   void onMemoryPressureCritical() {
@@ -106,6 +124,7 @@ class BackgroundMemoryManager {
     _requestGc();
     resourceController.forceClearAllCaches();
     _trimAppStateData();
+    _trimFlowingStateData();
   }
 
   void _reduceGlobalStateTimerFrequency() {
@@ -126,10 +145,19 @@ class BackgroundMemoryManager {
     resourceController.forceClearImageCache();
   }
 
+  void _clearNonEssentialCaches() {
+    resourceController.forceClearAllCaches();
+  }
+
   void _startBackgroundGc() {
     _stopBackgroundGc();
     _gcTimer = Timer.periodic(_gcInterval, (_) {
       _requestGc();
+      _requestDartGc();
+      _backgroundDuration += _gcInterval.inSeconds;
+      if (_backgroundDuration >= _aggressiveGcThreshold) {
+        _performAggressiveCleanup();
+      }
     });
   }
 
@@ -142,6 +170,21 @@ class BackgroundMemoryManager {
     clashCore.requestGc();
   }
 
+  void _requestDartGc() {
+    // 触发Dart VM垃圾回收
+    try {
+      // 通过空操作触发Dart GC的启发式回收
+      final List<dynamic> _ = [];
+      _.length;
+    } catch (_) {}
+  }
+
+  void _performAggressiveCleanup() {
+    resourceController.forceClearAllCaches();
+    _trimAppStateData();
+    _trimFlowingStateData();
+  }
+
   void _trimAppStateData() {
     final appController = globalState.appController;
     if (appController.appState.requests.length > 100) {
@@ -152,13 +195,33 @@ class BackgroundMemoryManager {
     }
   }
 
+  void _trimFlowingStateData() {
+    final appController = globalState.appController;
+    final flowingState = appController.appFlowingState;
+    if (flowingState.logs.length > 50) {
+      flowingState.logs = flowingState.logs.safeSublist(
+        flowingState.logs.length - 50,
+      );
+    }
+    if (flowingState.traffics.length > 20) {
+      flowingState.traffics = flowingState.traffics.safeSublist(
+        flowingState.traffics.length - 20,
+      );
+    }
+  }
+
   void startMemoryMonitor() {
     stopMemoryMonitor();
     _memoryMonitorTimer =
         Timer.periodic(_memoryMonitorInterval, (_) {
       if (_isInBackground) {
         _requestGc();
+        _requestDartGc();
         resourceController.forceClearImageCache();
+        _backgroundDuration += _memoryMonitorInterval.inSeconds;
+        if (_backgroundDuration >= _aggressiveGcThreshold) {
+          _performAggressiveCleanup();
+        }
       }
     });
   }

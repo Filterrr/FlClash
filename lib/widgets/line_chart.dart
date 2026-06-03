@@ -210,7 +210,9 @@ class LineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant LineChartPainter oldDelegate) {
+    // 低内存模式下不重绘，减少GPU渲染开销
+    if (isLowMemoryMode) return false;
+    return oldDelegate.color != color;
   }
 }

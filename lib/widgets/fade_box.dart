@@ -17,6 +17,10 @@ class FadeBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final realAlignment = alignment ?? Alignment.center;
+    // 低内存模式下跳过动画，直接显示
+    if (isLowMemoryMode) {
+      return Align(alignment: realAlignment, child: child);
+    }
     return AnimatedSwitcher(
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,

@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/resource_controller.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
@@ -109,6 +110,12 @@ class ApplicationState extends State<Application> {
         clashCore.closeConnections();
       }
     });
+    // 注册到ResourceController，低内存模式下自动暂停（网络连接变化是核心功能，使用normal优先级）
+    resourceController.registerPausableSubscription(
+      connectivitySubscription!,
+      priority: ResourcePriority.normal,
+      label: 'app_connectivity',
+    );
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
@@ -123,10 +130,11 @@ class ApplicationState extends State<Application> {
   _initTimer() {
     _cancelTimer();
     timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
+      // 后台低内存模式：完全停止分组更新
       if (isLowMemoryMode) return;
       _timerTickCount++;
       if (isReducedMemoryMode) {
-        if (_timerTickCount % 3 != 0) {
+        if (_timerTickCount % 4 != 0) {
           return;
         }
       }
@@ -275,6 +283,9 @@ class ApplicationState extends State<Application> {
   Future<void> dispose() async {
     linkManager.destroy();
     _cancelTimer();
+    if (connectivitySubscription != null) {
+      resourceController.unregisterPausableSubscription(connectivitySubscription!);
+    }
     connectivitySubscription?.cancel();
     await clashService?.destroy();
     await globalState.appController.savePreferences();

@@ -61,7 +61,7 @@ class _LogsFragmentState extends State<LogsFragment> {
 
   void _startReducedTimer() {
     _stopTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 2000), (timer) {
       final logs = globalState.appController.appFlowingState.logs;
       if (!logListEquality.equals(
         logsNotifier.value.logs,

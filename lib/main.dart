@@ -107,6 +107,9 @@ Future<void> vpnService() async {
           globalState.updateTraffic(config: config);
         }
       ];
+      globalState.trafficUpdateCallback = () {
+        globalState.updateTraffic(config: config);
+      };
     },
   );
 
