@@ -146,13 +146,14 @@ class AppState with ChangeNotifier {
 
   addRequest(Connection value) {
     _requests = List.from(_requests)..add(value);
-    final maxLength = isLowMemoryMode ? 200 : 1000;
+    final maxLength = isLowMemoryMode ? 100 : (isReducedMemoryMode ? 500 : 1000);
     _requests = _requests.safeSublist(_requests.length - maxLength);
     if (!isLowMemoryMode && !isReducedMemoryMode) {
       notifyListeners();
-    } else if (isReducedMemoryMode && _requests.length % 10 == 0) {
+    } else if (isReducedMemoryMode && _requests.length % 20 == 0) {
       notifyListeners();
     }
+    // 低内存模式下不通知UI更新
   }
 
   SystemColorSchemes get systemColorSchemes => _systemColorSchemes;
@@ -338,13 +339,14 @@ class AppFlowingState with ChangeNotifier {
 
   addLog(Log log) {
     _logs = List.from(_logs)..add(log);
-    final maxLength = isLowMemoryMode ? 50 : (isReducedMemoryMode ? 200 : 1000);
+    final maxLength = isLowMemoryMode ? 30 : (isReducedMemoryMode ? 100 : 1000);
     _logs = _logs.safeSublist(_logs.length - maxLength);
     if (isNormalMemoryMode) {
       notifyListeners();
-    } else if (isReducedMemoryMode && _logs.length % 20 == 0) {
+    } else if (isReducedMemoryMode && _logs.length % 50 == 0) {
       notifyListeners();
     }
+    // 低内存模式下不通知UI更新，节省内存
   }
 
   List<Traffic> get traffics => _traffics;
@@ -358,11 +360,12 @@ class AppFlowingState with ChangeNotifier {
 
   addTraffic(Traffic traffic) {
     _traffics = List.from(_traffics)..add(traffic);
-    final maxLength = isLowMemoryMode ? 20 : 60;
+    final maxLength = isLowMemoryMode ? 10 : 60;
     _traffics = _traffics.safeSublist(_traffics.length - maxLength);
     if (!isLowMemoryMode) {
       notifyListeners();
     }
+    // 低内存模式下不通知UI更新
   }
 
   Traffic get totalTraffic => _totalTraffic;

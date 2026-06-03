@@ -1,3 +1,4 @@
+import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:flutter/material.dart';
 
 typedef AnimatedGridBuilder<T> = Widget Function(BuildContext, T item);
@@ -49,6 +50,7 @@ class AnimateGrid<T> extends StatelessWidget {
       final rows = _rows(columns, count);
       final gapHeight = (rows - 1) * gap;
       final height = rows * itemHeight + gapHeight;
+      final skipAnimation = isLowMemoryMode;
       return SizedBox(
         width: width,
         height: height,
@@ -65,6 +67,20 @@ class AnimateGrid<T> extends StatelessWidget {
                     itemWidth,
                     itemHeight,
                   );
+                  // 低内存模式下跳过动画，直接定位
+                  if (skipAnimation) {
+                    return Transform.translate(
+                      offset: offset,
+                      child: SizedBox(
+                        height: itemHeight,
+                        width: itemWidth,
+                        child: builder(
+                          context,
+                          item,
+                        ),
+                      ),
+                    );
+                  }
                   return TweenAnimationBuilder(
                     tween: Tween<Offset>(end: offset),
                     duration: duration,

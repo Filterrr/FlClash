@@ -102,6 +102,13 @@ class _WindowContainerState extends State<WindowManager>
   }
 
   @override
+  void onWindowBlur() async {
+    // 窗口失焦时保存偏好设置
+    globalState.appController.savePreferencesDebounce();
+    super.onWindowBlur();
+  }
+
+  @override
   Future<void> onTaskbarCreated() async {
     globalState.appController.updateTray(true);
     await globalState.appController.restartCore();

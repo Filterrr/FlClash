@@ -30,6 +30,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
   CancelToken? cancelToken;
 
   _checkIp() async {
+    // 后台低内存模式下完全跳过网络检测
     if (isLowMemoryMode) return;
     if (isReducedMemoryMode) {
       final appFlowingState = globalState.appController.appFlowingState;

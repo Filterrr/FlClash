@@ -114,6 +114,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   @override
   void onLog(Log log) {
     globalState.appController.appFlowingState.addLog(log);
+    // 仅在正常内存模式下显示错误日志SnackBar
     if (log.logLevel == LogLevel.error && isNormalMemoryMode) {
       globalState.appController.showSnackBar(log.payload ?? '');
     }
@@ -128,6 +129,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onRequest(Connection connection) async {
+    // 低内存模式下完全跳过请求记录，节省内存
     if (!isLowMemoryMode) {
       globalState.appController.appState.addRequest(connection);
     }

@@ -67,12 +67,11 @@ class _AppStateManagerState extends State<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     backgroundMemoryManager.init();
-    backgroundMemoryManager.startMemoryMonitor();
   }
 
   @override
   void dispose() {
-    backgroundMemoryManager.stopMemoryMonitor();
+    backgroundMemoryManager.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -94,6 +93,7 @@ class _AppStateManagerState extends State<AppStateManager>
 
   @override
   void didHaveMemoryPressure() {
+    // 根据内存压力级别分级处理
     backgroundMemoryManager.onMemoryPressureMedium();
   }
 

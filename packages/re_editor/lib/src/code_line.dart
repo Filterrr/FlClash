@@ -217,10 +217,10 @@ abstract class CodeLineEditingController extends ValueNotifier<CodeLineEditingVa
   /// Move the cursor to the end of document.
   void moveCursorToPageEnd();
 
-  /// TODO
+  /// Move the cursor up by one page (requires viewport height calculation).
   void moveCursorToPageUp();
 
-  /// TODO
+  /// Move the cursor down by one page (requires viewport height calculation).
   void moveCursorToPageDown();
 
   /// Move the cursor to the start of the word.

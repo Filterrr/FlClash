@@ -37,6 +37,8 @@ class CommonIcon extends StatelessWidget {
       imageUrl: src,
       fadeInDuration: Duration.zero,
       fadeOutDuration: Duration.zero,
+      memCacheWidth: 64,
+      memCacheHeight: 64,
       errorWidget: (_, __, ___) => _defaultIcon(),
     );
   }

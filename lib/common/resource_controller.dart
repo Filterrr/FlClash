@@ -74,6 +74,7 @@ class PausableTimer {
   });
 
   bool get isActive => _timer != null && _timer!.isActive;
+  bool get isPaused => _isPaused;
 
   void start() {
     _cancel();
@@ -126,6 +127,7 @@ class ResourceController {
   final List<VoidCallback> _onEnterReducedMemory = [];
   final List<VoidCallback> _onExitReducedMemory = [];
   bool _isInitialized = false;
+  LowMemoryMode _lastMode = LowMemoryMode.normal;
 
   static const int _normalImageCacheLimit = 100;
   static const int _reducedImageCacheLimit = 30;
@@ -133,6 +135,22 @@ class ResourceController {
   static const int _normalImageCacheBytes = 100 * 1024 * 1024;
   static const int _reducedImageCacheBytes = 30 * 1024 * 1024;
   static const int _lowImageCacheBytes = 10 * 1024 * 1024;
+
+  // ListView缓存范围
+  static const double _normalCacheExtent = 500;
+  static const double _reducedCacheExtent = 200;
+  static const double _lowCacheExtent = 0;
+
+  double get currentCacheExtent {
+    switch (lowMemoryModeNotifier.value) {
+      case LowMemoryMode.normal:
+        return _normalCacheExtent;
+      case LowMemoryMode.reduced:
+        return _reducedCacheExtent;
+      case LowMemoryMode.low:
+        return _lowCacheExtent;
+    }
+  }
 
   void init() {
     if (_isInitialized) return;
@@ -143,6 +161,25 @@ class ResourceController {
 
   void _handleModeChange() {
     final mode = lowMemoryModeNotifier.value;
+    if (mode == _lastMode) return;
+
+    // 先退出旧模式
+    switch (_lastMode) {
+      case LowMemoryMode.reduced:
+        for (final callback in _onExitReducedMemory) {
+          callback();
+        }
+        break;
+      case LowMemoryMode.low:
+        for (final callback in _onExitLowMemory) {
+          callback();
+        }
+        break;
+      case LowMemoryMode.normal:
+        break;
+    }
+
+    // 再进入新模式
     switch (mode) {
       case LowMemoryMode.normal:
         _exitLowMemory();
@@ -154,6 +191,8 @@ class ResourceController {
         _enterLowMemory();
         break;
     }
+
+    _lastMode = mode;
   }
 
   void registerPausableTimer(PausableTimer timer) {
@@ -219,9 +258,6 @@ class ResourceController {
   }
 
   void _enterReducedMemory() {
-    for (final callback in _onExitLowMemory) {
-      callback();
-    }
     for (final timer in _pausableTimers) {
       if (timer.priority == ResourcePriority.low) {
         timer.pause();
@@ -299,6 +335,40 @@ class ResourceController {
   void forceClearAllCaches() {
     _clearImageCache();
     _clearListViewCache();
+  }
+
+  /// 暂停所有非critical优先级的定时器
+  void pauseAllNonCriticalTimers() {
+    for (final timer in _pausableTimers) {
+      if (timer.priority != ResourcePriority.critical) {
+        timer.pause();
+      }
+    }
+  }
+
+  /// 恢复所有定时器
+  void resumeAllTimers() {
+    for (final timer in _pausableTimers) {
+      timer.resume();
+    }
+  }
+
+  /// 暂停所有非critical优先级的订阅
+  void pauseAllNonCriticalSubscriptions() {
+    for (final sub in _pausableSubscriptions) {
+      if (sub.priority != ResourcePriority.critical) {
+        sub.subscription.pause();
+      }
+    }
+  }
+
+  /// 恢复所有订阅
+  void resumeAllSubscriptions() {
+    for (final sub in _pausableSubscriptions) {
+      if (sub.subscription.isPaused) {
+        sub.subscription.resume();
+      }
+    }
   }
 
   void dispose() {
