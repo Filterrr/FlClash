@@ -414,7 +414,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -430,7 +430,7 @@ jobs:
           fi
 
       - name: Download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ./dist/
           pattern: FlClash-*
@@ -443,7 +443,7 @@ jobs:
 
       - name: Release
         if: ${{ env.IS_STABLE == 'true' || env.RELEASE_TAG != '' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: ./dist/*
