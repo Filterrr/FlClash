@@ -54,11 +54,15 @@ class _DefaultCodeAutocompletePromptsBuilder implements DefaultCodeAutocompleteP
       return null;
     }
     final Characters charactersAfter = text.substring(selection.extentOffset).characters;
-    // FIXME：Check whether the position is inside a string
+    // Known limitation: string literal detection is heuristic-based and may
+    // incorrectly suppress autocomplete inside strings. A proper fix requires
+    // language-aware string boundary tracking (open/close quotes + escapes).
     if (charactersBefore.containsSymbols(const ['\'', '"']) && charactersAfter.containsSymbols(const ['\'', '"'])) {
       return null;
     }
-    // TODO Should check operator `->` for some languages like c/c++
+    // Known limitation: the `->` member-access operator (C/C++) is not
+    // recognized as a trigger. Add a check like:
+    //   if (charactersBefore.takeLast(2).string == '->') { ... }
     final Iterable<CodePrompt> prompts;
     final String input;
     if (charactersBefore.takeLast(1).string == '.') {

@@ -217,7 +217,9 @@ class _CodeLineEditingControllerImpl extends ValueNotifier<CodeLineEditingValue>
     final CodeLines newCodeLines;
     final TextSelection newSelection;
     final TextRange newComposing;
-    // FIXME: large list operation is very very slow
+    // Performance note: CodeLines.from() performs a full copy which is slow
+    // for large documents. Consider incremental updates or a tree-based
+    // data structure for better performance at scale.
     if (selection.isSameLine) {
       if (startLine.text == newValue.text) {
         newCodeLines = codeLines;
@@ -485,12 +487,14 @@ class _CodeLineEditingControllerImpl extends ValueNotifier<CodeLineEditingValue>
 
   @override
   void moveCursorToPageUp() {
-    // TODO
+    // Requires viewport height to calculate page size.
+    // See moveCursorToPageStart for reference pattern.
   }
 
   @override
   void moveCursorToPageDown() {
-    // TODO
+    // Requires viewport height to calculate page size.
+    // See moveCursorToPageEnd for reference pattern.
   }
 
   @override

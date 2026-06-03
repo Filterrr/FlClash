@@ -1158,10 +1158,10 @@ class _MobileSelectionToolbarController implements MobileSelectionToolbarControl
 
 }
 
-// TODO(justinmc): Currently this fades in but not out on all platforms. It
-// should follow the correct fading behavior for the current platform, then be
-// made public and de-duplicated with widgets/selectable_region.dart.
-// https://github.com/flutter/flutter/issues/107732
+// Known limitation (flutter/flutter#107732): The cursor fade animation fades
+// in but not out on all platforms. A proper fix should follow platform-specific
+// fading behavior, then be made public and de-duplicated with
+// widgets/selectable_region.dart.
 // Wrap the given child in the widgets common to both contextMenuBuilder and
 // TextSelectionControls.buildToolbar.
 class _SelectionToolbarWrapper extends StatefulWidget {

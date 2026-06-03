@@ -264,7 +264,7 @@ abstract class DefaultCodeAutocompletePromptsBuilder implements CodeAutocomplete
 /// ```
 /// CodeAutocomplete(
 ///   viewBuilder: (context, notifier, onSelected) {
-///     // TODO build the options list widget.
+///     // Build the options list widget here (e.g., ListView, Wrap).
 ///   },
 ///   promptsBuilder: DefaultCodeAutocompletePromptsBuilder(
 ///     language: langDart,
