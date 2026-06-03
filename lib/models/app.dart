@@ -244,14 +244,18 @@ class AppState with ChangeNotifier {
   set delayMap(DelayMap value) {
     if (!stringAndIntQMapEquality.equals(_delayMap, value)) {
       _delayMap = value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 
   setDelay(Delay delay) {
     if (_delayMap[delay.name] != delay.value) {
       _delayMap = Map.from(_delayMap)..[delay.name] = delay.value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 
@@ -324,7 +328,9 @@ class AppFlowingState with ChangeNotifier {
   set runTime(int? value) {
     if (_runTime != value) {
       _runTime = value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 
@@ -373,7 +379,9 @@ class AppFlowingState with ChangeNotifier {
   set totalTraffic(Traffic value) {
     if (_totalTraffic != value) {
       _totalTraffic = value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 }
