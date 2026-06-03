@@ -171,11 +171,10 @@ class BackgroundMemoryManager {
   }
 
   void _requestDartGc() {
-    // 触发Dart VM垃圾回收
+    // 触发Dart VM垃圾回收 - 通过创建并丢弃对象触发GC启发式回收
     try {
-      // 通过空操作触发Dart GC的启发式回收
-      final List<dynamic> _ = [];
-      _.length;
+      final List<dynamic> discard = [];
+      discard.length;
     } catch (_) {}
   }
 
@@ -210,8 +209,8 @@ class BackgroundMemoryManager {
     }
   }
 
-  void startMemoryMonitor() {
-    stopMemoryMonitor();
+  void _startMemoryMonitor() {
+    _stopMemoryMonitor();
     _memoryMonitorTimer =
         Timer.periodic(_memoryMonitorInterval, (_) {
       if (_isInBackground) {
@@ -226,14 +225,14 @@ class BackgroundMemoryManager {
     });
   }
 
-  void stopMemoryMonitor() {
+  void _stopMemoryMonitor() {
     _memoryMonitorTimer?.cancel();
     _memoryMonitorTimer = null;
   }
 
   void dispose() {
     _stopBackgroundGc();
-    stopMemoryMonitor();
+    _stopMemoryMonitor();
     resourceController.dispose();
     _isInitialized = false;
   }
