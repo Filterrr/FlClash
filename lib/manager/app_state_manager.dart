@@ -67,12 +67,11 @@ class _AppStateManagerState extends State<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     backgroundMemoryManager.init();
-    backgroundMemoryManager.startMemoryMonitor();
   }
 
   @override
   void dispose() {
-    backgroundMemoryManager.stopMemoryMonitor();
+    backgroundMemoryManager.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

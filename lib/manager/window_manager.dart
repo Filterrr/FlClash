@@ -109,11 +109,6 @@ class _WindowContainerState extends State<WindowManager>
   }
 
   @override
-  void onWindowFocus() async {
-    super.onWindowFocus();
-  }
-
-  @override
   Future<void> onTaskbarCreated() async {
     globalState.appController.updateTray(true);
     await globalState.appController.restartCore();
