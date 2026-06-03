@@ -62,7 +62,10 @@ class AppSidebarContainer extends StatelessWidget {
                                 destinations: navigationItems
                                     .map(
                                       (e) => NavigationRailDestination(
-                                        icon: e.icon,
+                                        icon: Tooltip(
+                                          message: Intl.message(e.label),
+                                          child: e.icon,
+                                        ),
                                         label: Text(Intl.message(e.label)),
                                       ),
                                     )
@@ -111,20 +114,6 @@ class AppSidebarContainer extends StatelessWidget {
                       },
                     );
                   },
-                ),
-                const SizedBox(height: 8),
-                IconButton(
-                  onPressed: () {
-                    final config = globalState.appController.config;
-                    final appSetting = config.appSetting;
-                    config.appSetting = appSetting.copyWith(
-                      showLabel: !appSetting.showLabel,
-                    );
-                  },
-                  icon: Icon(
-                    Icons.menu,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
                 ),
                 const SizedBox(height: 16),
               ],
