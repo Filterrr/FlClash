@@ -84,7 +84,6 @@ class AppSidebarContainer extends StatelessWidget {
                     },
                   ),
                 ),
-                const Divider(height: 1, indent: 12, endIndent: 12),
                 Selector<Config, bool>(
                   selector: (_, config) => config.networkProps.systemProxy,
                   builder: (_, systemProxy, __) {
@@ -115,6 +114,7 @@ class AppSidebarContainer extends StatelessWidget {
                     );
                   },
                 ),
+                const Divider(height: 1, indent: 12, endIndent: 12),
                 const SizedBox(height: 16),
               ],
             ),
