@@ -136,7 +136,6 @@ class ResourceController {
   static const int _reducedImageCacheBytes = 30 * 1024 * 1024;
   static const int _lowImageCacheBytes = 10 * 1024 * 1024;
 
-  // ListView缓存范围
   static const double _normalCacheExtent = 500;
   static const double _reducedCacheExtent = 200;
   static const double _lowCacheExtent = 0;
@@ -163,7 +162,6 @@ class ResourceController {
     final mode = lowMemoryModeNotifier.value;
     if (mode == _lastMode) return;
 
-    // 先退出旧模式
     switch (_lastMode) {
       case LowMemoryMode.reduced:
         for (final callback in _onExitReducedMemory) {
@@ -179,7 +177,6 @@ class ResourceController {
         break;
     }
 
-    // 再进入新模式
     switch (mode) {
       case LowMemoryMode.normal:
         _exitLowMemory();
@@ -337,7 +334,6 @@ class ResourceController {
     _clearListViewCache();
   }
 
-  /// 暂停所有非critical优先级的定时器
   void pauseAllNonCriticalTimers() {
     for (final timer in _pausableTimers) {
       if (timer.priority != ResourcePriority.critical) {
@@ -346,14 +342,12 @@ class ResourceController {
     }
   }
 
-  /// 恢复所有定时器
   void resumeAllTimers() {
     for (final timer in _pausableTimers) {
       timer.resume();
     }
   }
 
-  /// 暂停所有非critical优先级的订阅
   void pauseAllNonCriticalSubscriptions() {
     for (final sub in _pausableSubscriptions) {
       if (sub.priority != ResourcePriority.critical) {
@@ -362,7 +356,6 @@ class ResourceController {
     }
   }
 
-  /// 恢复所有订阅
   void resumeAllSubscriptions() {
     for (final sub in _pausableSubscriptions) {
       if (sub.subscription.isPaused) {

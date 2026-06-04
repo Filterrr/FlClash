@@ -20,11 +20,10 @@ using flutter::EncodableValue;
 using flutter::MethodCall;
 using flutter::MethodResultFunctions;
 
-}  // namespace
+}
 
 TEST(WindowExtPlugin, GetPlatformVersion) {
   WindowExtPlugin plugin;
-  // Save the reply value from the success callback.
   std::string result_string;
   plugin.HandleMethodCall(
       MethodCall("getPlatformVersion", std::make_unique<EncodableValue>()),
@@ -34,10 +33,8 @@ TEST(WindowExtPlugin, GetPlatformVersion) {
           },
           nullptr, nullptr));
 
-  // Since the exact string varies by host, just ensure that it's a string
-  // with the expected format.
   EXPECT_TRUE(result_string.rfind("Windows ", 0) == 0);
 }
 
-}  // namespace test
-}  // namespace window_ext
+}
+}

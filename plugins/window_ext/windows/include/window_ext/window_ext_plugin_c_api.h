@@ -17,7 +17,7 @@ FLUTTER_PLUGIN_EXPORT void WindowExtPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
-}  // extern "C"
+}
 #endif
 
 #endif  // FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_C_API_H_

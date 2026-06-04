@@ -177,16 +177,6 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 flutterMethodChannel.invokeMethod("dnsChanged", dns)
             }
         }
-//        if (flClashService is FlClashVpnService) {
-//            val network = networks.maxByOrNull { net ->
-//                connectivity?.getNetworkCapabilities(net)?.let { cap ->
-//                    TRANSPORT_PRIORITY.indexOfFirst { cap.hasTransport(it) }
-//                } ?: -1
-//            }
-//            network?.let {
-//                (flClashService as FlClashVpnService).updateUnderlyingNetworks(arrayOf(network))
-//            }
-//        }
     }
 
     private val callback = object : ConnectivityManager.NetworkCallback() {

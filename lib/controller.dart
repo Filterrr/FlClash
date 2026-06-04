@@ -77,7 +77,6 @@ class AppController {
         updateRunTime,
         updateTraffic,
       ];
-      // 设置流量更新回调，用于后台低内存模式下仅更新VPN通知
       globalState.trafficUpdateCallback = updateTraffic;
       final currentLastModified =
           await config.getCurrentProfile()?.profileLastModified;

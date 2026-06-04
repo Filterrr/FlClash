@@ -93,7 +93,6 @@ class _AppStateManagerState extends State<AppStateManager>
 
   @override
   void didHaveMemoryPressure() {
-    // 根据内存压力级别分级处理
     backgroundMemoryManager.onMemoryPressureMedium();
   }
 

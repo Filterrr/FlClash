@@ -16,11 +16,9 @@ class WindowExtPlugin : public flutter::Plugin {
   WindowExtPlugin(flutter::PluginRegistrarWindows *registrar);
   virtual ~WindowExtPlugin();
 
-  // Disallow copy and assign.
   WindowExtPlugin(const WindowExtPlugin&) = delete;
   WindowExtPlugin& operator=(const WindowExtPlugin&) = delete;
 
-  // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -36,6 +34,6 @@ class WindowExtPlugin : public flutter::Plugin {
   flutter::PluginRegistrarWindows *registrar;
 };
 
-}  // namespace window_ext
+}
 
 #endif  // FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_H_

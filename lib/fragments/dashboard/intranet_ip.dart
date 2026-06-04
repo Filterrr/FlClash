@@ -76,7 +76,6 @@ class _IntranetIPState extends State<IntranetIP> {
       debugPrint("[App] Connection change");
       ipNotifier.value = await getLocalIpAddress() ?? "";
     });
-    // 注册到ResourceController，低内存模式下自动暂停
     resourceController.registerPausableSubscription(
       subscription,
       priority: ResourcePriority.low,

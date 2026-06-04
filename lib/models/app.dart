@@ -153,7 +153,6 @@ class AppState with ChangeNotifier {
     } else if (isReducedMemoryMode && _requests.length % 20 == 0) {
       notifyListeners();
     }
-    // 低内存模式下不通知UI更新
   }
 
   SystemColorSchemes get systemColorSchemes => _systemColorSchemes;
@@ -346,7 +345,6 @@ class AppFlowingState with ChangeNotifier {
     } else if (isReducedMemoryMode && _logs.length % 50 == 0) {
       notifyListeners();
     }
-    // 低内存模式下不通知UI更新，节省内存
   }
 
   List<Traffic> get traffics => _traffics;
@@ -365,7 +363,6 @@ class AppFlowingState with ChangeNotifier {
     if (!isLowMemoryMode) {
       notifyListeners();
     }
-    // 低内存模式下不通知UI更新
   }
 
   Traffic get totalTraffic => _totalTraffic;
