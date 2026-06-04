@@ -31,6 +31,8 @@ class AppSetting with _$AppSetting {
     @Default(false) bool disclaimerAccepted,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
+    @Default(true) bool backgroundOptimization,
+    @Default(BackgroundOptimizationLevel.balanced) BackgroundOptimizationLevel backgroundOptimizationLevel,
   }) = _AppSetting;
 
   factory AppSetting.fromJson(Map<String, Object?> json) =>

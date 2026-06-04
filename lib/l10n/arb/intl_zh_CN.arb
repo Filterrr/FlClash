@@ -338,5 +338,13 @@
   "disableIcmpForwarding": "禁用 ICMP 转发",
   "disableIcmpForwardingDesc": "防止某些情况下的 ICMP 环回问题，ping 将不会显示真实的延迟",
   "runtimeConfig": "运行时配置",
-  "runtimeConfigDesc": "以 Clash Meta 配置文件格式查看当前运行时配置"
+  "runtimeConfigDesc": "以 Clash Meta 配置文件格式查看当前运行时配置",
+  "backgroundOptimization": "后台优化",
+  "backgroundOptimizationDesc": "应用进入后台时自动优化资源占用",
+  "backgroundOptimizationLevel": "优化级别",
+  "backgroundOptimizationLevelDesc": "调整后台资源优化的强度",
+  "backgroundOptimizationLevel_disabled": "关闭",
+  "backgroundOptimizationLevel_light": "轻度",
+  "backgroundOptimizationLevel_balanced": "均衡",
+  "backgroundOptimizationLevel_aggressive": "激进"
 }

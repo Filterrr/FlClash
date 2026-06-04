@@ -127,6 +127,22 @@ class MessageLookup extends MessageLookupByLibrary {
             "运行时配置"),
         "runtimeConfigDesc": MessageLookupByLibrary.simpleMessage(
             "以 Clash Meta 配置文件格式查看当前运行时配置"),
+        "backgroundOptimization": MessageLookupByLibrary.simpleMessage(
+            "后台优化"),
+        "backgroundOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+            "应用进入后台时自动优化资源占用"),
+        "backgroundOptimizationLevel": MessageLookupByLibrary.simpleMessage(
+            "优化级别"),
+        "backgroundOptimizationLevelDesc": MessageLookupByLibrary.simpleMessage(
+            "调整后台资源优化的强度"),
+        "backgroundOptimizationLevel_disabled": MessageLookupByLibrary.simpleMessage(
+            "关闭"),
+        "backgroundOptimizationLevel_light": MessageLookupByLibrary.simpleMessage(
+            "轻度"),
+        "backgroundOptimizationLevel_balanced": MessageLookupByLibrary.simpleMessage(
+            "均衡"),
+        "backgroundOptimizationLevel_aggressive": MessageLookupByLibrary.simpleMessage(
+            "激进"),
         "disclaimer": MessageLookupByLibrary.simpleMessage("免责声明"),
         "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
             "本软件仅供学习交流、科研等非商业性质的用途，严禁将本软件用于商业目的。如有任何商业行为，均与本软件无关。"),

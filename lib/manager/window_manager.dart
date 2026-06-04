@@ -104,7 +104,14 @@ class _WindowContainerState extends State<WindowManager>
   @override
   void onWindowBlur() async {
     globalState.appController.savePreferencesDebounce();
+    backgroundMemoryManager.onWindowHidden();
     super.onWindowBlur();
+  }
+
+  @override
+  void onWindowFocus() async {
+    backgroundMemoryManager.onWindowShown();
+    super.onWindowFocus();
   }
 
   @override

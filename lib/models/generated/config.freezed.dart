@@ -34,13 +34,12 @@ mixin _$AppSetting {
   bool get disclaimerAccepted => throw _privateConstructorUsedError;
   bool get minimizeOnExit => throw _privateConstructorUsedError;
   bool get hidden => throw _privateConstructorUsedError;
+  bool get backgroundOptimization => throw _privateConstructorUsedError;
+  BackgroundOptimizationLevel get backgroundOptimizationLevel =>
+      throw _privateConstructorUsedError;
 
-  /// Serializes this AppSetting to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AppSetting
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AppSettingCopyWith<AppSetting> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -65,7 +64,9 @@ abstract class $AppSettingCopyWith<$Res> {
       bool showLabel,
       bool disclaimerAccepted,
       bool minimizeOnExit,
-      bool hidden});
+      bool hidden,
+      bool backgroundOptimization,
+      BackgroundOptimizationLevel backgroundOptimizationLevel});
 }
 
 /// @nodoc
@@ -78,8 +79,6 @@ class _$AppSettingCopyWithImpl<$Res, $Val extends AppSetting>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AppSetting
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -97,6 +96,8 @@ class _$AppSettingCopyWithImpl<$Res, $Val extends AppSetting>
     Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
+    Object? backgroundOptimization = null,
+    Object? backgroundOptimizationLevel = null,
   }) {
     return _then(_value.copyWith(
       locale: freezed == locale
@@ -155,6 +156,14 @@ class _$AppSettingCopyWithImpl<$Res, $Val extends AppSetting>
           ? _value.hidden
           : hidden // ignore: cast_nullable_to_non_nullable
               as bool,
+      backgroundOptimization: null == backgroundOptimization
+          ? _value.backgroundOptimization
+          : backgroundOptimization // ignore: cast_nullable_to_non_nullable
+              as bool,
+      backgroundOptimizationLevel: null == backgroundOptimizationLevel
+          ? _value.backgroundOptimizationLevel
+          : backgroundOptimizationLevel // ignore: cast_nullable_to_non_nullable
+              as BackgroundOptimizationLevel,
     ) as $Val);
   }
 }
@@ -181,7 +190,9 @@ abstract class _$$AppSettingImplCopyWith<$Res>
       bool showLabel,
       bool disclaimerAccepted,
       bool minimizeOnExit,
-      bool hidden});
+      bool hidden,
+      bool backgroundOptimization,
+      BackgroundOptimizationLevel backgroundOptimizationLevel});
 }
 
 /// @nodoc
@@ -192,8 +203,6 @@ class __$$AppSettingImplCopyWithImpl<$Res>
       _$AppSettingImpl _value, $Res Function(_$AppSettingImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AppSetting
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -211,6 +220,8 @@ class __$$AppSettingImplCopyWithImpl<$Res>
     Object? disclaimerAccepted = null,
     Object? minimizeOnExit = null,
     Object? hidden = null,
+    Object? backgroundOptimization = null,
+    Object? backgroundOptimizationLevel = null,
   }) {
     return _then(_$AppSettingImpl(
       locale: freezed == locale
@@ -269,6 +280,14 @@ class __$$AppSettingImplCopyWithImpl<$Res>
           ? _value.hidden
           : hidden // ignore: cast_nullable_to_non_nullable
               as bool,
+      backgroundOptimization: null == backgroundOptimization
+          ? _value.backgroundOptimization
+          : backgroundOptimization // ignore: cast_nullable_to_non_nullable
+              as bool,
+      backgroundOptimizationLevel: null == backgroundOptimizationLevel
+          ? _value.backgroundOptimizationLevel
+          : backgroundOptimizationLevel // ignore: cast_nullable_to_non_nullable
+              as BackgroundOptimizationLevel,
     ));
   }
 }
@@ -290,7 +309,9 @@ class _$AppSettingImpl implements _AppSetting {
       this.showLabel = false,
       this.disclaimerAccepted = false,
       this.minimizeOnExit = true,
-      this.hidden = false});
+      this.hidden = false,
+      this.backgroundOptimization = true,
+      this.backgroundOptimizationLevel = BackgroundOptimizationLevel.balanced});
 
   factory _$AppSettingImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppSettingImplFromJson(json);
@@ -336,10 +357,16 @@ class _$AppSettingImpl implements _AppSetting {
   @override
   @JsonKey()
   final bool hidden;
+  @override
+  @JsonKey()
+  final bool backgroundOptimization;
+  @override
+  @JsonKey()
+  final BackgroundOptimizationLevel backgroundOptimizationLevel;
 
   @override
   String toString() {
-    return 'AppSetting(locale: $locale, onlyProxy: $onlyProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden)';
+    return 'AppSetting(locale: $locale, onlyProxy: $onlyProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, backgroundOptimization: $backgroundOptimization, backgroundOptimizationLevel: $backgroundOptimizationLevel)';
   }
 
   @override
@@ -370,10 +397,16 @@ class _$AppSettingImpl implements _AppSetting {
                 other.disclaimerAccepted == disclaimerAccepted) &&
             (identical(other.minimizeOnExit, minimizeOnExit) ||
                 other.minimizeOnExit == minimizeOnExit) &&
-            (identical(other.hidden, hidden) || other.hidden == hidden));
+            (identical(other.hidden, hidden) || other.hidden == hidden) &&
+            (identical(other.backgroundOptimization, backgroundOptimization) ||
+                other.backgroundOptimization == backgroundOptimization) &&
+            (identical(other.backgroundOptimizationLevel,
+                    backgroundOptimizationLevel) ||
+                other.backgroundOptimizationLevel ==
+                    backgroundOptimizationLevel));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -390,11 +423,11 @@ class _$AppSettingImpl implements _AppSetting {
       showLabel,
       disclaimerAccepted,
       minimizeOnExit,
-      hidden);
+      hidden,
+      backgroundOptimization,
+      backgroundOptimizationLevel);
 
-  /// Create a copy of AppSetting
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AppSettingImplCopyWith<_$AppSettingImpl> get copyWith =>
@@ -410,20 +443,23 @@ class _$AppSettingImpl implements _AppSetting {
 
 abstract class _AppSetting implements AppSetting {
   const factory _AppSetting(
-      {final String? locale,
-      final bool onlyProxy,
-      final bool autoLaunch,
-      final bool silentLaunch,
-      final bool autoRun,
-      final bool openLogs,
-      final bool closeConnections,
-      final String testUrl,
-      final bool isAnimateToPage,
-      final bool autoCheckUpdate,
-      final bool showLabel,
-      final bool disclaimerAccepted,
-      final bool minimizeOnExit,
-      final bool hidden}) = _$AppSettingImpl;
+          {final String? locale,
+          final bool onlyProxy,
+          final bool autoLaunch,
+          final bool silentLaunch,
+          final bool autoRun,
+          final bool openLogs,
+          final bool closeConnections,
+          final String testUrl,
+          final bool isAnimateToPage,
+          final bool autoCheckUpdate,
+          final bool showLabel,
+          final bool disclaimerAccepted,
+          final bool minimizeOnExit,
+          final bool hidden,
+          final bool backgroundOptimization,
+          final BackgroundOptimizationLevel backgroundOptimizationLevel}) =
+      _$AppSettingImpl;
 
   factory _AppSetting.fromJson(Map<String, dynamic> json) =
       _$AppSettingImpl.fromJson;
@@ -456,11 +492,12 @@ abstract class _AppSetting implements AppSetting {
   bool get minimizeOnExit;
   @override
   bool get hidden;
-
-  /// Create a copy of AppSetting
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool get backgroundOptimization;
+  @override
+  BackgroundOptimizationLevel get backgroundOptimizationLevel;
+  @override
+  @JsonKey(ignore: true)
   _$$AppSettingImplCopyWith<_$AppSettingImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -477,12 +514,8 @@ mixin _$AccessControl {
   AccessSortType get sort => throw _privateConstructorUsedError;
   bool get isFilterSystemApp => throw _privateConstructorUsedError;
 
-  /// Serializes this AccessControl to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AccessControl
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AccessControlCopyWith<AccessControl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -511,8 +544,6 @@ class _$AccessControlCopyWithImpl<$Res, $Val extends AccessControl>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AccessControl
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -571,8 +602,6 @@ class __$$AccessControlImplCopyWithImpl<$Res>
       _$AccessControlImpl _value, $Res Function(_$AccessControlImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AccessControl
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -670,7 +699,7 @@ class _$AccessControlImpl implements _AccessControl {
                 other.isFilterSystemApp == isFilterSystemApp));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -680,9 +709,7 @@ class _$AccessControlImpl implements _AccessControl {
       sort,
       isFilterSystemApp);
 
-  /// Create a copy of AccessControl
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AccessControlImplCopyWith<_$AccessControlImpl> get copyWith =>
@@ -717,11 +744,8 @@ abstract class _AccessControl implements AccessControl {
   AccessSortType get sort;
   @override
   bool get isFilterSystemApp;
-
-  /// Create a copy of AccessControl
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AccessControlImplCopyWith<_$AccessControlImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -737,12 +761,8 @@ mixin _$WindowProps {
   double? get top => throw _privateConstructorUsedError;
   double? get left => throw _privateConstructorUsedError;
 
-  /// Serializes this WindowProps to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of WindowProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $WindowPropsCopyWith<WindowProps> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -766,8 +786,6 @@ class _$WindowPropsCopyWithImpl<$Res, $Val extends WindowProps>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of WindowProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -816,8 +834,6 @@ class __$$WindowPropsImplCopyWithImpl<$Res>
       _$WindowPropsImpl _value, $Res Function(_$WindowPropsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of WindowProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -883,13 +899,11 @@ class _$WindowPropsImpl implements _WindowProps {
             (identical(other.left, left) || other.left == left));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, width, height, top, left);
 
-  /// Create a copy of WindowProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$WindowPropsImplCopyWith<_$WindowPropsImpl> get copyWith =>
@@ -921,11 +935,8 @@ abstract class _WindowProps implements WindowProps {
   double? get top;
   @override
   double? get left;
-
-  /// Create a copy of WindowProps
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$WindowPropsImplCopyWith<_$WindowPropsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -941,12 +952,8 @@ mixin _$VpnProps {
   bool get ipv6 => throw _privateConstructorUsedError;
   bool get allowBypass => throw _privateConstructorUsedError;
 
-  /// Serializes this VpnProps to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of VpnProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $VpnPropsCopyWith<VpnProps> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -969,8 +976,6 @@ class _$VpnPropsCopyWithImpl<$Res, $Val extends VpnProps>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of VpnProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1019,8 +1024,6 @@ class __$$VpnPropsImplCopyWithImpl<$Res>
       _$VpnPropsImpl _value, $Res Function(_$VpnPropsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of VpnProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1093,14 +1096,12 @@ class _$VpnPropsImpl implements _VpnProps {
                 other.allowBypass == allowBypass));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode =>
       Object.hash(runtimeType, enable, systemProxy, ipv6, allowBypass);
 
-  /// Create a copy of VpnProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$VpnPropsImplCopyWith<_$VpnPropsImpl> get copyWith =>
@@ -1132,11 +1133,8 @@ abstract class _VpnProps implements VpnProps {
   bool get ipv6;
   @override
   bool get allowBypass;
-
-  /// Create a copy of VpnProps
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$VpnPropsImplCopyWith<_$VpnPropsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1150,12 +1148,8 @@ mixin _$NetworkProps {
   bool get systemProxy => throw _privateConstructorUsedError;
   List<String> get bypassDomain => throw _privateConstructorUsedError;
 
-  /// Serializes this NetworkProps to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of NetworkProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $NetworkPropsCopyWith<NetworkProps> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1179,8 +1173,6 @@ class _$NetworkPropsCopyWithImpl<$Res, $Val extends NetworkProps>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of NetworkProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1219,8 +1211,6 @@ class __$$NetworkPropsImplCopyWithImpl<$Res>
       _$NetworkPropsImpl _value, $Res Function(_$NetworkPropsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of NetworkProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1279,14 +1269,12 @@ class _$NetworkPropsImpl implements _NetworkProps {
                 .equals(other._bypassDomain, _bypassDomain));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, systemProxy,
       const DeepCollectionEquality().hash(_bypassDomain));
 
-  /// Create a copy of NetworkProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$NetworkPropsImplCopyWith<_$NetworkPropsImpl> get copyWith =>
@@ -1312,11 +1300,8 @@ abstract class _NetworkProps implements NetworkProps {
   bool get systemProxy;
   @override
   List<String> get bypassDomain;
-
-  /// Create a copy of NetworkProps
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$NetworkPropsImplCopyWith<_$NetworkPropsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1334,12 +1319,8 @@ mixin _$ProxiesStyle {
   ProxyCardType get cardType => throw _privateConstructorUsedError;
   Map<String, String> get iconMap => throw _privateConstructorUsedError;
 
-  /// Serializes this ProxiesStyle to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ProxiesStyle
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ProxiesStyleCopyWith<ProxiesStyle> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1369,8 +1350,6 @@ class _$ProxiesStyleCopyWithImpl<$Res, $Val extends ProxiesStyle>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ProxiesStyle
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1435,8 +1414,6 @@ class __$$ProxiesStyleImplCopyWithImpl<$Res>
       _$ProxiesStyleImpl _value, $Res Function(_$ProxiesStyleImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ProxiesStyle
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1536,14 +1513,12 @@ class _$ProxiesStyleImpl implements _ProxiesStyle {
             const DeepCollectionEquality().equals(other._iconMap, _iconMap));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, type, sortType, layout,
       iconStyle, cardType, const DeepCollectionEquality().hash(_iconMap));
 
-  /// Create a copy of ProxiesStyle
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ProxiesStyleImplCopyWith<_$ProxiesStyleImpl> get copyWith =>
@@ -1581,11 +1556,8 @@ abstract class _ProxiesStyle implements ProxiesStyle {
   ProxyCardType get cardType;
   @override
   Map<String, String> get iconMap;
-
-  /// Create a copy of ProxiesStyle
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ProxiesStyleImplCopyWith<_$ProxiesStyleImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1601,12 +1573,8 @@ mixin _$ThemeProps {
   bool get prueBlack => throw _privateConstructorUsedError;
   FontFamily get fontFamily => throw _privateConstructorUsedError;
 
-  /// Serializes this ThemeProps to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ThemeProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ThemePropsCopyWith<ThemeProps> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -1634,8 +1602,6 @@ class _$ThemePropsCopyWithImpl<$Res, $Val extends ThemeProps>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ThemeProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1688,8 +1654,6 @@ class __$$ThemePropsImplCopyWithImpl<$Res>
       _$ThemePropsImpl _value, $Res Function(_$ThemePropsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ThemeProps
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -1763,14 +1727,12 @@ class _$ThemePropsImpl implements _ThemeProps {
                 other.fontFamily == fontFamily));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode =>
       Object.hash(runtimeType, primaryColor, themeMode, prueBlack, fontFamily);
 
-  /// Create a copy of ThemeProps
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ThemePropsImplCopyWith<_$ThemePropsImpl> get copyWith =>
@@ -1802,11 +1764,8 @@ abstract class _ThemeProps implements ThemeProps {
   bool get prueBlack;
   @override
   FontFamily get fontFamily;
-
-  /// Create a copy of ThemeProps
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ThemePropsImplCopyWith<_$ThemePropsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

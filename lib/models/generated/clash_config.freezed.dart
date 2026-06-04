@@ -28,12 +28,8 @@ mixin _$Tun {
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding => throw _privateConstructorUsedError;
 
-  /// Serializes this Tun to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Tun
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $TunCopyWith<Tun> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -59,8 +55,6 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Tun
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -115,8 +109,6 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
   __$$TunImplCopyWithImpl(_$TunImpl _value, $Res Function(_$TunImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Tun
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -208,19 +200,12 @@ class _$TunImpl implements _Tun {
                 other.disableIcmpForwarding == disableIcmpForwarding));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      enable,
-      device,
-      stack,
-      const DeepCollectionEquality().hash(_dnsHijack),
-      disableIcmpForwarding);
+  int get hashCode => Object.hash(runtimeType, enable, device, stack,
+      const DeepCollectionEquality().hash(_dnsHijack), disableIcmpForwarding);
 
-  /// Create a copy of Tun
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$TunImplCopyWith<_$TunImpl> get copyWith =>
@@ -240,7 +225,8 @@ abstract class _Tun implements Tun {
       final String device,
       final TunStack stack,
       @JsonKey(name: "dns-hijack") final List<String> dnsHijack,
-      @JsonKey(name: "disable-icmp-forwarding") final bool disableIcmpForwarding}) = _$TunImpl;
+      @JsonKey(name: "disable-icmp-forwarding")
+      final bool disableIcmpForwarding}) = _$TunImpl;
 
   factory _Tun.fromJson(Map<String, dynamic> json) = _$TunImpl.fromJson;
 
@@ -256,11 +242,8 @@ abstract class _Tun implements Tun {
   @override
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding;
-
-  /// Create a copy of Tun
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$TunImplCopyWith<_$TunImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -278,12 +261,8 @@ mixin _$FallbackFilter {
   List<String> get ipcidr => throw _privateConstructorUsedError;
   List<String> get domain => throw _privateConstructorUsedError;
 
-  /// Serializes this FallbackFilter to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of FallbackFilter
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $FallbackFilterCopyWith<FallbackFilter> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -312,8 +291,6 @@ class _$FallbackFilterCopyWithImpl<$Res, $Val extends FallbackFilter>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of FallbackFilter
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -372,8 +349,6 @@ class __$$FallbackFilterImplCopyWithImpl<$Res>
       _$FallbackFilterImpl _value, $Res Function(_$FallbackFilterImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of FallbackFilter
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -479,7 +454,7 @@ class _$FallbackFilterImpl implements _FallbackFilter {
             const DeepCollectionEquality().equals(other._domain, _domain));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -489,9 +464,7 @@ class _$FallbackFilterImpl implements _FallbackFilter {
       const DeepCollectionEquality().hash(_ipcidr),
       const DeepCollectionEquality().hash(_domain));
 
-  /// Create a copy of FallbackFilter
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$FallbackFilterImplCopyWith<_$FallbackFilterImpl> get copyWith =>
@@ -528,11 +501,8 @@ abstract class _FallbackFilter implements FallbackFilter {
   List<String> get ipcidr;
   @override
   List<String> get domain;
-
-  /// Create a copy of FallbackFilter
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$FallbackFilterImplCopyWith<_$FallbackFilterImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -571,12 +541,8 @@ mixin _$Dns {
   @JsonKey(name: "fallback-filter")
   FallbackFilter get fallbackFilter => throw _privateConstructorUsedError;
 
-  /// Serializes this Dns to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $DnsCopyWith<Dns> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -615,8 +581,6 @@ class _$DnsCopyWithImpl<$Res, $Val extends Dns> implements $DnsCopyWith<$Res> {
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -700,8 +664,6 @@ class _$DnsCopyWithImpl<$Res, $Val extends Dns> implements $DnsCopyWith<$Res> {
     ) as $Val);
   }
 
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $FallbackFilterCopyWith<$Res> get fallbackFilter {
@@ -745,8 +707,6 @@ class __$$DnsImplCopyWithImpl<$Res> extends _$DnsCopyWithImpl<$Res, _$DnsImpl>
   __$$DnsImplCopyWithImpl(_$DnsImpl _value, $Res Function(_$DnsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -999,7 +959,7 @@ class _$DnsImpl implements _Dns {
                 other.fallbackFilter == fallbackFilter));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -1019,9 +979,7 @@ class _$DnsImpl implements _Dns {
       const DeepCollectionEquality().hash(_proxyServerNameserver),
       fallbackFilter);
 
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$DnsImplCopyWith<_$DnsImpl> get copyWith =>
@@ -1099,11 +1057,8 @@ abstract class _Dns implements Dns {
   @override
   @JsonKey(name: "fallback-filter")
   FallbackFilter get fallbackFilter;
-
-  /// Create a copy of Dns
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$DnsImplCopyWith<_$DnsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

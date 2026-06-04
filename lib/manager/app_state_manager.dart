@@ -93,7 +93,11 @@ class _AppStateManagerState extends State<AppStateManager>
 
   @override
   void didHaveMemoryPressure() {
-    backgroundMemoryManager.onMemoryPressureMedium();
+    if (backgroundMemoryManager.isInBackground) {
+      backgroundMemoryManager.onMemoryPressureCritical();
+    } else {
+      backgroundMemoryManager.onMemoryPressureMedium();
+    }
   }
 
   @override

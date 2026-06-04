@@ -214,3 +214,10 @@ enum WindowsHelperServiceStatus {
   presence,
   running,
 }
+
+enum BackgroundOptimizationLevel {
+  disabled,
+  light,
+  balanced,
+  aggressive,
+}

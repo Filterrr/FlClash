@@ -3447,6 +3447,78 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  String get backgroundOptimization {
+    return Intl.message(
+      'Background optimization',
+      name: 'backgroundOptimization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationDesc {
+    return Intl.message(
+      'Automatically optimize resource usage when the app is in the background',
+      name: 'backgroundOptimizationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevel {
+    return Intl.message(
+      'Optimization level',
+      name: 'backgroundOptimizationLevel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevelDesc {
+    return Intl.message(
+      'Adjust the intensity of background resource optimization',
+      name: 'backgroundOptimizationLevelDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevel_disabled {
+    return Intl.message(
+      'Disabled',
+      name: 'backgroundOptimizationLevel_disabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevel_light {
+    return Intl.message(
+      'Light',
+      name: 'backgroundOptimizationLevel_light',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevel_balanced {
+    return Intl.message(
+      'Balanced',
+      name: 'backgroundOptimizationLevel_balanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get backgroundOptimizationLevel_aggressive {
+    return Intl.message(
+      'Aggressive',
+      name: 'backgroundOptimizationLevel_aggressive',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
