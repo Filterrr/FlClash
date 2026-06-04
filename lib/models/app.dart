@@ -264,7 +264,9 @@ class AppState with ChangeNotifier {
   set packages(List<Package> value) {
     if (!packageListEquality.equals(_packages, value)) {
       _packages = value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 
@@ -273,7 +275,9 @@ class AppState with ChangeNotifier {
   set providers(List<ExternalProvider> value) {
     if (!externalProviderListEquality.equals(_providers, value)) {
       _providers = value;
-      notifyListeners();
+      if (!isLowMemoryMode) {
+        notifyListeners();
+      }
     }
   }
 
@@ -282,7 +286,9 @@ class AppState with ChangeNotifier {
     final index = _providers.indexWhere((item) => item.name == provider.name);
     if (index == -1) return;
     _providers = List.from(_providers)..[index] = provider;
-    notifyListeners();
+    if (!isLowMemoryMode) {
+      notifyListeners();
+    }
   }
 
   Group? getGroupWithName(String groupName) {
