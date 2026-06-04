@@ -103,15 +103,9 @@ class _WindowContainerState extends State<WindowManager>
 
   @override
   void onWindowBlur() async {
+    // 窗口失焦时保存偏好设置
     globalState.appController.savePreferencesDebounce();
-    backgroundMemoryManager.onWindowBlurred();
     super.onWindowBlur();
-  }
-
-  @override
-  void onWindowFocus() async {
-    backgroundMemoryManager.onWindowFocused();
-    super.onWindowFocus();
   }
 
   @override

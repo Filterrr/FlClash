@@ -244,18 +244,14 @@ class AppState with ChangeNotifier {
   set delayMap(DelayMap value) {
     if (!stringAndIntQMapEquality.equals(_delayMap, value)) {
       _delayMap = value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
   setDelay(Delay delay) {
     if (_delayMap[delay.name] != delay.value) {
       _delayMap = Map.from(_delayMap)..[delay.name] = delay.value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
@@ -264,9 +260,7 @@ class AppState with ChangeNotifier {
   set packages(List<Package> value) {
     if (!packageListEquality.equals(_packages, value)) {
       _packages = value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
@@ -275,9 +269,7 @@ class AppState with ChangeNotifier {
   set providers(List<ExternalProvider> value) {
     if (!externalProviderListEquality.equals(_providers, value)) {
       _providers = value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
@@ -286,9 +278,7 @@ class AppState with ChangeNotifier {
     final index = _providers.indexWhere((item) => item.name == provider.name);
     if (index == -1) return;
     _providers = List.from(_providers)..[index] = provider;
-    if (!isLowMemoryMode) {
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   Group? getGroupWithName(String groupName) {
@@ -334,9 +324,7 @@ class AppFlowingState with ChangeNotifier {
   set runTime(int? value) {
     if (_runTime != value) {
       _runTime = value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 
@@ -385,9 +373,7 @@ class AppFlowingState with ChangeNotifier {
   set totalTraffic(Traffic value) {
     if (_totalTraffic != value) {
       _totalTraffic = value;
-      if (!isLowMemoryMode) {
-        notifyListeners();
-      }
+      notifyListeners();
     }
   }
 }
