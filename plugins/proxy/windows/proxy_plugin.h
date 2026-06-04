@@ -16,16 +16,14 @@ class ProxyPlugin : public flutter::Plugin {
 
   virtual ~ProxyPlugin();
 
-  // Disallow copy and assign.
   ProxyPlugin(const ProxyPlugin&) = delete;
   ProxyPlugin& operator=(const ProxyPlugin&) = delete;
 
-  // Called when a method is called on this plugin's channel from Dart.
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 };
 
-}  // namespace proxy
+}
 
 #endif  // FLUTTER_PLUGIN_PROXY_PLUGIN_H_

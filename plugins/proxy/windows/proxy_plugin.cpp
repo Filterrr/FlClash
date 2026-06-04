@@ -1,6 +1,5 @@
 #include "proxy_plugin.h"
 
-// This must be included before many other Windows headers.
 #include <windows.h>
 
 #include <WinInet.h>
@@ -12,7 +11,6 @@
 #pragma comment(lib, "wininet")
 #pragma comment(lib, "Rasapi32")
 
-// For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 
 #include <flutter/method_channel.h>
@@ -144,7 +142,6 @@ void stopProxy()
 namespace proxy
 {
 
-  // static
   void ProxyPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarWindows *registrar)
   {
@@ -190,4 +187,4 @@ namespace proxy
       result->NotImplemented();
     }
   }
-} // namespace proxy
+}

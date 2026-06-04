@@ -34,16 +34,13 @@ class GlobalState {
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
-  /// 设置流量更新回调，用于后台低内存模式下仅更新VPN通知
   set trafficUpdateCallback(Function? callback) =>
       _trafficUpdateCallback = callback;
 
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      // 后台低内存模式：完全停止UI更新，仅保留核心流量更新
       if (isLowMemoryMode) {
-        // 仅更新VPN前台通知（核心功能）
         if (Platform.isAndroid && isVpnService == true) {
           _trafficUpdateCallback?.call();
         }

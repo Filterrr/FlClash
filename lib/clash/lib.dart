@@ -306,8 +306,6 @@ class ClashLib with ClashInterface {
     clashFFI.forceGc();
   }
 
-  /// Android
-
   startTun(int fd, int port) {
     if (!Platform.isAndroid) return;
     clashFFI.startTUN(fd, port);

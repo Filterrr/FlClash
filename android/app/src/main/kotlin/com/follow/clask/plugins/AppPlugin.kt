@@ -64,7 +64,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         "com.android.vending",
         "com.microsoft",
         "com.apple",
-        "com.zhiliaoapp.musically", // Banned by China
+        "com.zhiliaoapp.musically",
     )
 
     private val chinaAppPrefixList = listOf(

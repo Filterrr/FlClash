@@ -103,7 +103,6 @@ class _WindowContainerState extends State<WindowManager>
 
   @override
   void onWindowBlur() async {
-    // 窗口失焦时保存偏好设置
     globalState.appController.savePreferencesDebounce();
     super.onWindowBlur();
   }
@@ -255,9 +254,6 @@ class _WindowHeaderState extends State<WindowHeader> {
           },
           icon: const Icon(Icons.close),
         ),
-        // const SizedBox(
-        //   width: 8,
-        // ),
       ],
     );
   }

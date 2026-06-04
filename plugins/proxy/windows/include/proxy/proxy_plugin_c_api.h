@@ -17,7 +17,7 @@ FLUTTER_PLUGIN_EXPORT void ProxyPluginCApiRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
-}  // extern "C"
+}
 #endif
 
 #endif  // FLUTTER_PLUGIN_PROXY_PLUGIN_C_API_H_

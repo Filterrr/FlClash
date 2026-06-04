@@ -109,7 +109,6 @@ class ApplicationState extends State<Application> {
         clashCore.closeConnections();
       }
     });
-    // 注册到ResourceController，低内存模式下自动暂停（网络连接变化是核心功能，使用normal优先级）
     resourceController.registerPausableSubscription(
       connectivitySubscription!,
       priority: ResourcePriority.normal,
@@ -129,7 +128,6 @@ class ApplicationState extends State<Application> {
   _initTimer() {
     _cancelTimer();
     timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
-      // 后台低内存模式：完全停止分组更新
       if (isLowMemoryMode) return;
       _timerTickCount++;
       if (isReducedMemoryMode) {

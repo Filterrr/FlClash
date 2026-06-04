@@ -481,7 +481,7 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
                   colorTween = _colorTween.flipped;
                   break;
                 case AnimationStatus.completed:
-                  assert(false); // Unreachable.
+                  assert(false);
                   break;
               }
               assert(colorTween != null);
@@ -504,7 +504,6 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
                         child: Stack(
                           fit: StackFit.passthrough,
                           children: <Widget>[
-                            // Closed child fading out.
                             FittedBox(
                               fit: BoxFit.fitWidth,
                               alignment: Alignment.topLeft,
@@ -520,8 +519,6 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
                                         child: Builder(
                                           key: closedBuilderKey,
                                           builder: (BuildContext context) {
-                                            // Use dummy "open container" callback
-                                            // since we are in the process of opening.
                                             return closedBuilder(
                                                 context, () {});
                                           },
@@ -530,7 +527,6 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
                               ),
                             ),
 
-                            // Open child fading in.
                             FittedBox(
                               fit: BoxFit.fitWidth,
                               alignment: Alignment.topLeft,

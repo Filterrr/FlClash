@@ -67,7 +67,6 @@ class AnimateGrid<T> extends StatelessWidget {
                     itemWidth,
                     itemHeight,
                   );
-                  // 低内存模式下跳过动画，直接定位
                   if (skipAnimation) {
                     return Transform.translate(
                       offset: offset,

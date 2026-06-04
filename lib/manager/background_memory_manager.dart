@@ -18,7 +18,7 @@ class BackgroundMemoryManager {
 
   static const Duration _gcInterval = Duration(seconds: 30);
   static const Duration _memoryMonitorInterval = Duration(seconds: 60);
-  static const int _aggressiveGcThreshold = 60; // 后台60秒后进入激进GC
+  static const int _aggressiveGcThreshold = 60;
 
   bool get isInBackground => _isInBackground;
 
@@ -171,7 +171,6 @@ class BackgroundMemoryManager {
   }
 
   void _requestDartGc() {
-    // 触发Dart VM垃圾回收 - 通过创建并丢弃对象触发GC启发式回收
     try {
       final List<dynamic> discard = [];
       discard.length;

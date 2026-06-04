@@ -17,7 +17,7 @@ class Request {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          return handler.next(options); // 继续请求
+          return handler.next(options);
         },
       ),
     );

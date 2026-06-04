@@ -78,11 +78,6 @@ class Windows {
   }
 
   Future<WindowsHelperServiceStatus> checkService() async {
-    // final qcResult = await Process.run('sc', ['qc', appHelperService]);
-    // final qcOutput = qcResult.stdout.toString();
-    // if (qcResult.exitCode != 0 || !qcOutput.contains(appPath.helperPath)) {
-    //   return WindowsHelperServiceStatus.none;
-    // }
     final result = await Process.run('sc', ['query', appHelperService]);
     if(result.exitCode != 0){
       return WindowsHelperServiceStatus.none;

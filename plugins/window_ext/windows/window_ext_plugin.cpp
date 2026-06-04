@@ -1,9 +1,7 @@
 #include "window_ext_plugin.h"
 
-// This must be included before many other Windows headers.
 #include <windows.h>
 
-// For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 
 #include <flutter/method_channel.h>
@@ -22,7 +20,6 @@ std::unique_ptr<
     channel = nullptr;
 
 
-// static
 void WindowExtPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
   channel =
@@ -85,4 +82,4 @@ void WindowExtPlugin::HandleMethodCall(
   }
 }
 
-}  // namespace window_ext
+}
