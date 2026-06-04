@@ -58,13 +58,6 @@ class FadeThroughBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final realAlignment = alignment ?? Alignment.centerLeft;
-    if (isLowMemoryMode) {
-      return Container(
-        alignment: realAlignment,
-        margin: margin,
-        child: child,
-      );
-    }
     return PageTransitionSwitcher(
       transitionBuilder: (child, animation, secondaryAnimation) {
         return FadeThroughTransition(
@@ -97,9 +90,6 @@ class FadeScaleBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final realAlignment = alignment ?? Alignment.center;
-    if (isLowMemoryMode) {
-      return Align(alignment: realAlignment, child: child);
-    }
     return AnimatedSwitcher(
       duration: commonDuration,
       switchOutCurve: Curves.easeOutBack,
@@ -150,9 +140,7 @@ class _FadeScaleEnterBoxState extends State<FadeScaleEnterBox>
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    if (!isLowMemoryMode) {
-      _controller.forward();
-    }
+    _controller.forward();
   }
 
   @override
@@ -163,9 +151,6 @@ class _FadeScaleEnterBoxState extends State<FadeScaleEnterBox>
 
   @override
   Widget build(BuildContext context) {
-    if (isLowMemoryMode) {
-      return widget.child;
-    }
     return AnimatedBuilder(
       animation: _controller.view,
       builder: (_, child) {
@@ -262,12 +247,6 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
 
   @override
   Widget build(BuildContext context) {
-    if (isLowMemoryMode) {
-      return RotationTransition(
-        turns: AlwaysStoppedAnimation(widget.expand ? 0.5 : 0.0),
-        child: const Icon(Icons.expand_more),
-      );
-    }
     return AnimatedBuilder(
       animation: _animationController.view,
       builder: (_, child) {
