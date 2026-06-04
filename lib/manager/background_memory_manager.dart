@@ -13,12 +13,11 @@ class BackgroundMemoryManager {
   bool _isInitialized = false;
   bool _isInBackground = false;
   Timer? _gcTimer;
-  Timer? _memoryMonitorTimer;
+  Timer? _recoveryTimer;
   int _backgroundDuration = 0;
 
   static const Duration _gcInterval = Duration(seconds: 30);
-  static const Duration _memoryMonitorInterval = Duration(seconds: 60);
-  static const int _aggressiveGcThreshold = 60; // 后台60秒后进入激进GC
+  static const int _aggressiveGcThreshold = 60;
 
   bool get isInBackground => _isInBackground;
 
@@ -47,17 +46,12 @@ class BackgroundMemoryManager {
     _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
-    _startMemoryMonitor();
   }
 
   void onAppResumed() {
     _isInBackground = false;
     _backgroundDuration = 0;
-    exitLowMemoryMode();
-    _restoreGlobalStateTimerFrequency();
-    _resumeAllUpdates();
-    _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _gradualRecovery();
   }
 
   void onWindowHidden() {
@@ -69,17 +63,28 @@ class BackgroundMemoryManager {
     _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
-    _startMemoryMonitor();
   }
 
   void onWindowShown() {
     _isInBackground = false;
     _backgroundDuration = 0;
-    exitLowMemoryMode();
-    _restoreGlobalStateTimerFrequency();
-    _resumeAllUpdates();
-    _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _gradualRecovery();
+  }
+
+  void onWindowBlurred() {
+    if (_isInBackground) return;
+    enterReducedMemoryMode();
+    _reduceGlobalStateTimerFrequency();
+    _requestGc();
+  }
+
+  void onWindowFocused() {
+    if (_isInBackground) return;
+    if (lowMemoryModeNotifier.value != LowMemoryMode.low) {
+      exitLowMemoryMode();
+      _restoreGlobalStateTimerFrequency();
+      _resumeAllUpdates();
+    }
   }
 
   void onWindowMinimized() {
@@ -91,17 +96,12 @@ class BackgroundMemoryManager {
     _clearNonEssentialCaches();
     _requestGc();
     _startBackgroundGc();
-    _startMemoryMonitor();
   }
 
   void onWindowRestored() {
     _isInBackground = false;
     _backgroundDuration = 0;
-    exitLowMemoryMode();
-    _restoreGlobalStateTimerFrequency();
-    _resumeAllUpdates();
-    _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _gradualRecovery();
   }
 
   void onMemoryPressureLow() {
@@ -142,7 +142,18 @@ class BackgroundMemoryManager {
   }
 
   void _resumeAllUpdates() {
-    resourceController.forceClearImageCache();
+    resourceController.resumeAllTimers();
+    resourceController.resumeAllSubscriptions();
+    _restoreGlobalStateTimerFrequency();
+    _triggerDataRefresh();
+  }
+
+  void _triggerDataRefresh() {
+    if (!globalState.isStart) return;
+    final appController = globalState.appController;
+    appController.updateRunTime();
+    appController.updateTraffic();
+    appController.updateGroupDebounce();
   }
 
   void _clearNonEssentialCaches() {
@@ -153,7 +164,6 @@ class BackgroundMemoryManager {
     _stopBackgroundGc();
     _gcTimer = Timer.periodic(_gcInterval, (_) {
       _requestGc();
-      _requestDartGc();
       _backgroundDuration += _gcInterval.inSeconds;
       if (_backgroundDuration >= _aggressiveGcThreshold) {
         _performAggressiveCleanup();
@@ -170,12 +180,28 @@ class BackgroundMemoryManager {
     clashCore.requestGc();
   }
 
-  void _requestDartGc() {
-    // 触发Dart VM垃圾回收 - 通过创建并丢弃对象触发GC启发式回收
-    try {
-      final List<dynamic> discard = [];
-      discard.length;
-    } catch (_) {}
+  void _gradualRecovery() {
+    _stopBackgroundGc();
+    _cancelRecoveryTimer();
+    final currentMode = lowMemoryModeNotifier.value;
+    if (currentMode == LowMemoryMode.low) {
+      lowMemoryModeNotifier.value = LowMemoryMode.reduced;
+      _restoreGlobalStateTimerFrequency();
+      _recoveryTimer = Timer(const Duration(seconds: 2), () {
+        lowMemoryModeNotifier.value = LowMemoryMode.normal;
+        _resumeAllUpdates();
+        _recoveryTimer = null;
+      });
+    } else if (currentMode == LowMemoryMode.reduced) {
+      lowMemoryModeNotifier.value = LowMemoryMode.normal;
+      _restoreGlobalStateTimerFrequency();
+      _resumeAllUpdates();
+    }
+  }
+
+  void _cancelRecoveryTimer() {
+    _recoveryTimer?.cancel();
+    _recoveryTimer = null;
   }
 
   void _performAggressiveCleanup() {
@@ -209,30 +235,9 @@ class BackgroundMemoryManager {
     }
   }
 
-  void _startMemoryMonitor() {
-    _stopMemoryMonitor();
-    _memoryMonitorTimer =
-        Timer.periodic(_memoryMonitorInterval, (_) {
-      if (_isInBackground) {
-        _requestGc();
-        _requestDartGc();
-        resourceController.forceClearImageCache();
-        _backgroundDuration += _memoryMonitorInterval.inSeconds;
-        if (_backgroundDuration >= _aggressiveGcThreshold) {
-          _performAggressiveCleanup();
-        }
-      }
-    });
-  }
-
-  void _stopMemoryMonitor() {
-    _memoryMonitorTimer?.cancel();
-    _memoryMonitorTimer = null;
-  }
-
   void dispose() {
     _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _cancelRecoveryTimer();
     resourceController.dispose();
     _isInitialized = false;
   }
