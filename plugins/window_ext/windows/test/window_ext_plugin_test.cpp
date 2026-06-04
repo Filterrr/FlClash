@@ -1,3 +1,5 @@
+#if __has_include(<flutter/method_call.h>)
+
 #include <flutter/method_call.h>
 #include <flutter/method_result_functions.h>
 #include <flutter/standard_method_codec.h>
@@ -37,4 +39,7 @@ TEST(WindowExtPlugin, GetPlatformVersion) {
 }
 
 }
+
 }
+
+#endif
