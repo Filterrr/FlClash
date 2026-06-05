@@ -1,3 +1,4 @@
+#if __has_include(<windows.h>)
 #include "win32_window.h"
 #include "app_links/app_links_plugin_c_api.h"
 
@@ -340,3 +341,5 @@ void Win32Window::UpdateTheme(HWND const window)
                           &enable_dark_mode, sizeof(enable_dark_mode));
   }
 }
+
+#endif  // __has_include(<windows.h>)

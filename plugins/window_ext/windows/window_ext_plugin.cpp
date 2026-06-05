@@ -1,3 +1,4 @@
+#if __has_include(<flutter/method_channel.h>)
 #include "window_ext_plugin.h"
 
 #include <windows.h>
@@ -83,3 +84,5 @@ void WindowExtPlugin::HandleMethodCall(
 }
 
 }
+
+#endif  // __has_include(<flutter/method_channel.h>)

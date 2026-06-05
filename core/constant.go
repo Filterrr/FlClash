@@ -73,6 +73,7 @@ const (
 	stopLogMethod                  Method = "stopLog"
 	startListenerMethod            Method = "startListener"
 	stopListenerMethod             Method = "stopListener"
+	getMemoryStatsMethod           Method = "getMemoryStats"
 )
 
 type Method string

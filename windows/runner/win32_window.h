@@ -1,6 +1,8 @@
 #ifndef RUNNER_WIN32_WINDOW_H_
 #define RUNNER_WIN32_WINDOW_H_
 
+#if __has_include(<windows.h>)
+
 #include <windows.h>
 
 #include <functional>
@@ -72,5 +74,7 @@ private:
 
   HWND child_content_ = nullptr;
 };
+
+#endif  // __has_include(<windows.h>)
 
 #endif  // RUNNER_WIN32_WINDOW_H_

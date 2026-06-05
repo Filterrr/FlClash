@@ -1,3 +1,4 @@
+#if __has_include(<flutter/dart_project.h>)
 #include "flutter_window.h"
 
 #include <optional>
@@ -62,3 +63,5 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
 }
+
+#endif  // __has_include(<flutter/dart_project.h>)

@@ -338,5 +338,13 @@
   "disableIcmpForwarding": "Disable ICMP forwarding",
   "disableIcmpForwardingDesc": "Prevent ICMP loopback issues, ping will not show real latency",
   "runtimeConfig": "Runtime Config",
-  "runtimeConfigDesc": "View the current running configuration in Clash Meta format"
+  "runtimeConfigDesc": "View the current running configuration in Clash Meta format",
+  "backgroundOptimization": "Background optimization",
+  "backgroundOptimizationDesc": "Automatically optimize resource usage when the app is in the background",
+  "backgroundOptimizationLevel": "Optimization level",
+  "backgroundOptimizationLevelDesc": "Adjust the intensity of background resource optimization",
+  "backgroundOptimizationLevel_disabled": "Disabled",
+  "backgroundOptimizationLevel_light": "Light",
+  "backgroundOptimizationLevel_balanced": "Balanced",
+  "backgroundOptimizationLevel_aggressive": "Aggressive"
 }

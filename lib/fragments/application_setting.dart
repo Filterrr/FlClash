@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -203,6 +204,60 @@ class ApplicationSettingFragment extends StatelessWidget {
       ),
       const CloseConnectionsSwitch(),
       const UsageSwitch(),
+      Selector<Config, bool>(
+        selector: (_, config) => config.appSetting.backgroundOptimization,
+        builder: (_, backgroundOptimization, child) {
+          return ListItem.switchItem(
+            title: Text(appLocalizations.backgroundOptimization),
+            subtitle: Text(appLocalizations.backgroundOptimizationDesc),
+            delegate: SwitchDelegate(
+              value: backgroundOptimization,
+              onChanged: (bool value) {
+                final config = globalState.appController.config;
+                config.appSetting = config.appSetting.copyWith(
+                  backgroundOptimization: value,
+                );
+              },
+            ),
+          );
+        },
+      ),
+      Selector<Config, ({bool enabled, BackgroundOptimizationLevel level})>(
+        selector: (_, config) => (
+          enabled: config.appSetting.backgroundOptimization,
+          level: config.appSetting.backgroundOptimizationLevel,
+        ),
+        builder: (_, state, child) {
+          return ListItem.options(
+            title: Text(appLocalizations.backgroundOptimizationLevel),
+            subtitle: Text(appLocalizations.backgroundOptimizationLevelDesc),
+            delegate: OptionsDelegate<BackgroundOptimizationLevel>(
+              title: appLocalizations.backgroundOptimizationLevel,
+              options: BackgroundOptimizationLevel.values,
+              value: state.enabled ? state.level : BackgroundOptimizationLevel.disabled,
+              textBuilder: (level) => switch (level) {
+                BackgroundOptimizationLevel.disabled =>
+                  appLocalizations.backgroundOptimizationLevel_disabled,
+                BackgroundOptimizationLevel.light =>
+                  appLocalizations.backgroundOptimizationLevel_light,
+                BackgroundOptimizationLevel.balanced =>
+                  appLocalizations.backgroundOptimizationLevel_balanced,
+                BackgroundOptimizationLevel.aggressive =>
+                  appLocalizations.backgroundOptimizationLevel_aggressive,
+              },
+              onChanged: (BackgroundOptimizationLevel? value) {
+                if (value != null) {
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    backgroundOptimizationLevel: value,
+                    backgroundOptimization: value != BackgroundOptimizationLevel.disabled,
+                  );
+                }
+              },
+            ),
+          );
+        },
+      ),
       Selector<Config, bool>(
         selector: (_, config) => config.appSetting.autoCheckUpdate,
         builder: (_, autoCheckUpdate, child) {

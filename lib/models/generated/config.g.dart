@@ -67,6 +67,11 @@ _$AppSettingImpl _$$AppSettingImplFromJson(Map<String, dynamic> json) =>
       disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
       hidden: json['hidden'] as bool? ?? false,
+      backgroundOptimization: json['backgroundOptimization'] as bool? ?? true,
+      backgroundOptimizationLevel: $enumDecodeNullable(
+              _$BackgroundOptimizationLevelEnumMap,
+              json['backgroundOptimizationLevel']) ??
+          BackgroundOptimizationLevel.balanced,
     );
 
 Map<String, dynamic> _$$AppSettingImplToJson(_$AppSettingImpl instance) =>
@@ -85,7 +90,17 @@ Map<String, dynamic> _$$AppSettingImplToJson(_$AppSettingImpl instance) =>
       'disclaimerAccepted': instance.disclaimerAccepted,
       'minimizeOnExit': instance.minimizeOnExit,
       'hidden': instance.hidden,
+      'backgroundOptimization': instance.backgroundOptimization,
+      'backgroundOptimizationLevel': _$BackgroundOptimizationLevelEnumMap[
+          instance.backgroundOptimizationLevel]!,
     };
+
+const _$BackgroundOptimizationLevelEnumMap = {
+  BackgroundOptimizationLevel.disabled: 'disabled',
+  BackgroundOptimizationLevel.light: 'light',
+  BackgroundOptimizationLevel.balanced: 'balanced',
+  BackgroundOptimizationLevel.aggressive: 'aggressive',
+};
 
 _$AccessControlImpl _$$AccessControlImplFromJson(Map<String, dynamic> json) =>
     _$AccessControlImpl(

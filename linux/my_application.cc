@@ -1,3 +1,5 @@
+#if __has_include(<gtk/gtk.h>)
+
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
@@ -88,4 +90,7 @@ static void my_application_init(MyApplication* self) {}
 MyApplication* my_application_new() {
    return MY_APPLICATION(g_object_new(my_application_get_type(),
                                       "application-id", APPLICATION_ID,
-                                      nullptr)); }
+                                      nullptr));
+}
+
+#endif

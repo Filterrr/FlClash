@@ -109,8 +109,7 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
               ?.map((e) => e as String)
               .toList() ??
           const ["any:53", "tcp://any:53"],
-      disableIcmpForwarding:
-          json['disable-icmp-forwarding'] as bool? ?? false,
+      disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{

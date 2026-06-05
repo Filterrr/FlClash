@@ -1,3 +1,4 @@
+#if __has_include(<flutter/method_channel.h>)
 #include "proxy_plugin.h"
 
 #include <windows.h>
@@ -188,3 +189,5 @@ namespace proxy
     }
   }
 }
+
+#endif  // __has_include(<flutter/method_channel.h>)

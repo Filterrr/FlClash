@@ -153,6 +153,22 @@ class MessageLookup extends MessageLookupByLibrary {
             "Runtime Config"),
         "runtimeConfigDesc": MessageLookupByLibrary.simpleMessage(
             "View the current running configuration in Clash Meta format"),
+        "backgroundOptimization": MessageLookupByLibrary.simpleMessage(
+            "Background optimization"),
+        "backgroundOptimizationDesc": MessageLookupByLibrary.simpleMessage(
+            "Automatically optimize resource usage when the app is in the background"),
+        "backgroundOptimizationLevel": MessageLookupByLibrary.simpleMessage(
+            "Optimization level"),
+        "backgroundOptimizationLevelDesc": MessageLookupByLibrary.simpleMessage(
+            "Adjust the intensity of background resource optimization"),
+        "backgroundOptimizationLevel_disabled": MessageLookupByLibrary.simpleMessage(
+            "Disabled"),
+        "backgroundOptimizationLevel_light": MessageLookupByLibrary.simpleMessage(
+            "Light"),
+        "backgroundOptimizationLevel_balanced": MessageLookupByLibrary.simpleMessage(
+            "Balanced"),
+        "backgroundOptimizationLevel_aggressive": MessageLookupByLibrary.simpleMessage(
+            "Aggressive"),
         "disclaimer": MessageLookupByLibrary.simpleMessage("Disclaimer"),
         "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
             "This software is only used for non-commercial purposes such as learning exchanges and scientific research. It is strictly prohibited to use this software for commercial purposes. Any commercial activity, if any, has nothing to do with this software."),

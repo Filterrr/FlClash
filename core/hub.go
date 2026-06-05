@@ -17,6 +17,7 @@ import (
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 	"runtime"
+	"runtime/debug"
 	"sort"
 	"time"
 )
@@ -57,10 +58,28 @@ func handleGetIsInit() bool {
 	return isInit
 }
 
+func logMemoryStats(prefix string) {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	log.Infoln("[MEM] %s | Alloc=%dKB | TotalAlloc=%dKB | Sys=%dKB | HeapAlloc=%dKB | HeapReleased=%dKB | NumGC=%d | NumForcedGC=%d",
+		prefix,
+		m.Alloc/1024,
+		m.TotalAlloc/1024,
+		m.Sys/1024,
+		m.HeapAlloc/1024,
+		m.HeapReleased/1024,
+		m.NumGC,
+		m.NumForcedGC,
+	)
+}
+
 func handleForceGc() {
 	go func() {
 		log.Infoln("[APP] request force GC")
+		logMemoryStats("before-GC")
 		runtime.GC()
+		debug.FreeOSMemory()
+		logMemoryStats("after-FreeOSMemory")
 	}()
 }
 
@@ -68,6 +87,7 @@ func handleShutdown() bool {
 	stopListeners()
 	executor.Shutdown()
 	runtime.GC()
+	debug.FreeOSMemory()
 	isInit = false
 	return true
 }
@@ -141,7 +161,6 @@ func handleChangeProxy(data string, fn func(string string)) {
 		}
 
 		fn("")
-		return
 	}()
 }
 
@@ -401,6 +420,31 @@ func handleStopLog() {
 		log.UnSubscribe(logSubscriber)
 		logSubscriber = nil
 	}
+}
+
+func handleGetMemoryStats() string {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	stats := map[string]uint64{
+		"alloc":        m.Alloc,
+		"totalAlloc":   m.TotalAlloc,
+		"sys":          m.Sys,
+		"heapAlloc":    m.HeapAlloc,
+		"heapSys":      m.HeapSys,
+		"heapReleased": m.HeapReleased,
+		"heapIdle":     m.HeapIdle,
+		"heapInUse":    m.HeapInuse,
+		"stackInUse":   m.StackInuse,
+		"stackSys":     m.StackSys,
+		"numGC":        uint64(m.NumGC),
+		"numForcedGC":  uint64(m.NumForcedGC),
+		"gcCPUFraction": uint64(m.GCCPUFraction * 1e6),
+	}
+	data, err := json.Marshal(stats)
+	if err != nil {
+		return "{}"
+	}
+	return string(data)
 }
 
 func init() {
