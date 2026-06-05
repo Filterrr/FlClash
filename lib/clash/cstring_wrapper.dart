@@ -12,7 +12,7 @@ class CStringWrapper implements Finalizable {
   final Pointer<Char> _ptr;
   final void Function(Pointer<Char>) _freeFn;
   static NativeFinalizer? _finalizerCache;
-  static Pointer<NativeFunction<Void Function(Pointer<Char>)>>? _freeCStringNativePtr;
+  static Pointer<NativeFinalizerFunction>? _freeCStringNativePtr;
 
   CStringWrapper(this._ptr, this._freeFn) {
     _ensureFinalizer();
@@ -29,7 +29,7 @@ class CStringWrapper implements Finalizable {
   static void init(
     Pointer<NativeFunction<Void Function(Pointer<Char>)>> freeCStringNativePtr,
   ) {
-    _freeCStringNativePtr = freeCStringNativePtr;
+    _freeCStringNativePtr = freeCStringNativePtr.cast();
   }
 
   /// Reads the C string as a Dart [String] and frees the native memory.

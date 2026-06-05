@@ -171,9 +171,4 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
     }
     super.onTraffic(traffic);
   }
-
-  @override
-  void onMemory(dynamic memoryStats) {
-    super.onMemory(memoryStats);
-  }
 }

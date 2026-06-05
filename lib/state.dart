@@ -28,14 +28,10 @@ class GlobalState {
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
   List<Function> updateFunctionLists = [];
-  Function? _trafficUpdateCallback;
   bool lastTunEnable = false;
   int? lastProfileModified;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
-
-  set trafficUpdateCallback(Function? callback) =>
-      _trafficUpdateCallback = callback;
 
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
