@@ -161,7 +161,6 @@ func handleChangeProxy(data string, fn func(string string)) {
 		}
 
 		fn("")
-		return
 	}()
 }
 

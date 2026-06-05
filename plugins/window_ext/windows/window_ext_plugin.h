@@ -1,6 +1,8 @@
 #ifndef FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_H_
 #define FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_H_
 
+#if __has_include(<flutter/method_channel.h>)
+
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 
@@ -35,5 +37,7 @@ class WindowExtPlugin : public flutter::Plugin {
 };
 
 }
+
+#endif  // __has_include(<flutter/method_channel.h>)
 
 #endif  // FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_H_

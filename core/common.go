@@ -35,7 +35,7 @@ var (
 	isRunning = false
 	runLock   sync.Mutex
 	ips       = []string{"ipinfo.io", "ipapi.co", "api.ip.sb", "ipwho.is"}
-	b, _      = batch.New[bool](context.Background(), batch.WithConcurrencyNum[bool](50))
+	b, _      = batch.New(context.Background(), batch.WithConcurrencyNum[bool](50))
 )
 
 type ExternalProviders []ExternalProvider
@@ -124,9 +124,8 @@ func getExternalProvidersRaw() map[string]cp.Provider {
 }
 
 func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
-	switch p.(type) {
+	switch psp := p.(type) {
 	case *provider.ProxySetProvider:
-		psp := p.(*provider.ProxySetProvider)
 		return &ExternalProvider{
 			Name:             psp.Name(),
 			Type:             psp.Type().String(),
@@ -152,17 +151,15 @@ func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
 }
 
 func sideUpdateExternalProvider(p cp.Provider, bytes []byte) error {
-	switch p.(type) {
+	switch psp := p.(type) {
 	case *provider.ProxySetProvider:
-		psp := p.(*provider.ProxySetProvider)
 		_, _, err := psp.SideUpdate(bytes)
 		if err == nil {
 			return err
 		}
 		return nil
-	case rp.RuleSetProvider:
-		rsp := p.(*rp.RuleSetProvider)
-		_, _, err := rsp.SideUpdate(bytes)
+	case *rp.RuleSetProvider:
+		_, _, err := psp.SideUpdate(bytes)
 		if err == nil {
 			return err
 		}

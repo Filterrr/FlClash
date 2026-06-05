@@ -1,6 +1,8 @@
 #ifndef RUNNER_FLUTTER_WINDOW_H_
 #define RUNNER_FLUTTER_WINDOW_H_
 
+#if __has_include(<flutter/dart_project.h>)
+
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 
@@ -24,5 +26,7 @@ class FlutterWindow : public Win32Window {
 
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 };
+
+#endif  // __has_include(<flutter/dart_project.h>)
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

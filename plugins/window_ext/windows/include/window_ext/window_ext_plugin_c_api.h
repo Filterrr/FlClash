@@ -1,6 +1,8 @@
 #ifndef FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_C_API_H_
 #define FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_C_API_H_
 
+#if __has_include(<flutter_plugin_registrar.h>)
+
 #include <flutter_plugin_registrar.h>
 
 #ifdef FLUTTER_PLUGIN_IMPL
@@ -19,5 +21,7 @@ FLUTTER_PLUGIN_EXPORT void WindowExtPluginCApiRegisterWithRegistrar(
 #if defined(__cplusplus)
 }
 #endif
+
+#endif  // __has_include(<flutter_plugin_registrar.h>)
 
 #endif  // FLUTTER_PLUGIN_WINDOW_EXT_PLUGIN_C_API_H_
