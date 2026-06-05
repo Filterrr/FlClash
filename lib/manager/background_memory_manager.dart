@@ -85,10 +85,10 @@ class BackgroundMemoryManager {
   int _backgroundDuration = 0;
   final _PerformanceStats _perfStats = _PerformanceStats();
 
-  static const Duration _gcInterval = Duration(seconds: 30);
-  static const Duration _memoryMonitorInterval = Duration(seconds: 60);
-  static const Duration _escalationDelay = Duration(seconds: 30);
-  static const int _aggressiveGcThreshold = 60;
+  static const Duration _gcInterval = Duration(seconds: 300);
+  static const Duration _memoryMonitorInterval = Duration(seconds: 600);
+  static const Duration _escalationDelay = Duration(seconds: 300);
+  static const int _aggressiveGcThreshold = 600;
 
   bool get isInBackground => _isInBackground;
 
