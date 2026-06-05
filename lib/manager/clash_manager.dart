@@ -150,7 +150,8 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   }
 
   @override
-  void onTraffic(Traffic traffic) {
+  void onTraffic(Traffic traffic, {Traffic? totalTraffic}) {
+    if (isLowMemoryMode) return;
     final appController = globalState.appController;
     if (Platform.isAndroid && globalState.isVpnService == true) {
       vpn?.startForeground(
@@ -159,16 +160,10 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
       );
     } else {
       appController.appFlowingState.addTraffic(traffic);
-      final onlyProxy = appController.config.appSetting.onlyProxy;
-      if (Platform.isAndroid) {
-        appController.appFlowingState.totalTraffic =
-            Traffic.fromMap(clashCore.getTotalTrafficSync(onlyProxy));
-      } else {
-        clashCore.getTotalTraffic(onlyProxy).then((totalTraffic) {
-          appController.appFlowingState.totalTraffic = totalTraffic;
-        });
+      if (totalTraffic != null) {
+        appController.appFlowingState.totalTraffic = totalTraffic;
       }
     }
-    super.onTraffic(traffic);
+    super.onTraffic(traffic, totalTraffic: totalTraffic);
   }
 }

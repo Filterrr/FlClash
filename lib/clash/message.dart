@@ -32,12 +32,14 @@ class ClashMessage {
               listener.onLoaded(m.data);
               break;
             case AppMessageType.traffic:
-              listener.onTraffic(Traffic.fromMap(
-                Map<String, int>.from(m.data),
-              ));
-              break;
-            case AppMessageType.memory:
-              listener.onMemory(m.data);
+              final data = m.data as Map<String, dynamic>;
+              final traffic = Traffic.fromMap(
+                Map<String, int>.from(data['current']),
+              );
+              final totalTraffic = Traffic.fromMap(
+                Map<String, int>.from(data['total']),
+              );
+              listener.onTraffic(traffic, totalTraffic: totalTraffic);
               break;
           }
         }

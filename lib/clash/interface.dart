@@ -47,6 +47,10 @@ mixin ClashInterface {
 
   Map<String, int> getTotalTrafficSync(bool value);
 
+  pauseTrafficPush();
+
+  resumeTrafficPush();
+
   resetTraffic();
 
   startLog();

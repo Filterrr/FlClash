@@ -2457,6 +2457,24 @@ class ClashFFI {
       _lookup<ffi.NativeFunction<ffi.Void Function()>>('forceGc');
   late final _forceGc = _forceGcPtr.asFunction<void Function()>();
 
+  void pauseTrafficPush() {
+    return _pauseTrafficPush();
+  }
+
+  late final _pauseTrafficPushPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('pauseTrafficPush');
+  late final _pauseTrafficPush =
+      _pauseTrafficPushPtr.asFunction<void Function()>();
+
+  void resumeTrafficPush() {
+    return _resumeTrafficPush();
+  }
+
+  late final _resumeTrafficPushPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('resumeTrafficPush');
+  late final _resumeTrafficPush =
+      _resumeTrafficPushPtr.asFunction<void Function()>();
+
   void validateConfig(
     ffi.Pointer<ffi.Char> s,
     int port,

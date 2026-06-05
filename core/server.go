@@ -160,6 +160,12 @@ func handleAction(action *Action) {
 	case getMemoryStatsMethod:
 		action.callback(handleGetMemoryStats())
 		return
+	case pauseTrafficPushMethod:
+		handlePauseTrafficPush()
+		return
+	case resumeTrafficPushMethod:
+		handleResumeTrafficPush()
+		return
 	}
 
 }

@@ -299,6 +299,16 @@ class ClashLib with ClashInterface {
   }
 
   @override
+  pauseTrafficPush() {
+    clashFFI.pauseTrafficPush();
+  }
+
+  @override
+  resumeTrafficPush() {
+    clashFFI.resumeTrafficPush();
+  }
+
+  @override
   void startLog() {
     clashFFI.startLog();
   }

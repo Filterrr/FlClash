@@ -74,6 +74,8 @@ const (
 	startListenerMethod            Method = "startListener"
 	stopListenerMethod             Method = "stopListener"
 	getMemoryStatsMethod           Method = "getMemoryStats"
+	pauseTrafficPushMethod         Method = "pauseTrafficPush"
+	resumeTrafficPushMethod        Method = "resumeTrafficPush"
 )
 
 type Method string
@@ -109,6 +111,5 @@ const (
 	RequestMessage MessageType = "request"
 	StartedMessage MessageType = "started"
 	LoadedMessage  MessageType = "loaded"
-	TrafficMessage MessageType = "traffic"
-	MemoryMessage  MessageType = "memory"
+	TrafficMessage  MessageType = "traffic"
 )

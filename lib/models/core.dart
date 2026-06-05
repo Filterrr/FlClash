@@ -20,9 +20,7 @@ abstract mixin class AppMessageListener {
 
   void onLoaded(String providerName) {}
 
-  void onTraffic(Traffic traffic) {}
-
-  void onMemory(dynamic memoryStats) {}
+  void onTraffic(Traffic traffic, {Traffic? totalTraffic}) {}
 }
 
 abstract mixin class ServiceMessageListener {

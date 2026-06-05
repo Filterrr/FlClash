@@ -185,3 +185,13 @@ func stopLog() {
 func getMemoryStats() *C.char {
 	return C.CString(handleGetMemoryStats())
 }
+
+//export pauseTrafficPush
+func pauseTrafficPush() {
+	handlePauseTrafficPush()
+}
+
+//export resumeTrafficPush
+func resumeTrafficPush() {
+	handleResumeTrafficPush()
+}

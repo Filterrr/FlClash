@@ -29,6 +29,7 @@ var (
 	logSubscriber     observable.Subscription[log.Event]
 	currentConfig     *config.Config
 	trafficTicker     *time.Ticker
+	trafficPauseCh    chan struct{}
 	trafficStopCh     chan struct{}
 )
 
@@ -456,21 +457,27 @@ func handleStartTrafficPush() {
 		return
 	}
 	trafficStopCh = make(chan struct{})
+	trafficPauseCh = make(chan struct{}, 1)
 	trafficTicker = time.NewTicker(1 * time.Second)
 	go func() {
+		paused := false
 		for {
 			select {
 			case <-trafficTicker.C:
+				if paused {
+					continue
+				}
 				trafficData := json.RawMessage(handleGetTraffic(false))
+				totalTrafficData := json.RawMessage(handleGetTotalTraffic(false))
 				SendMessage(Message{
 					Type: TrafficMessage,
-					Data: trafficData,
+					Data: map[string]json.RawMessage{
+						"current": trafficData,
+						"total":   totalTrafficData,
+					},
 				})
-				memoryData := json.RawMessage(handleGetMemoryStats())
-				SendMessage(Message{
-					Type: MemoryMessage,
-					Data: memoryData,
-				})
+			case <-trafficPauseCh:
+				paused = !paused
 			case <-trafficStopCh:
 				trafficTicker.Stop()
 				trafficTicker = nil
@@ -480,10 +487,29 @@ func handleStartTrafficPush() {
 	}()
 }
 
+func handlePauseTrafficPush() {
+	if trafficPauseCh != nil {
+		select {
+		case trafficPauseCh <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func handleResumeTrafficPush() {
+	if trafficPauseCh != nil {
+		select {
+		case trafficPauseCh <- struct{}{}:
+		default:
+		}
+	}
+}
+
 func handleStopTrafficPush() {
 	if trafficStopCh != nil {
 		close(trafficStopCh)
 		trafficStopCh = nil
+		trafficPauseCh = nil
 	}
 }
 
