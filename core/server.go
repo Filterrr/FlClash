@@ -157,6 +157,9 @@ func handleAction(action *Action) {
 	case stopListenerMethod:
 		action.callback(handleStopListener())
 		return
+	case getMemoryStatsMethod:
+		action.callback(handleGetMemoryStats())
+		return
 	}
 
 }

@@ -180,3 +180,8 @@ func startLog() {
 func stopLog() {
 	handleStopLog()
 }
+
+//export getMemoryStats
+func getMemoryStats() *C.char {
+	return C.CString(handleGetMemoryStats())
+}

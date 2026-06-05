@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 )
@@ -387,6 +388,7 @@ func applyConfig(rawConfig *config.RawConfig) error {
 	} else {
 		handleCloseConnectionsUnLock()
 		runtime.GC()
+		debug.FreeOSMemory()
 		hub.ApplyConfig(currentConfig)
 		patchSelectGroup()
 	}
