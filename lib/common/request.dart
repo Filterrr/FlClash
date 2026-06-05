@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -78,23 +79,61 @@ class Request {
   };
 
   Future<IpInfo?> checkIp({CancelToken? cancelToken}) async {
+    final completer = Completer<IpInfo?>();
+    final individualTokens = <CancelToken>[];
+    var completedCount = 0;
+    final totalCount = _ipInfoSources.length;
+
     for (final source in _ipInfoSources.entries) {
-      try {
-        final response = await _dio
-            .get<Map<String, dynamic>>(source.key, cancelToken: cancelToken)
-            .timeout(httpTimeoutDuration);
-        if (response.statusCode != 200 || response.data == null) {
-          continue;
+      final token = CancelToken();
+      individualTokens.add(token);
+
+      if (cancelToken != null) {
+        cancelToken.whenCancel.then((_) {
+          if (!token.isCancelled) token.cancel();
+        });
+      }
+
+      _dio
+          .get<Map<String, dynamic>>(source.key, cancelToken: token)
+          .timeout(httpTimeoutDuration)
+          .then((response) {
+        if (!completer.isCompleted &&
+            response.statusCode == 200 &&
+            response.data != null) {
+          for (final t in individualTokens) {
+            if (!t.isCancelled) t.cancel();
+          }
+          completer.complete(source.value(response.data!));
         }
-        return source.value(response.data!);
-      } catch (e) {
+      }).catchError((e) {
         if (e is DioException && e.type == DioExceptionType.cancel) {
-          throw "cancelled";
+          if (!completer.isCompleted) {
+            completedCount++;
+            if (completedCount >= totalCount) {
+              completer.complete(null);
+            }
+          }
+          return;
         }
         debugPrint("checkIp error ===> $e");
-      }
+        if (!completer.isCompleted) {
+          completedCount++;
+          if (completedCount >= totalCount) {
+            completer.complete(null);
+          }
+        }
+      });
     }
-    return null;
+
+    try {
+      return await completer.future;
+    } catch (e) {
+      if (e.toString() == "cancelled") {
+        rethrow;
+      }
+      return null;
+    }
   }
 
   Future<bool> pingHelper() async {
