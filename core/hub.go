@@ -30,6 +30,7 @@ var (
 	currentConfig     *config.Config
 	trafficTicker     *time.Ticker
 	trafficPauseCh    chan struct{}
+	trafficResumeCh   chan struct{}
 	trafficStopCh     chan struct{}
 )
 
@@ -458,6 +459,7 @@ func handleStartTrafficPush() {
 	}
 	trafficStopCh = make(chan struct{})
 	trafficPauseCh = make(chan struct{}, 1)
+	trafficResumeCh = make(chan struct{}, 1)
 	trafficTicker = time.NewTicker(1 * time.Second)
 	go func() {
 		paused := false
@@ -477,7 +479,9 @@ func handleStartTrafficPush() {
 					},
 				})
 			case <-trafficPauseCh:
-				paused = !paused
+				paused = true
+			case <-trafficResumeCh:
+				paused = false
 			case <-trafficStopCh:
 				trafficTicker.Stop()
 				trafficTicker = nil
@@ -497,9 +501,9 @@ func handlePauseTrafficPush() {
 }
 
 func handleResumeTrafficPush() {
-	if trafficPauseCh != nil {
+	if trafficResumeCh != nil {
 		select {
-		case trafficPauseCh <- struct{}{}:
+		case trafficResumeCh <- struct{}{}:
 		default:
 		}
 	}
@@ -510,6 +514,7 @@ func handleStopTrafficPush() {
 		close(trafficStopCh)
 		trafficStopCh = nil
 		trafficPauseCh = nil
+		trafficResumeCh = nil
 	}
 }
 
