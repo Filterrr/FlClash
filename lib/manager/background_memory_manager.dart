@@ -87,7 +87,7 @@ class BackgroundMemoryManager {
 
   static const Duration _gcInterval = Duration(seconds: 300);
   static const Duration _memoryMonitorInterval = Duration(seconds: 600);
-  static const Duration _escalationDelay = Duration(seconds: 300);
+  static const Duration _escalationDelay = Duration(seconds: 120);
   static const int _aggressiveGcThreshold = 600;
 
   bool get isInBackground => _isInBackground;
