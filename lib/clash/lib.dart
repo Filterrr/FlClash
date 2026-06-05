@@ -9,6 +9,7 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/models/models.dart';
 
 import 'generated/clash_ffi.dart';
+import 'cstring_wrapper.dart';
 import 'interface.dart';
 
 class ClashLib with ClashInterface {
@@ -24,6 +25,9 @@ class ClashLib with ClashInterface {
     clashFFI = ClashFFI(lib);
     clashFFI.initNativeApiBridge(
       NativeApi.initializeApiDLData,
+    );
+    CStringWrapper.init(
+      lib.lookup<NativeFunction<Void Function(Pointer<Char>)>>('freeCString'),
     );
   }
 
@@ -96,32 +100,29 @@ class ClashLib with ClashInterface {
 
   @override
   String getProxies() {
-    final proxiesRaw = clashFFI.getProxies();
-    final proxiesRawString = proxiesRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(proxiesRaw);
-    return proxiesRawString;
+    final wrapper = CStringWrapper(clashFFI.getProxies(), clashFFI.freeCString);
+    return wrapper.toDartString();
   }
 
   @override
   String getExternalProviders() {
-    final externalProvidersRaw = clashFFI.getExternalProviders();
-    final externalProvidersRawString =
-        externalProvidersRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(externalProvidersRaw);
-    return externalProvidersRawString;
+    final wrapper = CStringWrapper(clashFFI.getExternalProviders(), clashFFI.freeCString);
+    return wrapper.toDartString();
   }
 
   @override
   String getExternalProvider(String externalProviderName) {
     final externalProviderNameChar =
         externalProviderName.toNativeUtf8().cast<Char>();
-    final externalProviderRaw =
-        clashFFI.getExternalProvider(externalProviderNameChar);
-    malloc.free(externalProviderNameChar);
-    final externalProviderRawString =
-        externalProviderRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(externalProviderRaw);
-    return externalProviderRawString;
+    try {
+      final wrapper = CStringWrapper(
+        clashFFI.getExternalProvider(externalProviderNameChar),
+        clashFFI.freeCString,
+      );
+      return wrapper.toDartString();
+    } finally {
+      malloc.free(externalProviderNameChar);
+    }
   }
 
   @override
@@ -215,10 +216,8 @@ class ClashLib with ClashInterface {
 
   @override
   String getConnections() {
-    final connectionsDataRaw = clashFFI.getConnections();
-    final connectionsString = connectionsDataRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(connectionsDataRaw);
-    return connectionsString;
+    final wrapper = CStringWrapper(clashFFI.getConnections(), clashFFI.freeCString);
+    return wrapper.toDartString();
   }
 
   @override
@@ -273,17 +272,25 @@ class ClashLib with ClashInterface {
 
   @override
   String getTraffic(bool value) {
-    final trafficRaw = clashFFI.getTraffic(value ? 1 : 0);
-    final trafficString = trafficRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(trafficRaw);
-    return trafficString;
+    final wrapper = CStringWrapper(clashFFI.getTraffic(value ? 1 : 0), clashFFI.freeCString);
+    return wrapper.toDartString();
   }
 
   @override
   String getTotalTraffic(bool value) {
-    final trafficRaw = clashFFI.getTotalTraffic(value ? 1 : 0);
-    clashFFI.freeCString(trafficRaw);
-    return trafficRaw.cast<Utf8>().toDartString();
+    final wrapper = CStringWrapper(clashFFI.getTotalTraffic(value ? 1 : 0), clashFFI.freeCString);
+    return wrapper.toDartString();
+  }
+
+  @override
+  Map<String, int> getTotalTrafficSync(bool value) {
+    final wrapper = CStringWrapper(clashFFI.getTotalTraffic(value ? 1 : 0), clashFFI.freeCString);
+    try {
+      final trafficString = wrapper.toDartString();
+      return Map<String, int>.from(json.decode(trafficString));
+    } catch (_) {
+      return {"up": 0, "down": 0};
+    }
   }
 
   @override
@@ -336,16 +343,13 @@ class ClashLib with ClashInterface {
   }
 
   String getCurrentProfileName() {
-    final currentProfileRaw = clashFFI.getCurrentProfileName();
-    final currentProfile = currentProfileRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(currentProfileRaw);
-    return currentProfile;
+    final wrapper = CStringWrapper(clashFFI.getCurrentProfileName(), clashFFI.freeCString);
+    return wrapper.toDartString();
   }
 
   AndroidVpnOptions getAndroidVpnOptions() {
-    final vpnOptionsRaw = clashFFI.getAndroidVpnOptions();
-    final vpnOptions = json.decode(vpnOptionsRaw.cast<Utf8>().toDartString());
-    clashFFI.freeCString(vpnOptionsRaw);
+    final wrapper = CStringWrapper(clashFFI.getAndroidVpnOptions(), clashFFI.freeCString);
+    final vpnOptions = json.decode(wrapper.toDartString());
     return AndroidVpnOptions.fromJson(vpnOptions);
   }
 
@@ -354,9 +358,8 @@ class ClashLib with ClashInterface {
   }
 
   DateTime? getRunTime() {
-    final runTimeRaw = clashFFI.getRunTime();
-    final runTimeString = runTimeRaw.cast<Utf8>().toDartString();
-    clashFFI.freeCString(runTimeRaw);
+    final wrapper = CStringWrapper(clashFFI.getRunTime(), clashFFI.freeCString);
+    final runTimeString = wrapper.toDartString();
     if (runTimeString.isEmpty) return null;
     return DateTime.fromMillisecondsSinceEpoch(int.parse(runTimeString));
   }

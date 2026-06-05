@@ -205,6 +205,14 @@ class ClashCore {
     return Traffic.fromMap(json.decode(totalTrafficString));
   }
 
+  Map<String, int> getTotalTrafficSync(bool value) {
+    final totalTrafficString = clashInterface.getTotalTraffic(value);
+    if (totalTrafficString is Future<String>) {
+      return {"up": 0, "down": 0};
+    }
+    return Map<String, int>.from(json.decode(totalTrafficString));
+  }
+
   resetTraffic() {
     clashInterface.resetTraffic();
   }

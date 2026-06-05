@@ -344,6 +344,11 @@ class ClashService with ClashInterface {
   }
 
   @override
+  Map<String, int> getTotalTrafficSync(bool value) {
+    return {"up": 0, "down": 0};
+  }
+
+  @override
   FutureOr<String> getTraffic(bool value) {
     return _invoke<String>(
       method: ActionMethod.getTraffic,

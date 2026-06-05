@@ -31,6 +31,14 @@ class ClashMessage {
             case AppMessageType.loaded:
               listener.onLoaded(m.data);
               break;
+            case AppMessageType.traffic:
+              listener.onTraffic(Traffic.fromMap(
+                Map<String, int>.from(m.data),
+              ));
+              break;
+            case AppMessageType.memory:
+              listener.onMemory(m.data);
+              break;
           }
         }
       },

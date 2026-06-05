@@ -72,6 +72,8 @@ enum AppMessageType {
   request,
   started,
   loaded,
+  traffic,
+  memory,
 }
 
 enum ServiceMessageType {

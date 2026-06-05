@@ -75,9 +75,8 @@ class AppController {
       updateTraffic();
       globalState.updateFunctionLists = [
         updateRunTime,
-        updateTraffic,
       ];
-      globalState.trafficUpdateCallback = updateTraffic;
+      globalState.trafficUpdateCallback = null;
       final currentLastModified =
           await config.getCurrentProfile()?.profileLastModified;
       if (currentLastModified == null ||

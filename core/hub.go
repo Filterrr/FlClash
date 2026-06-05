@@ -28,6 +28,8 @@ var (
 	externalProviders = map[string]cp.Provider{}
 	logSubscriber     observable.Subscription[log.Event]
 	currentConfig     *config.Config
+	trafficTicker     *time.Ticker
+	trafficStopCh     chan struct{}
 )
 
 func handleInitClash(homeDirStr string) bool {
@@ -43,6 +45,7 @@ func handleStartListener() bool {
 	defer runLock.Unlock()
 	isRunning = true
 	updateListeners(true)
+	handleStartTrafficPush()
 	return true
 }
 
@@ -50,6 +53,7 @@ func handleStopListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isRunning = false
+	handleStopTrafficPush()
 	listener.StopListener()
 	return true
 }
@@ -445,6 +449,42 @@ func handleGetMemoryStats() string {
 		return "{}"
 	}
 	return string(data)
+}
+
+func handleStartTrafficPush() {
+	if trafficTicker != nil {
+		return
+	}
+	trafficStopCh = make(chan struct{})
+	trafficTicker = time.NewTicker(1 * time.Second)
+	go func() {
+		for {
+			select {
+			case <-trafficTicker.C:
+				trafficData := json.RawMessage(handleGetTraffic(false))
+				SendMessage(Message{
+					Type: TrafficMessage,
+					Data: trafficData,
+				})
+				memoryData := json.RawMessage(handleGetMemoryStats())
+				SendMessage(Message{
+					Type: MemoryMessage,
+					Data: memoryData,
+				})
+			case <-trafficStopCh:
+				trafficTicker.Stop()
+				trafficTicker = nil
+				return
+			}
+		}
+	}()
+}
+
+func handleStopTrafficPush() {
+	if trafficStopCh != nil {
+		close(trafficStopCh)
+		trafficStopCh = nil
+	}
 }
 
 func init() {

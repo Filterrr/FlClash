@@ -19,6 +19,10 @@ abstract mixin class AppMessageListener {
   void onStarted(String runTime) {}
 
   void onLoaded(String providerName) {}
+
+  void onTraffic(Traffic traffic) {}
+
+  void onMemory(dynamic memoryStats) {}
 }
 
 abstract mixin class ServiceMessageListener {

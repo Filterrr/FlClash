@@ -45,6 +45,8 @@ mixin ClashInterface {
 
   FutureOr<String> getTotalTraffic(bool value);
 
+  Map<String, int> getTotalTrafficSync(bool value);
+
   resetTraffic();
 
   startLog();

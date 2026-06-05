@@ -41,9 +41,6 @@ class GlobalState {
     if (timer != null && timer!.isActive == true) return;
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       if (isLowMemoryMode) {
-        if (Platform.isAndroid && isVpnService == true) {
-          _trafficUpdateCallback?.call();
-        }
         return;
       }
       if (isReducedMemoryMode && t.tick % 5 != 0) return;

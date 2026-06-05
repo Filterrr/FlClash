@@ -109,4 +109,6 @@ const (
 	RequestMessage MessageType = "request"
 	StartedMessage MessageType = "started"
 	LoadedMessage  MessageType = "loaded"
+	TrafficMessage MessageType = "traffic"
+	MemoryMessage  MessageType = "memory"
 )
