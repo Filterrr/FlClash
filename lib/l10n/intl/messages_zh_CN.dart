@@ -20,10 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh_CN';
 
-  static String m0(count) => "已移除 ${count} 个重复节点";
-
-  static String m1(days) => "您的订阅将在 ${days} 天后到期";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("关于"),
@@ -115,11 +111,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "开启将失去部分应用能力，获得全量的Clash的支持",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("确定"),
-    "connectionGroupByChain": MessageLookupByLibrary.simpleMessage("按代理链分组"),
-    "connectionGroupByHost": MessageLookupByLibrary.simpleMessage("按主机分组"),
-    "connectionGroupByProcess": MessageLookupByLibrary.simpleMessage("按进程分组"),
-    "connectionStats": MessageLookupByLibrary.simpleMessage("连接统计"),
-    "connectionUngrouped": MessageLookupByLibrary.simpleMessage("未分组"),
     "connections": MessageLookupByLibrary.simpleMessage("连接"),
     "connectionsDesc": MessageLookupByLibrary.simpleMessage("查看当前连接数据"),
     "connectivity": MessageLookupByLibrary.simpleMessage("连通性："),
@@ -168,7 +159,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "exit": MessageLookupByLibrary.simpleMessage("退出"),
     "expand": MessageLookupByLibrary.simpleMessage("标准"),
     "expirationTime": MessageLookupByLibrary.simpleMessage("到期时间"),
-    "exportConnections": MessageLookupByLibrary.simpleMessage("导出连接"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("导出日志"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("导出成功"),
     "externalController": MessageLookupByLibrary.simpleMessage("外部控制器"),
@@ -300,12 +290,6 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("请输入有效间隔时间格式"),
     "profileAutoUpdateIntervalNullValidationDesc":
         MessageLookupByLibrary.simpleMessage("请输入自动更新间隔时间"),
-    "profileDeduplicate": MessageLookupByLibrary.simpleMessage("节点去重"),
-    "profileDeduplicateDesc": MessageLookupByLibrary.simpleMessage(
-      "移除配置中的重复节点",
-    ),
-    "profileDeduplicateResult": m0,
-    "profileFilter": MessageLookupByLibrary.simpleMessage("筛选"),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "请输入配置名称",
     ),
@@ -384,10 +368,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "stopVpn": MessageLookupByLibrary.simpleMessage("正在停止VPN..."),
     "style": MessageLookupByLibrary.simpleMessage("风格"),
     "submit": MessageLookupByLibrary.simpleMessage("提交"),
-    "subscriptionExpired": MessageLookupByLibrary.simpleMessage("订阅已到期"),
-    "subscriptionExpiredDesc": MessageLookupByLibrary.simpleMessage("您的订阅已到期"),
-    "subscriptionExpiring": MessageLookupByLibrary.simpleMessage("订阅即将到期"),
-    "subscriptionExpiringDesc": m1,
     "sync": MessageLookupByLibrary.simpleMessage("同步"),
     "system": MessageLookupByLibrary.simpleMessage("系统"),
     "systemFont": MessageLookupByLibrary.simpleMessage("系统字体"),
@@ -411,9 +391,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("提示"),
     "toggle": MessageLookupByLibrary.simpleMessage("切换"),
     "tools": MessageLookupByLibrary.simpleMessage("工具"),
-    "totalConnections": MessageLookupByLibrary.simpleMessage("总连接数"),
-    "totalDownload": MessageLookupByLibrary.simpleMessage("总下载"),
-    "totalUpload": MessageLookupByLibrary.simpleMessage("总上传"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
     "tunDesc": MessageLookupByLibrary.simpleMessage("仅在管理员模式生效"),

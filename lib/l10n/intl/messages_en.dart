@@ -20,10 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(count) => "Removed ${count} duplicate nodes";
-
-  static String m1(days) => "Your subscription will expire in ${days} days";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("About"),
@@ -165,17 +161,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Opening it will lose part of its application ability and gain the support of full amount of Clash.",
     ),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
-    "connectionGroupByChain": MessageLookupByLibrary.simpleMessage(
-      "Group by chain",
-    ),
-    "connectionGroupByHost": MessageLookupByLibrary.simpleMessage(
-      "Group by host",
-    ),
-    "connectionGroupByProcess": MessageLookupByLibrary.simpleMessage(
-      "Group by process",
-    ),
-    "connectionStats": MessageLookupByLibrary.simpleMessage("Connection Stats"),
-    "connectionUngrouped": MessageLookupByLibrary.simpleMessage("Ungrouped"),
     "connections": MessageLookupByLibrary.simpleMessage("Connections"),
     "connectionsDesc": MessageLookupByLibrary.simpleMessage(
       "View current connections data",
@@ -246,9 +231,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expirationTime": MessageLookupByLibrary.simpleMessage("Expiration time"),
-    "exportConnections": MessageLookupByLibrary.simpleMessage(
-      "Export connections",
-    ),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
     "exportSuccess": MessageLookupByLibrary.simpleMessage("Export Success"),
     "externalController": MessageLookupByLibrary.simpleMessage(
@@ -466,14 +448,6 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Please enter the auto update interval time",
         ),
-    "profileDeduplicate": MessageLookupByLibrary.simpleMessage(
-      "Deduplicate nodes",
-    ),
-    "profileDeduplicateDesc": MessageLookupByLibrary.simpleMessage(
-      "Remove duplicate nodes from the profile",
-    ),
-    "profileDeduplicateResult": m0,
-    "profileFilter": MessageLookupByLibrary.simpleMessage("Filter"),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please input the profile name",
     ),
@@ -578,16 +552,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "stopVpn": MessageLookupByLibrary.simpleMessage("Stopping VPN..."),
     "style": MessageLookupByLibrary.simpleMessage("Style"),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
-    "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
-      "Subscription expired",
-    ),
-    "subscriptionExpiredDesc": MessageLookupByLibrary.simpleMessage(
-      "Your subscription has expired",
-    ),
-    "subscriptionExpiring": MessageLookupByLibrary.simpleMessage(
-      "Subscription expiring soon",
-    ),
-    "subscriptionExpiringDesc": m1,
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
     "systemFont": MessageLookupByLibrary.simpleMessage("System font"),
@@ -617,11 +581,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "tip": MessageLookupByLibrary.simpleMessage("tip"),
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
-    "totalConnections": MessageLookupByLibrary.simpleMessage(
-      "Total connections",
-    ),
-    "totalDownload": MessageLookupByLibrary.simpleMessage("Total download"),
-    "totalUpload": MessageLookupByLibrary.simpleMessage("Total upload"),
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
