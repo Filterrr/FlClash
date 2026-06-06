@@ -1,3 +1,4 @@
+export 'adaptive_timer.dart';
 export 'android.dart';
 export 'app_localizations.dart';
 export 'color.dart';

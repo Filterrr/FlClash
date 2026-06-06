@@ -17,16 +17,31 @@ import 'models/models.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   clashLib?.initMessage();
-  globalState.packageInfo = await PackageInfo.fromPlatform();
-  final version = await system.version;
-  final config = await preferences.getConfig() ?? Config();
+
+  // 并行化独立的启动任务
+  final results = await Future.wait<dynamic>([
+    PackageInfo.fromPlatform(),
+    system.version,
+    preferences.getConfig(),
+    preferences.getClashConfig(),
+  ]);
+  globalState.packageInfo = results[0] as PackageInfo;
+  final version = results[1] as int;
+  final config = (results[2] as Config?) ?? Config();
+  final clashConfig = (results[3] as ClashConfig?) ?? ClashConfig();
+
+  // 本地化加载依赖 config，需在 config 之后
   await AppLocalizations.load(
     other.getLocaleForString(config.appSetting.locale) ??
         WidgetsBinding.instance.platformDispatcher.locale,
   );
-  final clashConfig = await preferences.getClashConfig() ?? ClashConfig();
-  await android?.init();
-  await window?.init(config.windowProps, version);
+
+  // 平台初始化可并行
+  await Future.wait<dynamic>([
+    android?.init() ?? Future.value(),
+    window?.init(config.windowProps, version) ?? Future.value(),
+  ]);
+
   final appState = AppState(
     mode: clashConfig.mode,
     version: version,

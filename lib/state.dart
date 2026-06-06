@@ -16,7 +16,7 @@ import 'controller.dart';
 import 'models/models.dart';
 
 class GlobalState {
-  Timer? timer;
+  AdaptiveTimer? adaptiveTimer;
   Timer? groupsUpdateTimer;
   var isVpnService = false;
   late PackageInfo packageInfo;
@@ -38,24 +38,29 @@ class GlobalState {
       _trafficUpdateCallback = callback;
 
   startListenUpdate() {
-    if (timer != null && timer!.isActive == true) return;
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      if (isLowMemoryMode) {
-        if (Platform.isAndroid && isVpnService == true) {
-          _trafficUpdateCallback?.call();
+    if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
+    adaptiveTimer = AdaptiveTimer(
+      activeInterval: const Duration(seconds: 1),
+      idleInterval: const Duration(seconds: 5),
+      idleThreshold: 3,
+      callback: () {
+        if (isLowMemoryMode) {
+          if (Platform.isAndroid && isVpnService == true) {
+            _trafficUpdateCallback?.call();
+          }
+          return;
         }
-        return;
-      }
-      if (isReducedMemoryMode && t.tick % 5 != 0) return;
-      for (final function in updateFunctionLists) {
-        function();
-      }
-    });
+        for (final function in updateFunctionLists) {
+          function();
+        }
+      },
+    );
+    adaptiveTimer!.start();
   }
 
   stopListenUpdate() {
-    if (timer == null || timer?.isActive == false) return;
-    timer?.cancel();
+    if (adaptiveTimer == null || !adaptiveTimer!.isActive) return;
+    adaptiveTimer!.stop();
   }
 
   Future<void> initCore({
