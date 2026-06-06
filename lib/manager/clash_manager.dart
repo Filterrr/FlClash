@@ -117,7 +117,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   @override
   void onLog(Log log) {
     globalState.appController.appFlowingState.addLog(log);
-    if (log.logLevel == LogLevel.error && isNormalMemoryMode) {
+    if (log.logLevel == LogLevel.error && !isLowMemoryMode) {
       globalState.appController.showSnackBar(log.payload ?? '');
     }
     super.onLog(log);

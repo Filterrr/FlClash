@@ -112,7 +112,8 @@ class LogsAndKeywords with _$LogsAndKeywords {
 extension LogsAndKeywordsExt on LogsAndKeywords {
   List<Log> get filteredLogs => logs
       .where(
-        (log) => {log.logLevel.name}.containsAll(keywords),
+        (log) =>
+            keywords.isEmpty || keywords.contains(log.logLevel.name),
       )
       .toList();
 }
