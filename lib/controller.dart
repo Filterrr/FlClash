@@ -203,7 +203,7 @@ class AppController {
         continue;
       }
       try {
-        updateProfile(profile);
+        await updateProfile(profile);
       } catch (e) {
         appFlowingState.addLog(
           Log(
