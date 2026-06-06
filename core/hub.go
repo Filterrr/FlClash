@@ -28,6 +28,10 @@ var (
 	externalProviders = map[string]cp.Provider{}
 	logSubscriber     observable.Subscription[log.Event]
 	currentConfig     *config.Config
+	trafficTicker     *time.Ticker
+	trafficPauseCh    chan struct{}
+	trafficResumeCh   chan struct{}
+	trafficStopCh     chan struct{}
 )
 
 func handleInitClash(homeDirStr string) bool {
@@ -43,6 +47,7 @@ func handleStartListener() bool {
 	defer runLock.Unlock()
 	isRunning = true
 	updateListeners(true)
+	handleStartTrafficPush()
 	return true
 }
 
@@ -50,6 +55,7 @@ func handleStopListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isRunning = false
+	handleStopTrafficPush()
 	listener.StopListener()
 	return true
 }
@@ -445,6 +451,71 @@ func handleGetMemoryStats() string {
 		return "{}"
 	}
 	return string(data)
+}
+
+func handleStartTrafficPush() {
+	if trafficTicker != nil {
+		return
+	}
+	trafficStopCh = make(chan struct{})
+	trafficPauseCh = make(chan struct{}, 1)
+	trafficResumeCh = make(chan struct{}, 1)
+	trafficTicker = time.NewTicker(1 * time.Second)
+	go func() {
+		paused := false
+		for {
+			select {
+			case <-trafficTicker.C:
+				if paused {
+					continue
+				}
+				trafficData := json.RawMessage(handleGetTraffic(false))
+				totalTrafficData := json.RawMessage(handleGetTotalTraffic(false))
+				SendMessage(Message{
+					Type: TrafficMessage,
+					Data: map[string]json.RawMessage{
+						"current": trafficData,
+						"total":   totalTrafficData,
+					},
+				})
+			case <-trafficPauseCh:
+				paused = true
+			case <-trafficResumeCh:
+				paused = false
+			case <-trafficStopCh:
+				trafficTicker.Stop()
+				trafficTicker = nil
+				return
+			}
+		}
+	}()
+}
+
+func handlePauseTrafficPush() {
+	if trafficPauseCh != nil {
+		select {
+		case trafficPauseCh <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func handleResumeTrafficPush() {
+	if trafficResumeCh != nil {
+		select {
+		case trafficResumeCh <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func handleStopTrafficPush() {
+	if trafficStopCh != nil {
+		close(trafficStopCh)
+		trafficStopCh = nil
+		trafficPauseCh = nil
+		trafficResumeCh = nil
+	}
 }
 
 func init() {

@@ -72,6 +72,7 @@ enum AppMessageType {
   request,
   started,
   loaded,
+  traffic,
 }
 
 enum ServiceMessageType {
@@ -205,6 +206,8 @@ enum ActionMethod {
   stopLog,
   startListener,
   stopListener,
+  pauseTrafficPush,
+  resumeTrafficPush,
 }
 
 enum AuthorizeCode { none, success, error }

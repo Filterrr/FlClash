@@ -28,22 +28,15 @@ class GlobalState {
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
   List<Function> updateFunctionLists = [];
-  Function? _trafficUpdateCallback;
   bool lastTunEnable = false;
   int? lastProfileModified;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
-  set trafficUpdateCallback(Function? callback) =>
-      _trafficUpdateCallback = callback;
-
   startListenUpdate() {
     if (timer != null && timer!.isActive == true) return;
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       if (isLowMemoryMode) {
-        if (Platform.isAndroid && isVpnService == true) {
-          _trafficUpdateCallback?.call();
-        }
         return;
       }
       if (isReducedMemoryMode && t.tick % 5 != 0) return;

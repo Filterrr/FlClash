@@ -146,6 +146,8 @@ class ClashService with ClashInterface {
       case ActionMethod.forceGc:
       case ActionMethod.startLog:
       case ActionMethod.stopLog:
+      case ActionMethod.pauseTrafficPush:
+      case ActionMethod.resumeTrafficPush:
         return;
     }
   }
@@ -344,6 +346,11 @@ class ClashService with ClashInterface {
   }
 
   @override
+  Map<String, int> getTotalTrafficSync(bool value) {
+    return {"up": 0, "down": 0};
+  }
+
+  @override
   FutureOr<String> getTraffic(bool value) {
     return _invoke<String>(
       method: ActionMethod.getTraffic,
@@ -354,6 +361,16 @@ class ClashService with ClashInterface {
   @override
   resetTraffic() {
     _prueInvoke(method: ActionMethod.resetTraffic);
+  }
+
+  @override
+  pauseTrafficPush() {
+    _prueInvoke(method: ActionMethod.pauseTrafficPush);
+  }
+
+  @override
+  resumeTrafficPush() {
+    _prueInvoke(method: ActionMethod.resumeTrafficPush);
   }
 
   @override

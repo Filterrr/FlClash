@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
@@ -189,7 +190,25 @@ class BackgroundMemoryManager {
     final oldMode = lowMemoryModeNotifier.value;
     if (oldMode == newMode) return;
     lowMemoryModeNotifier.value = newMode;
+    _updateTrafficPushForMode();
     _perfStats.recordModeTransition(oldMode, newMode);
+  }
+
+  void _updateTrafficPushForMode() {
+    final shouldPause = isLowMemoryMode || isReducedMemoryMode;
+    if (Platform.isAndroid) {
+      if (shouldPause) {
+        clashLib?.pauseTrafficPush();
+      } else {
+        clashLib?.resumeTrafficPush();
+      }
+    } else {
+      if (shouldPause) {
+        clashService?.pauseTrafficPush();
+      } else {
+        clashService?.resumeTrafficPush();
+      }
+    }
   }
 
   void onAppPaused() => _enterBackground();

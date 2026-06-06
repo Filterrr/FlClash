@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/plugins/vpn.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -144,5 +147,23 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
     );
     await appController.updateGroupDebounce();
     super.onLoaded(providerName);
+  }
+
+  @override
+  void onTraffic(Traffic traffic, {Traffic? totalTraffic}) {
+    if (isLowMemoryMode) return;
+    final appController = globalState.appController;
+    if (Platform.isAndroid && globalState.isVpnService == true) {
+      vpn?.startForeground(
+        title: clashLib?.getCurrentProfileName() ?? "",
+        content: "$traffic",
+      );
+    } else {
+      appController.appFlowingState.addTraffic(traffic);
+      if (totalTraffic != null) {
+        appController.appFlowingState.totalTraffic = totalTraffic;
+      }
+    }
+    super.onTraffic(traffic, totalTraffic: totalTraffic);
   }
 }
