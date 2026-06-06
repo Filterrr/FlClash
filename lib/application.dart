@@ -60,9 +60,8 @@ class Application extends StatefulWidget {
 
 class ApplicationState extends State<Application> {
   late SystemColorSchemes systemColorSchemes;
-  Timer? timer;
+  AdaptiveTimer? groupUpdateTimer;
   StreamSubscription? connectivitySubscription;
-  int _timerTickCount = 0;
 
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
@@ -127,25 +126,23 @@ class ApplicationState extends State<Application> {
 
   _initTimer() {
     _cancelTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 20000), (_) {
-      if (isLowMemoryMode) return;
-      _timerTickCount++;
-      if (isReducedMemoryMode) {
-        if (_timerTickCount % 4 != 0) {
-          return;
-        }
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        globalState.appController.updateGroupDebounce();
-      });
-    });
+    groupUpdateTimer = AdaptiveTimer(
+      activeInterval: const Duration(seconds: 20),
+      idleInterval: const Duration(seconds: 60),
+      idleThreshold: 3,
+      callback: () {
+        if (isLowMemoryMode) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          globalState.appController.updateGroupDebounce();
+        });
+      },
+    );
+    groupUpdateTimer!.start();
   }
 
   _cancelTimer() {
-    if (timer != null) {
-      timer?.cancel();
-      timer = null;
-    }
+    groupUpdateTimer?.stop();
+    groupUpdateTimer = null;
   }
 
   _buildApp(Widget app) {

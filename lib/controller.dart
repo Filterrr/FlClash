@@ -10,6 +10,8 @@ import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/state/profile_controller.dart';
+import 'package:fl_clash/state/backup_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +30,10 @@ class AppController {
   late Function updateGroupDebounce;
   late Function addCheckIpNumDebounce;
   late Function applyProfileDebounce;
+
+  // 拆分出的子控制器
+  late final ProfileController profileController;
+  late final BackupController backupController;
   late Function savePreferencesDebounce;
   late Function changeProxyDebounce;
 
@@ -36,6 +42,9 @@ class AppController {
     config = context.read<Config>();
     clashConfig = context.read<ClashConfig>();
     appFlowingState = context.read<AppFlowingState>();
+    // 初始化子控制器
+    profileController = ProfileController(context);
+    backupController = BackupController(context);
     updateClashConfigDebounce = debounce<Function()>(() async {
       await updateClashConfig();
     });
@@ -122,23 +131,11 @@ class AppController {
   }
 
   addProfile(Profile profile) async {
-    config.setProfile(profile);
-    if (config.currentProfileId != null) return;
-    await changeProfile(profile.id);
+    await profileController.addProfile(profile);
   }
 
   deleteProfile(String id) async {
-    config.deleteProfileById(id);
-    clearEffect(id);
-    if (config.currentProfileId == id) {
-      if (config.profiles.isNotEmpty) {
-        final updateId = config.profiles.first.id;
-        changeProfile(updateId);
-      } else {
-        changeProfile(null);
-        updateStatus(false);
-      }
-    }
+    await profileController.deleteProfile(id);
   }
 
   updateProviders() {
@@ -146,10 +143,7 @@ class AppController {
   }
 
   Future<void> updateProfile(Profile profile) async {
-    final newProfile = await profile.update();
-    config.setProfile(
-      newProfile.copyWith(isUpdating: false),
-    );
+    await profileController.updateProfile(profile);
   }
 
   Future<void> updateClashConfig({bool isPatch = true}) async {
@@ -192,36 +186,11 @@ class AppController {
   }
 
   autoUpdateProfiles() async {
-    for (final profile in config.profiles) {
-      if (!profile.autoUpdate) continue;
-      final isNotNeedUpdate = profile.lastUpdateDate
-          ?.add(
-            profile.autoUpdateDuration,
-          )
-          .isBeforeNow;
-      if (isNotNeedUpdate == false || profile.type == ProfileType.file) {
-        continue;
-      }
-      try {
-        updateProfile(profile);
-      } catch (e) {
-        appFlowingState.addLog(
-          Log(
-            logLevel: LogLevel.info,
-            payload: e.toString(),
-          ),
-        );
-      }
-    }
+    await profileController.autoUpdateProfiles();
   }
 
   updateProfiles() async {
-    for (final profile in config.profiles) {
-      if (profile.type == ProfileType.file) {
-        continue;
-      }
-      await updateProfile(profile);
-    }
+    await profileController.updateProfiles();
   }
 
   Future<void> updateGroups() async {
@@ -337,6 +306,7 @@ class AppController {
     await _initStatus();
     autoUpdateProfiles();
     autoCheckUpdate();
+    SubscriptionExpiryChecker.checkOnStartup(config.profiles);
   }
 
   _initStatus() async {
@@ -634,18 +604,7 @@ class AppController {
   }
 
   Future<List<int>> backupData() async {
-    final homeDirPath = await appPath.getHomeDirPath();
-    final profilesPath = await appPath.getProfilesPath();
-    final configJson = config.toJson();
-    final clashConfigJson = clashConfig.toJson();
-    return Isolate.run<List<int>>(() async {
-      final archive = Archive();
-      archive.add("config.json", configJson);
-      archive.add("clashConfig.json", clashConfigJson);
-      await archive.addDirectoryToArchive(profilesPath, homeDirPath);
-      final zipEncoder = ZipEncoder();
-      return zipEncoder.encode(archive) ?? [];
-    });
+    return await backupController.backupData();
   }
 
   updateTray([bool focus = false]) async {
@@ -662,43 +621,16 @@ class AppController {
     List<int> data,
     RecoveryOption recoveryOption,
   ) async {
-    final archive = await Isolate.run<Archive>(() {
-      final zipDecoder = ZipDecoder();
-      return zipDecoder.decodeBytes(data);
-    });
-    final homeDirPath = await appPath.getHomeDirPath();
-    final configs =
-        archive.files.where((item) => item.name.endsWith(".json")).toList();
-    final profiles =
-        archive.files.where((item) => !item.name.endsWith(".json"));
-    final configIndex =
-        configs.indexWhere((config) => config.name == "config.json");
-    final clashConfigIndex =
-        configs.indexWhere((config) => config.name == "clashConfig.json");
-    if (configIndex == -1 || clashConfigIndex == -1) throw "invalid backup.zip";
-    final configFile = configs[configIndex];
-    final clashConfigFile = configs[clashConfigIndex];
-    final tempConfig = Config.fromJson(
-      json.decode(
-        utf8.decode(configFile.content),
-      ),
-    );
-    final tempClashConfig = ClashConfig.fromJson(
-      json.decode(
-        utf8.decode(clashConfigFile.content),
-      ),
-    );
-    for (final profile in profiles) {
-      final filePath = join(homeDirPath, profile.name);
-      final file = File(filePath);
-      await file.create(recursive: true);
-      await file.writeAsBytes(profile.content);
-    }
-    if (recoveryOption == RecoveryOption.onlyProfiles) {
-      config.update(tempConfig, RecoveryOption.onlyProfiles);
-    } else {
-      config.update(tempConfig, RecoveryOption.all);
-      clashConfig.update(tempClashConfig);
-    }
+    await backupController.recoveryData(data, recoveryOption);
+  }
+
+  /// 对当前配置的代理节点进行去重
+  /// 返回被移除的重复节点数量
+  Future<int> deduplicateProfileNodes() async {
+    return await profileController.deduplicateProfileNodes();
+  }
+
+  clearEffect(String profileId) async {
+    await profileController.clearEffect(profileId);
   }
 }

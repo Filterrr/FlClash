@@ -20,7 +20,8 @@ class _LogsFragmentState extends State<LogsFragment> {
     keepScrollOffset: false,
   );
 
-  Timer? timer;
+  StreamSubscription<List<Log>>? _logSubscription;
+  VisibilityAwareTimer? timer;
 
   @override
   void initState() {
@@ -29,66 +30,79 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
+      _startEventDrivenLogs();
       _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
   }
 
   void _onLowMemoryModeChanged() {
+    LogStreamManager.instance.applyMemoryMode();
     if (isLowMemoryMode) {
       _stopTimer();
-    } else if (isReducedMemoryMode) {
-      _startReducedTimer();
+      _logSubscription?.cancel();
+      _logSubscription = null;
     } else {
+      _startEventDrivenLogs();
       _startTimer();
     }
   }
 
-  void _startTimer() {
-    _stopTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      final logs = globalState.appController.appFlowingState.logs;
-      if (!logListEquality.equals(
-        logsNotifier.value.logs,
-        logs,
-      )) {
+  /// 启动事件驱动的日志流监听
+  void _startEventDrivenLogs() {
+    _logSubscription?.cancel();
+    _logSubscription = LogStreamManager.instance.stream.listen((newLogs) {
+      if (!mounted) return;
+      final currentLogs = globalState.appController.appFlowingState.logs;
+      if (!logListEquality.equals(logsNotifier.value.logs, currentLogs)) {
         logsNotifier.value = logsNotifier.value.copyWith(
-          logs: logs,
+          logs: currentLogs,
         );
       }
     });
   }
 
-  void _startReducedTimer() {
+  void _startTimer() {
     _stopTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 2000), (timer) {
-      final logs = globalState.appController.appFlowingState.logs;
-      if (!logListEquality.equals(
-        logsNotifier.value.logs,
-        logs,
-      )) {
-        logsNotifier.value = logsNotifier.value.copyWith(
-          logs: logs,
-        );
-      }
-    });
+    timer = VisibilityAwareTimer(
+      interval: isReducedMemoryMode
+          ? const Duration(milliseconds: 2000)
+          : const Duration(milliseconds: 200),
+      callback: () {
+        final logs = globalState.appController.appFlowingState.logs;
+        if (!logListEquality.equals(
+          logsNotifier.value.logs,
+          logs,
+        )) {
+          logsNotifier.value = logsNotifier.value.copyWith(
+            logs: logs,
+          );
+        }
+      },
+      isVisible: () {
+        final appState = globalState.appController.appState;
+        return appState.currentLabel == 'logs' ||
+            (appState.viewMode == ViewMode.mobile &&
+                appState.currentLabel == "tools");
+      },
+    );
+    timer!.start();
   }
 
   void _stopTimer() {
-    if (timer != null) {
-      timer?.cancel();
-      timer = null;
-    }
+    timer?.stop();
+    timer = null;
   }
 
   @override
   void dispose() {
     super.dispose();
-    timer?.cancel();
+    _stopTimer();
+    _logSubscription?.cancel();
+    _logSubscription = null;
     logsNotifier.dispose();
     scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
-    timer = null;
   }
 
   _handleExport() async {

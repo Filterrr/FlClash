@@ -6,6 +6,7 @@ export 'card.dart';
 export 'chip.dart';
 export 'color_scheme_box.dart';
 export 'connection_item.dart';
+export 'connection_stats_panel.dart';
 export 'disabled_mask.dart';
 export 'fade_box.dart';
 export 'float_layout.dart';

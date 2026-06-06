@@ -346,5 +346,22 @@
   "backgroundOptimizationLevel_disabled": "Disabled",
   "backgroundOptimizationLevel_light": "Light",
   "backgroundOptimizationLevel_balanced": "Balanced",
-  "backgroundOptimizationLevel_aggressive": "Aggressive"
+  "backgroundOptimizationLevel_aggressive": "Aggressive",
+  "connectionStats": "Connection Stats",
+  "exportConnections": "Export connections",
+  "connectionGroupByProcess": "Group by process",
+  "connectionGroupByHost": "Group by host",
+  "connectionGroupByChain": "Group by chain",
+  "connectionUngrouped": "Ungrouped",
+  "totalConnections": "Total connections",
+  "totalUpload": "Total upload",
+  "totalDownload": "Total download",
+  "subscriptionExpiring": "Subscription expiring soon",
+  "subscriptionExpiringDesc": "Your subscription will expire in {days} days",
+  "subscriptionExpired": "Subscription expired",
+  "subscriptionExpiredDesc": "Your subscription has expired",
+  "profileFilter": "Filter",
+  "profileDeduplicate": "Deduplicate nodes",
+  "profileDeduplicateDesc": "Remove duplicate nodes from the profile",
+  "profileDeduplicateResult": "Removed {count} duplicate nodes"
 }
