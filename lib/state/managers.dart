@@ -191,14 +191,10 @@ abstract class GlobalStateBase {
   var isVpnService = false;
   DateTime? startTime;
   List<Function> updateFunctionLists = [];
-  Function? _trafficUpdateCallback;
   bool lastTunEnable = false;
   int? lastProfileModified;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
-
-  set trafficUpdateCallback(Function? callback) =>
-      _trafficUpdateCallback = callback;
 
   void startListenUpdate() {}
   void stopListenUpdate() {}

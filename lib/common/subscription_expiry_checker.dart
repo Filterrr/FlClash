@@ -1,4 +1,5 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ class SubscriptionExpiryChecker {
         : appLocalizations.subscriptionExpiring;
     final message = isExpired
         ? appLocalizations.subscriptionExpiredDesc
-        : appLocalizations.subscriptionExpiringDesc;
+        : appLocalizations.subscriptionExpiringDesc(daysRemaining);
 
     globalState.showMessage(
       title: title,
@@ -75,7 +76,6 @@ class SubscriptionExpiryChecker {
           ),
         );
       } else {
-        final days = expiryDate.difference(now).inDays;
         globalState.appController.appFlowingState.addLog(
           Log(
             logLevel: LogLevel.info,

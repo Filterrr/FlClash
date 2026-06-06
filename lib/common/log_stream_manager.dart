@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_clash/clash/clash.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 
 /// 事件驱动的日志流管理器

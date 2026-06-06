@@ -19,7 +19,7 @@ Future<void> main() async {
   clashLib?.initMessage();
 
   // 并行化独立的启动任务
-  final results = await Future.wait([
+  final results = await Future.wait<dynamic>([
     PackageInfo.fromPlatform(),
     system.version,
     preferences.getConfig(),
@@ -37,7 +37,7 @@ Future<void> main() async {
   );
 
   // 平台初始化可并行
-  await Future.wait([
+  await Future.wait<dynamic>([
     android?.init() ?? Future.value(),
     window?.init(config.windowProps, version) ?? Future.value(),
   ]);

@@ -349,7 +349,9 @@ class _WebDAVFormDialogState extends State<WebDAVFormDialog> {
       await DAVClient.deletePasswordSecurely(dav);
     }
     globalState.appController.config.dav = null;
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override

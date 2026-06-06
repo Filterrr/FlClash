@@ -99,7 +99,7 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
           ),
           IconButton(
             onPressed: () async {
-              final count = await globalState.appController.deduplicateProfileNodes();
+              await globalState.appController.deduplicateProfileNodes();
               if (context.mounted) {
                 globalState.showMessage(
                   title: appLocalizations.profileDeduplicate,

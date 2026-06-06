@@ -4,16 +4,13 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:fl_clash/clash/clash.dart';
-import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/state/profile_controller.dart';
 import 'package:fl_clash/state/backup_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -523,19 +520,6 @@ class AppController {
     return group?.getCurrentSelectedName(
             config.currentSelectedMap[groupName] ?? '') ??
         '';
-  }
-
-  clearEffect(String profileId) async {
-    final profilePath = await appPath.getProfilePath(profileId);
-    final providersPath = await appPath.getProvidersPath(profileId);
-    return await Isolate.run(() async {
-      if (profilePath != null) {
-        await File(profilePath).delete(recursive: true);
-      }
-      if (providersPath != null) {
-        await File(providersPath).delete(recursive: true);
-      }
-    });
   }
 
   updateTun() {
