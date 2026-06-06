@@ -126,136 +126,132 @@ class BackupAndRecovery extends StatelessWidget {
     return Selector<Config, DAV?>(
       selector: (_, config) => config.dav,
       builder: (_, dav, __) {
-        return FutureBuilder<DAVClient?>(
-          future: dav != null ? DAVClient.fromSecureStorage(dav) : null,
-          builder: (_, snapshot) {
-            final client = snapshot.data;
-            return ListView(
-              children: [
-                ListHeader(title: appLocalizations.remote),
-                if (dav == null)
-                  ListItem(
-                    leading: const Icon(Icons.account_box),
-                    title: Text(appLocalizations.noInfo),
-                    subtitle: Text(appLocalizations.pleaseBindWebDAV),
-                    trailing: FilledButton.tonal(
-                      onPressed: () {
-                        _showAddWebDAV(dav);
-                      },
-                      child: Text(appLocalizations.bind),
-                    ),
-                  )
-                else if (client == null)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else ...[
-                  ListItem(
-                    leading: const Icon(Icons.account_box),
-                    title: TooltipText(
-                      text: Text(
-                        dav.user,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(appLocalizations.connectivity),
-                          FutureBuilder<bool>(
-                            future: client.pingCompleter.future,
-                            builder: (_, snapshot) {
-                              return Center(
-                                child: FadeBox(
-                                  child: snapshot.connectionState ==
-                                          ConnectionState.waiting
-                                      ? const SizedBox(
-                                          width: 12,
-                                          height: 12,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                          ),
-                                        )
-                                      : Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: snapshot.data == true
-                                                ? Colors.green
-                                                : Colors.red,
-                                          ),
-                                          width: 12,
-                                          height: 12,
-                                        ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    trailing: FilledButton.tonal(
-                      onPressed: () {
-                        _showAddWebDAV(dav);
-                      },
-                      child: Text(appLocalizations.edit),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  ListItem.input(
-                    title: Text(appLocalizations.file),
-                    subtitle: Text(dav.fileName),
-                    delegate: InputDelegate(
-                      title: appLocalizations.file,
-                      value: dav.fileName,
-                      resetValue: defaultDavFileName,
-                      onChanged: (String? value) {
-                        if (value == null) return;
-                        globalState.appController.config.dav =
-                            globalState.appController.config.dav?.copyWith(
-                          fileName: value,
-                        );
-                      },
-                    ),
-                  ),
-                  ListItem(
-                    onTap: () {
-                      _backupOnWebDAV(context, client);
-                    },
-                    title: Text(appLocalizations.backup),
-                    subtitle: Text(appLocalizations.remoteBackupDesc),
-                  ),
-                  ListItem(
-                    onTap: () {
-                      _handleRecoveryOnWebDAV(context, client);
-                    },
-                    title: Text(appLocalizations.recovery),
-                    subtitle: Text(appLocalizations.remoteRecoveryDesc),
-                  ),
-                ],
-                ListHeader(title: appLocalizations.local),
-                ListItem(
-                  onTap: () {
-                    _backupOnLocal(context);
+        final client = dav != null ? DAVClient(dav) : null;
+        return ListView(
+          children: [
+            ListHeader(title: appLocalizations.remote),
+            if (dav == null)
+              ListItem(
+                leading: const Icon(Icons.account_box),
+                title: Text(appLocalizations.noInfo),
+                subtitle: Text(appLocalizations.pleaseBindWebDAV),
+                trailing: FilledButton.tonal(
+                  onPressed: () {
+                    _showAddWebDAV(dav);
                   },
-                  title: Text(appLocalizations.backup),
-                  subtitle: Text(appLocalizations.localBackupDesc),
+                  child: Text(
+                    appLocalizations.bind,
+                  ),
                 ),
-                ListItem(
-                  onTap: () {
-                    _handleRecoveryOnLocal(context);
+              )
+            else ...[
+              ListItem(
+                leading: const Icon(Icons.account_box),
+                title: TooltipText(
+                  text: Text(
+                    dav.user,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(appLocalizations.connectivity),
+                      FutureBuilder<bool>(
+                        future: client!.pingCompleter.future,
+                        builder: (_, snapshot) {
+                          return Center(
+                            child: FadeBox(
+                              child: snapshot.connectionState ==
+                                      ConnectionState.waiting
+                                  ? const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1,
+                                      ),
+                                    )
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: snapshot.data == true
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                      width: 12,
+                                      height: 12,
+                                    ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                trailing: FilledButton.tonal(
+                  onPressed: () {
+                    _showAddWebDAV(dav);
                   },
-                  title: Text(appLocalizations.recovery),
-                  subtitle: Text(appLocalizations.localRecoveryDesc),
+                  child: Text(
+                    appLocalizations.edit,
+                  ),
                 ),
-              ],
-            );
-          },
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              ListItem.input(
+                title: Text(appLocalizations.file),
+                subtitle: Text(dav.fileName),
+                delegate: InputDelegate(
+                  title: appLocalizations.file,
+                  value: dav.fileName,
+                  resetValue: defaultDavFileName,
+                  onChanged: (String? value) {
+                    if (value == null) {
+                      return;
+                    }
+                    globalState.appController.config.dav =
+                        globalState.appController.config.dav?.copyWith(
+                      fileName: value,
+                    );
+                  },
+                ),
+              ),
+              ListItem(
+                onTap: () {
+                  _backupOnWebDAV(context, client);
+                },
+                title: Text(appLocalizations.backup),
+                subtitle: Text(appLocalizations.remoteBackupDesc),
+              ),
+              ListItem(
+                onTap: () {
+                  _handleRecoveryOnWebDAV(context, client);
+                },
+                title: Text(appLocalizations.recovery),
+                subtitle: Text(appLocalizations.remoteRecoveryDesc),
+              ),
+            ],
+            ListHeader(title: appLocalizations.local),
+            ListItem(
+              onTap: () {
+                _backupOnLocal(context);
+              },
+              title: Text(appLocalizations.backup),
+              subtitle: Text(appLocalizations.localBackupDesc),
+            ),
+            ListItem(
+              onTap: () {
+                _handleRecoveryOnLocal(context);
+              },
+              title: Text(appLocalizations.recovery),
+              subtitle: Text(appLocalizations.localRecoveryDesc),
+            ),
+          ],
         );
       },
     );
@@ -330,28 +326,19 @@ class _WebDAVFormDialogState extends State<WebDAVFormDialog> {
     passwordController = TextEditingController(text: widget.dav?.password);
   }
 
-  _submit() async {
+  _submit() {
     if (!_formKey.currentState!.validate()) return;
-    final dav = DAV(
+    globalState.appController.config.dav = DAV(
       uri: uriController.text,
       user: userController.text,
       password: passwordController.text,
     );
-    // 将密码保存到安全加密存储
-    await DAVClient.savePasswordSecurely(dav);
-    globalState.appController.config.dav = dav;
-    if (mounted) Navigator.pop(context);
+    Navigator.pop(context);
   }
 
-  _delete() async {
-    final dav = globalState.appController.config.dav;
-    if (dav != null) {
-      await DAVClient.deletePasswordSecurely(dav);
-    }
+  _delete() {
     globalState.appController.config.dav = null;
-    if (mounted) {
-      Navigator.pop(context);
-    }
+    Navigator.pop(context);
   }
 
   @override

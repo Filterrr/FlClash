@@ -29,29 +29,6 @@ class DAVClient {
     pingCompleter.complete(_ping());
   }
 
-  /// 从安全存储创建 DAVClient，密码从加密存储中读取
-  static Future<DAVClient> fromSecureStorage(DAV dav) async {
-    final securePassword = await SecureStorage.instance.read(
-      'dav_password_${dav.user}_${dav.uri.hashCode}',
-    );
-    final davWithPassword = dav.copyWith(
-      password: securePassword ?? dav.password,
-    );
-    return DAVClient(davWithPassword);
-  }
-
-  /// 保存 DAV 密码到安全存储
-  static Future<void> savePasswordSecurely(DAV dav) async {
-    final key = 'dav_password_${dav.user}_${dav.uri.hashCode}';
-    await SecureStorage.instance.write(key, dav.password);
-  }
-
-  /// 从安全存储删除 DAV 密码
-  static Future<void> deletePasswordSecurely(DAV dav) async {
-    final key = 'dav_password_${dav.user}_${dav.uri.hashCode}';
-    await SecureStorage.instance.delete(key);
-  }
-
   Future<bool> _ping() async {
     try {
       await client.ping();

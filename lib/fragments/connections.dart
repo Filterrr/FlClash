@@ -1,23 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-enum ConnectionGroupAction {
-  none,
-  process,
-  host,
-  chain,
-}
 
 class ConnectionsFragment extends StatefulWidget {
   const ConnectionsFragment({super.key});
@@ -33,9 +22,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     keepScrollOffset: false,
   );
 
-  VisibilityAwareTimer? timer;
-  ConnectionGroupMode _groupMode = ConnectionGroupMode.none;
-  bool _showStats = false;
+  Timer? timer;
 
   @override
   void initState() {
@@ -52,6 +39,8 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
   void _onLowMemoryModeChanged() {
     if (isLowMemoryMode) {
       _stopTimer();
+    } else if (isReducedMemoryMode) {
+      _startReducedTimer();
     } else {
       _startTimer();
     }
@@ -59,30 +48,39 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
 
   void _startTimer() {
     _stopTimer();
-    timer = VisibilityAwareTimer(
-      interval: isReducedMemoryMode
-          ? const Duration(seconds: 10)
-          : const Duration(seconds: 1),
-      callback: () async {
-        if (!context.mounted) return;
-        final connections = await clashCore.getConnections();
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) async {
+        if (!context.mounted) {
+          return;
+        }
         connectionsNotifier.value = connectionsNotifier.value.copyWith(
-          connections: connections,
+          connections: await clashCore.getConnections(),
         );
       },
-      isVisible: () {
-        final appState = globalState.appController.appState;
-        return appState.currentLabel == 'connections' ||
-            (appState.viewMode == ViewMode.mobile &&
-                appState.currentLabel == "tools");
+    );
+  }
+
+  void _startReducedTimer() {
+    _stopTimer();
+    timer = Timer.periodic(
+      const Duration(seconds: 10),
+      (timer) async {
+        if (!context.mounted) {
+          return;
+        }
+        connectionsNotifier.value = connectionsNotifier.value.copyWith(
+          connections: await clashCore.getConnections(),
+        );
       },
     );
-    timer!.start();
   }
 
   void _stopTimer() {
-    timer?.stop();
-    timer = null;
+    if (timer != null) {
+      timer?.cancel();
+      timer = null;
+    }
   }
 
   _initActions() {
@@ -91,16 +89,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
         final commonScaffoldState =
             context.findAncestorStateOfType<CommonScaffoldState>();
         commonScaffoldState?.actions = [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showStats = !_showStats;
-              });
-            },
-            icon: Icon(_showStats ? Icons.bar_chart : Icons.bar_chart_outlined),
-            tooltip: appLocalizations.connectionStats,
-          ),
-          const SizedBox(width: 4),
           IconButton(
             onPressed: () {
               showSearch(
@@ -112,40 +100,9 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
             },
             icon: const Icon(Icons.search),
           ),
-          const SizedBox(width: 4),
-          PopupMenuButton<ConnectionGroupAction>(
-            icon: const Icon(Icons.folder_open_outlined),
-            tooltip: appLocalizations.connectionGroupByProcess,
-            onSelected: (action) {
-              setState(() {
-                _groupMode = switch (action) {
-                  ConnectionGroupAction.none => ConnectionGroupMode.none,
-                  ConnectionGroupAction.process => ConnectionGroupMode.process,
-                  ConnectionGroupAction.host => ConnectionGroupMode.host,
-                  ConnectionGroupAction.chain => ConnectionGroupMode.chain,
-                };
-              });
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                value: ConnectionGroupAction.none,
-                child: Text(appLocalizations.connectionUngrouped),
-              ),
-              PopupMenuItem(
-                value: ConnectionGroupAction.process,
-                child: Text(appLocalizations.connectionGroupByProcess),
-              ),
-              PopupMenuItem(
-                value: ConnectionGroupAction.host,
-                child: Text(appLocalizations.connectionGroupByHost),
-              ),
-              PopupMenuItem(
-                value: ConnectionGroupAction.chain,
-                child: Text(appLocalizations.connectionGroupByChain),
-              ),
-            ],
+          const SizedBox(
+            width: 8,
           ),
-          const SizedBox(width: 4),
           IconButton(
             onPressed: () async {
               clashCore.closeConnections();
@@ -155,33 +112,9 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
             },
             icon: const Icon(Icons.delete_sweep_outlined),
           ),
-          const SizedBox(width: 4),
-          IconButton(
-            onPressed: _handleExportConnections,
-            icon: const Icon(Icons.file_download_outlined),
-            tooltip: appLocalizations.exportConnections,
-          ),
         ];
       },
     );
-  }
-
-  Future<void> _handleExportConnections() async {
-    final connections = connectionsNotifier.value.connections;
-    final data = await Isolate.run<List<int>>(() {
-      final jsonStr = json.encode(connections.map((c) => c.toJson()).toList());
-      return utf8.encode(jsonStr);
-    });
-    final res = await picker.saveFile(
-      'connections.json',
-      Uint8List.fromList(data),
-    );
-    if (res != null && mounted) {
-      globalState.showMessage(
-        title: appLocalizations.tip,
-        message: TextSpan(text: appLocalizations.exportSuccess),
-      );
-    }
   }
 
   _addKeyword(String keyword) {
@@ -214,10 +147,11 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
   @override
   void dispose() {
     super.dispose();
-    _stopTimer();
+    timer?.cancel();
     connectionsNotifier.dispose();
     _scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
+    timer = null;
   }
 
   @override
@@ -246,8 +180,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_showStats)
-                ConnectionStatsPanel(connections: connections),
               if (state.keywords.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -270,68 +202,34 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
                   ),
                 ),
               Expanded(
-                child: _groupMode == ConnectionGroupMode.none
-                    ? ListView.separated(
-                        controller: _scrollController,
-                        itemBuilder: (_, index) {
-                          final connection = connections[index];
-                          return ConnectionItem(
-                            key: Key(connection.id),
-                            connection: connection,
-                            onClick: _addKeyword,
-                            trailing: IconButton(
-                              icon: const Icon(Icons.block),
-                              onPressed: () {
-                                _handleBlockConnection(connection.id);
-                              },
-                            ),
-                          );
+                child: ListView.separated(
+                  controller: _scrollController,
+                  itemBuilder: (_, index) {
+                    final connection = connections[index];
+                    return ConnectionItem(
+                      key: Key(connection.id),
+                      connection: connection,
+                      onClick: _addKeyword,
+                      trailing: IconButton(
+                        icon: const Icon(Icons.block),
+                        onPressed: () {
+                          _handleBlockConnection(connection.id);
                         },
-                        separatorBuilder: (BuildContext context, int index) {
-                          return const Divider(height: 0);
-                        },
-                        itemCount: connections.length,
-                      )
-                    : _buildGroupedListView(connections),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider(
+                      height: 0,
+                    );
+                  },
+                  itemCount: connections.length,
+                ),
               )
             ],
           );
         },
       ),
-    );
-  }
-
-  Widget _buildGroupedListView(List<Connection> connections) {
-    final groups = groupConnections(connections, _groupMode);
-    final groupNames = groups.keys.toList();
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: groupNames.length,
-      itemBuilder: (_, groupIndex) {
-        final groupName = groupNames[groupIndex];
-        final groupConnections = groups[groupName]!;
-        return ExpansionTile(
-          initiallyExpanded: true,
-          title: Text(
-            '$groupName (${groupConnections.length})',
-            style: context.textTheme.titleSmall,
-          ),
-          children: [
-            for (final connection in groupConnections)
-              ConnectionItem(
-                key: Key(connection.id),
-                connection: connection,
-                onClick: _addKeyword,
-                trailing: IconButton(
-                  icon: const Icon(Icons.block),
-                  onPressed: () {
-                    _handleBlockConnection(connection.id);
-                  },
-                ),
-              ),
-          ],
-        );
-      },
     );
   }
 }

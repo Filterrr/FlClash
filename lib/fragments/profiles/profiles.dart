@@ -98,24 +98,6 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             width: 8,
           ),
           IconButton(
-            onPressed: () async {
-              await globalState.appController.deduplicateProfileNodes();
-              if (context.mounted) {
-                globalState.showMessage(
-                  title: appLocalizations.profileDeduplicate,
-                  message: TextSpan(
-                    text: appLocalizations.profileDeduplicateDesc,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.difference_outlined),
-            tooltip: appLocalizations.profileDeduplicate,
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          IconButton(
             onPressed: () {
               final profiles = globalState.appController.config.profiles;
               showSheet(
@@ -277,7 +259,6 @@ class ProfileItem extends StatelessWidget {
 
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
     final subscriptionInfo = profile.subscriptionInfo;
-    final isExpiring = _isSubscriptionExpiring();
     return [
       const SizedBox(
         height: 8,
@@ -286,50 +267,11 @@ class ProfileItem extends StatelessWidget {
         SubscriptionInfoView(
           subscriptionInfo: subscriptionInfo,
         ),
-      if (isExpiring)
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                size: 14,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _isSubscriptionExpired()
-                    ? appLocalizations.subscriptionExpired
-                    : appLocalizations.subscriptionExpiring,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-              ),
-            ],
-          ),
-        ),
       Text(
         profile.lastUpdateDate?.lastUpdateTimeDesc ?? "",
         style: context.textTheme.labelMedium?.toLight,
       ),
     ];
-  }
-
-  bool _isSubscriptionExpiring() {
-    final info = profile.subscriptionInfo;
-    if (info == null || info.expire == 0) return false;
-    final expiryDate =
-        DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
-    final warningDate = DateTime.now().add(const Duration(days: 7));
-    return expiryDate.isBefore(warningDate);
-  }
-
-  bool _isSubscriptionExpired() {
-    final info = profile.subscriptionInfo;
-    if (info == null || info.expire == 0) return false;
-    final expiryDate =
-        DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
-    return expiryDate.isBefore(DateTime.now());
   }
 
   List<Widget> _buildFileProfileInfo(BuildContext context) {

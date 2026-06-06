@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/clash/clash.dart';
-import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
@@ -18,10 +17,7 @@ class ClashMessage {
         for (final AppMessageListener listener in _listeners) {
           switch (m.type) {
             case AppMessageType.log:
-              final log = Log.fromJson(m.data);
-              listener.onLog(log);
-              // 同时推送到事件驱动日志流
-              LogStreamManager.instance.addLog(log);
+              listener.onLog(Log.fromJson(m.data));
               break;
             case AppMessageType.delay:
               listener.onDelay(Delay.fromJson(m.data));
