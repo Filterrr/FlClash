@@ -11,7 +11,17 @@ import 'package:fl_clash/common/low_memory_mode.dart';
 /// - 空闲切换时请求轻量 GC 释放内存
 class AdaptiveTimer {
   final Duration activeInterval;
-  Duration idleInterval;
+  /// 更新空闲间隔，若当前处于空闲模式则立即重启定时器
+  set idleInterval(Duration value) {
+    if (_idleInterval == value) return;
+    _idleInterval = value;
+    if (_isIdleMode && _timer != null) {
+      _restartWithInterval(value);
+    }
+  }
+
+  Duration get idleInterval => _idleInterval;
+  Duration _idleInterval;
   final int idleThreshold;
   final bool Function() callback;
 
@@ -23,10 +33,10 @@ class AdaptiveTimer {
 
   AdaptiveTimer({
     required this.activeInterval,
-    required this.idleInterval,
+    required Duration idleInterval,
     this.idleThreshold = 3,
     required this.callback,
-  });
+  }) : _idleInterval = idleInterval;
 
   bool get isActive => _timer != null && _timer!.isActive;
   int get wakeCount => _wakeCount;
