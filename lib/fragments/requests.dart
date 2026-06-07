@@ -23,6 +23,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
   );
 
   Timer? timer;
+  bool _isVisible = true;
 
   @override
   void initState() {
@@ -40,9 +41,24 @@ class _RequestsFragmentState extends State<RequestsFragment> {
     if (isLowMemoryMode) {
       _stopTimer();
     } else if (isReducedMemoryMode) {
-      _startReducedTimer();
+      if (_isVisible) _startReducedTimer();
     } else {
-      _startTimer();
+      if (_isVisible) _startTimer();
+    }
+  }
+
+  void _onVisibilityChanged(bool visible) {
+    if (_isVisible == visible) return;
+    _isVisible = visible;
+    if (visible) {
+      if (isLowMemoryMode) return;
+      if (isReducedMemoryMode) {
+        _startReducedTimer();
+      } else {
+        _startTimer();
+      }
+    } else {
+      _stopTimer();
     }
   }
 
@@ -148,7 +164,9 @@ class _RequestsFragmentState extends State<RequestsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        if (isCurrent == null || isCurrent) {
+        final visible = isCurrent == null || isCurrent;
+        _onVisibilityChanged(visible);
+        if (visible) {
           _initActions();
         }
         return child!;

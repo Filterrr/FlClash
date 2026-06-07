@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 
 /// 智能轮询定时器：根据数据变化频率自动调整轮询间隔
@@ -7,6 +8,7 @@ import 'package:fl_clash/common/low_memory_mode.dart';
 /// - 数据活跃时使用 [activeInterval] 高频轮询
 /// - 连续 [idleThreshold] 次无变化后降频至 [idleInterval]
 /// - 支持 LowMemoryMode 降频/暂停
+/// - 空闲切换时请求轻量 GC 释放内存
 class AdaptiveTimer {
   final Duration activeInterval;
   final Duration idleInterval;
@@ -17,6 +19,7 @@ class AdaptiveTimer {
   int _idleTicks = 0;
   bool _lastHadChange = false;
   bool _isIdleMode = false;
+  bool _gcRequested = false;
 
   AdaptiveTimer({
     required this.activeInterval,
@@ -30,12 +33,14 @@ class AdaptiveTimer {
   /// 通知当前周期有数据变化，重置空闲计数
   void notifyChange() {
     _lastHadChange = true;
+    _gcRequested = false;
   }
 
   void start() {
     stop();
     _idleTicks = 0;
     _isIdleMode = false;
+    _gcRequested = false;
     _timer = Timer.periodic(activeInterval, (_) {
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
@@ -60,9 +65,19 @@ class AdaptiveTimer {
       _idleTicks++;
       if (_idleTicks >= idleThreshold && !_isIdleMode) {
         _isIdleMode = true;
+        _requestIdleGc();
         _restartWithInterval(idleInterval);
       }
     }
+  }
+
+  /// 切换到空闲模式时请求一次轻量 GC
+  void _requestIdleGc() {
+    if (_gcRequested) return;
+    _gcRequested = true;
+    try {
+      clashCore.requestGc();
+    } catch (_) {}
   }
 
   void _restartWithInterval(Duration interval) {
@@ -78,6 +93,7 @@ class AdaptiveTimer {
         _idleTicks = 0;
         _isIdleMode = false;
         _lastHadChange = false;
+        _gcRequested = false;
         _restartWithInterval(activeInterval);
       } else {
         _idleTicks++;

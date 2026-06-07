@@ -7,10 +7,11 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
 
 class ClashMessage {
-  final controller = StreamController();
+  final controller = StreamController.broadcast();
+  StreamSubscription? _messageSubscription;
 
   ClashMessage._() {
-    clashLib?.receiver.listen(controller.add);
+    _messageSubscription = clashLib?.receiver.listen(controller.add);
     controller.stream.listen(
       (message) {
         final m = AppMessage.fromJson(json.decode(message));
@@ -52,6 +53,13 @@ class ClashMessage {
 
   void removeListener(AppMessageListener listener) {
     _listeners.remove(listener);
+  }
+
+  void dispose() {
+    _messageSubscription?.cancel();
+    _messageSubscription = null;
+    controller.close();
+    _listeners.clear();
   }
 }
 
