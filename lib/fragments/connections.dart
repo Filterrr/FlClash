@@ -32,7 +32,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       connectionsNotifier.value = connectionsNotifier.value.copyWith(
         connections: await clashCore.getConnections(),
       );
-      _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
   }

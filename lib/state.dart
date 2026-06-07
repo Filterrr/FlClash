@@ -28,16 +28,12 @@ class GlobalState {
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
   List<Function> updateFunctionLists = [];
-  Function? _trafficUpdateCallback;
   bool lastTunEnable = false;
   int? lastProfileModified;
   DateTime? _lastForegroundUpdate;
   static const Duration _foregroundUpdateThrottle = Duration(seconds: 5);
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
-
-  set trafficUpdateCallback(Function? callback) =>
-      _trafficUpdateCallback = callback;
 
   startListenUpdate() {
     if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
@@ -46,15 +42,10 @@ class GlobalState {
       idleInterval: const Duration(seconds: 5),
       idleThreshold: 3,
       callback: () {
-        if (isLowMemoryMode) {
-          if (Platform.isAndroid && isVpnService == true) {
-            _trafficUpdateCallback?.call();
-          }
-          return;
-        }
         for (final function in updateFunctionLists) {
           function();
         }
+        return true;
       },
     );
     adaptiveTimer!.start();

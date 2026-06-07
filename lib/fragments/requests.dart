@@ -32,7 +32,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
   }

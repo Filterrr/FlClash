@@ -30,7 +30,7 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
   }

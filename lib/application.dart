@@ -140,10 +140,11 @@ class ApplicationState extends State<Application> {
       idleInterval: const Duration(seconds: 60),
       idleThreshold: 3,
       callback: () {
-        if (isLowMemoryMode) return;
+        if (isLowMemoryMode) return false;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           globalState.appController.updateGroupDebounce();
         });
+        return true;
       },
     );
     groupUpdateTimer!.start();
@@ -291,6 +292,7 @@ class ApplicationState extends State<Application> {
       resourceController.unregisterPausableSubscription(connectivitySubscription!);
     }
     connectivitySubscription?.cancel();
+    clashMessage.dispose();
     await clashService?.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

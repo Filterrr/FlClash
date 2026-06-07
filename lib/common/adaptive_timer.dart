@@ -13,11 +13,10 @@ class AdaptiveTimer {
   final Duration activeInterval;
   final Duration idleInterval;
   final int idleThreshold;
-  final void Function() callback;
+  final bool Function() callback;
 
   Timer? _timer;
   int _idleTicks = 0;
-  bool _lastHadChange = false;
   bool _isIdleMode = false;
   bool _gcRequested = false;
 
@@ -30,12 +29,6 @@ class AdaptiveTimer {
 
   bool get isActive => _timer != null && _timer!.isActive;
 
-  /// 通知当前周期有数据变化，重置空闲计数
-  void notifyChange() {
-    _lastHadChange = true;
-    _gcRequested = false;
-  }
-
   void start() {
     stop();
     _idleTicks = 0;
@@ -46,8 +39,8 @@ class AdaptiveTimer {
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
         return;
       }
-      callback();
-      _updateIdleState();
+      final hadChange = callback();
+      _updateIdleState(hadChange);
     });
   }
 
@@ -56,11 +49,10 @@ class AdaptiveTimer {
     _timer = null;
   }
 
-  void _updateIdleState() {
-    if (_lastHadChange) {
+  void _updateIdleState(bool hadChange) {
+    if (hadChange) {
       _idleTicks = 0;
       _isIdleMode = false;
-      _lastHadChange = false;
     } else {
       _idleTicks++;
       if (_idleTicks >= idleThreshold && !_isIdleMode) {
@@ -84,15 +76,14 @@ class AdaptiveTimer {
     _timer?.cancel();
     _timer = Timer.periodic(interval, (_) {
       if (isLowMemoryMode) return;
-      if (isReducedMemoryMode && _idleTicks % 3 != 0) {
+      if (isReducedMemoryMode && !_reducedIdleTick()) {
         _idleTicks++;
         return;
       }
-      callback();
-      if (_lastHadChange) {
+      final hadChange = callback();
+      if (hadChange) {
         _idleTicks = 0;
         _isIdleMode = false;
-        _lastHadChange = false;
         _gcRequested = false;
         _restartWithInterval(activeInterval);
       } else {
