@@ -100,7 +100,7 @@ class BackgroundMemoryManager {
       }
       return config.appSetting.backgroundOptimizationLevel;
     } catch (_) {
-      return BackgroundOptimizationLevel.balanced;
+      return BackgroundOptimizationLevel.disabled;
     }
   }
 
