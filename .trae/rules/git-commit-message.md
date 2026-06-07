@@ -2,6 +2,7 @@
 alwaysApply: true
 scene: git_message
 ---
+
 # Commit Message Rules
 
 ## Format
