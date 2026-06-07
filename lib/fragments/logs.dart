@@ -21,6 +21,7 @@ class _LogsFragmentState extends State<LogsFragment> {
   );
 
   Timer? timer;
+  bool _isVisible = true;
 
   @override
   void initState() {
@@ -29,7 +30,7 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
   }
@@ -38,9 +39,24 @@ class _LogsFragmentState extends State<LogsFragment> {
     if (isLowMemoryMode) {
       _stopTimer();
     } else if (isReducedMemoryMode) {
-      _startReducedTimer();
+      if (_isVisible) _startReducedTimer();
     } else {
-      _startTimer();
+      if (_isVisible) _startTimer();
+    }
+  }
+
+  void _onVisibilityChanged(bool visible) {
+    if (_isVisible == visible) return;
+    _isVisible = visible;
+    if (visible) {
+      if (isLowMemoryMode) return;
+      if (isReducedMemoryMode) {
+        _startReducedTimer();
+      } else {
+        _startTimer();
+      }
+    } else {
+      _stopTimer();
     }
   }
 
@@ -165,7 +181,9 @@ class _LogsFragmentState extends State<LogsFragment> {
           appState.viewMode == ViewMode.mobile &&
               appState.currentLabel == "tools",
       builder: (_, isCurrent, child) {
-        if (isCurrent == null || isCurrent) {
+        final visible = isCurrent == null || isCurrent;
+        _onVisibilityChanged(visible);
+        if (visible) {
           _initActions();
         }
         return child!;

@@ -20,6 +20,8 @@ class ClashService with ClashInterface {
 
   Process? process;
 
+  Timer? _completerCleanupTimer;
+
   factory ClashService() {
     _instance ??= ClashService._internal();
     return _instance!;
@@ -28,6 +30,20 @@ class ClashService with ClashInterface {
   ClashService._internal() {
     _createServer();
     startCore();
+    _startCompleterCleanup();
+  }
+
+  /// 定期清理已完成的 completer，防止内存累积
+  void _startCompleterCleanup() {
+    _completerCleanupTimer?.cancel();
+    _completerCleanupTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) {
+        callbackCompleterMap.removeWhere((key, completer) {
+          return completer.isCompleted;
+        });
+      },
+    );
   }
 
   _createServer() async {
@@ -404,6 +420,15 @@ class ClashService with ClashInterface {
   }
 
   destroy() async {
+    _completerCleanupTimer?.cancel();
+    _completerCleanupTimer = null;
+    // 清理所有残留的 completer
+    for (final completer in callbackCompleterMap.values) {
+      if (!completer.isCompleted) {
+        completer.completeError(StateError('Service destroyed'));
+      }
+    }
+    callbackCompleterMap.clear();
     final server = await serverCompleter.future;
     await server.close();
     await _deleteSocketFile();

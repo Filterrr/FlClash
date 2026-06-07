@@ -113,6 +113,8 @@ class ApplicationState extends State<Application> {
       priority: ResourcePriority.normal,
       label: 'app_connectivity',
     );
+    // 监听低内存模式变化，控制 groupUpdateTimer
+    lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
@@ -124,6 +126,13 @@ class ApplicationState extends State<Application> {
     });
   }
 
+  void _onLowMemoryModeChanged() {
+    if (isLowMemoryMode) {
+      _cancelTimer();
+    }
+    // reduced 和 normal 模式下 timer 继续运行（AdaptiveTimer 自身已处理降频）
+  }
+
   _initTimer() {
     _cancelTimer();
     groupUpdateTimer = AdaptiveTimer(
@@ -131,10 +140,11 @@ class ApplicationState extends State<Application> {
       idleInterval: const Duration(seconds: 60),
       idleThreshold: 3,
       callback: () {
-        if (isLowMemoryMode) return;
+        if (isLowMemoryMode) return false;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           globalState.appController.updateGroupDebounce();
         });
+        return true;
       },
     );
     groupUpdateTimer!.start();
@@ -277,10 +287,12 @@ class ApplicationState extends State<Application> {
   Future<void> dispose() async {
     linkManager.destroy();
     _cancelTimer();
+    lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
     if (connectivitySubscription != null) {
       resourceController.unregisterPausableSubscription(connectivitySubscription!);
     }
     connectivitySubscription?.cancel();
+    clashMessage.dispose();
     await clashService?.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

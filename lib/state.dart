@@ -28,14 +28,12 @@ class GlobalState {
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
   List<Function> updateFunctionLists = [];
-  Function? _trafficUpdateCallback;
   bool lastTunEnable = false;
   int? lastProfileModified;
+  DateTime? _lastForegroundUpdate;
+  static const Duration _foregroundUpdateThrottle = Duration(seconds: 5);
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
-
-  set trafficUpdateCallback(Function? callback) =>
-      _trafficUpdateCallback = callback;
 
   startListenUpdate() {
     if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
@@ -44,15 +42,10 @@ class GlobalState {
       idleInterval: const Duration(seconds: 5),
       idleThreshold: 3,
       callback: () {
-        if (isLowMemoryMode) {
-          if (Platform.isAndroid && isVpnService == true) {
-            _trafficUpdateCallback?.call();
-          }
-          return;
-        }
         for (final function in updateFunctionLists) {
           function();
         }
+        return true;
       },
     );
     adaptiveTimer!.start();
@@ -306,10 +299,16 @@ class GlobalState {
     final onlyProxy = config.appSetting.onlyProxy;
     final traffic = await clashCore.getTraffic(onlyProxy);
     if (Platform.isAndroid && isVpnService == true) {
-      vpn?.startForeground(
-        title: clashLib?.getCurrentProfileName() ?? "",
-        content: "$traffic",
-      );
+      // 节流前台通知更新，避免频繁唤醒系统通知管理器
+      final now = DateTime.now();
+      if (_lastForegroundUpdate == null ||
+          now.difference(_lastForegroundUpdate!) >= _foregroundUpdateThrottle) {
+        _lastForegroundUpdate = now;
+        vpn?.startForeground(
+          title: clashLib?.getCurrentProfileName() ?? "",
+          content: "$traffic",
+        );
+      }
     } else {
       if (appFlowingState != null) {
         appFlowingState.addTraffic(traffic);

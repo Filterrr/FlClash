@@ -216,6 +216,9 @@ class ApplicationSettingFragment extends StatelessWidget {
                 final config = globalState.appController.config;
                 config.appSetting = config.appSetting.copyWith(
                   backgroundOptimization: value,
+                  backgroundOptimizationLevel: value
+                      ? BackgroundOptimizationLevel.balanced
+                      : BackgroundOptimizationLevel.disabled,
                 );
               },
             ),

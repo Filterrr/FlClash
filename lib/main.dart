@@ -116,15 +116,14 @@ Future<void> vpnService() async {
           },
         ),
       );
-      globalState.updateTraffic(config: config);
+
+      // 使用 AdaptiveTimer 替代硬编码的更新列表，降低后台 CPU 唤醒频率
+      globalState.startListenUpdate();
       globalState.updateFunctionLists = [
         () {
           globalState.updateTraffic(config: config);
         }
       ];
-      globalState.trafficUpdateCallback = () {
-        globalState.updateTraffic(config: config);
-      };
     },
   );
 

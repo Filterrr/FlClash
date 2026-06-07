@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 
 /// 智能轮询定时器：根据数据变化频率自动调整轮询间隔
@@ -7,16 +8,17 @@ import 'package:fl_clash/common/low_memory_mode.dart';
 /// - 数据活跃时使用 [activeInterval] 高频轮询
 /// - 连续 [idleThreshold] 次无变化后降频至 [idleInterval]
 /// - 支持 LowMemoryMode 降频/暂停
+/// - 空闲切换时请求轻量 GC 释放内存
 class AdaptiveTimer {
   final Duration activeInterval;
   final Duration idleInterval;
   final int idleThreshold;
-  final void Function() callback;
+  final bool Function() callback;
 
   Timer? _timer;
   int _idleTicks = 0;
-  bool _lastHadChange = false;
   bool _isIdleMode = false;
+  bool _gcRequested = false;
 
   AdaptiveTimer({
     required this.activeInterval,
@@ -27,22 +29,18 @@ class AdaptiveTimer {
 
   bool get isActive => _timer != null && _timer!.isActive;
 
-  /// 通知当前周期有数据变化，重置空闲计数
-  void notifyChange() {
-    _lastHadChange = true;
-  }
-
   void start() {
     stop();
     _idleTicks = 0;
     _isIdleMode = false;
+    _gcRequested = false;
     _timer = Timer.periodic(activeInterval, (_) {
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
         return;
       }
-      callback();
-      _updateIdleState();
+      final hadChange = callback();
+      _updateIdleState(hadChange);
     });
   }
 
@@ -51,33 +49,42 @@ class AdaptiveTimer {
     _timer = null;
   }
 
-  void _updateIdleState() {
-    if (_lastHadChange) {
+  void _updateIdleState(bool hadChange) {
+    if (hadChange) {
       _idleTicks = 0;
       _isIdleMode = false;
-      _lastHadChange = false;
     } else {
       _idleTicks++;
       if (_idleTicks >= idleThreshold && !_isIdleMode) {
         _isIdleMode = true;
+        _requestIdleGc();
         _restartWithInterval(idleInterval);
       }
     }
+  }
+
+  /// 切换到空闲模式时请求一次轻量 GC
+  void _requestIdleGc() {
+    if (_gcRequested) return;
+    _gcRequested = true;
+    try {
+      clashCore.requestGc();
+    } catch (_) {}
   }
 
   void _restartWithInterval(Duration interval) {
     _timer?.cancel();
     _timer = Timer.periodic(interval, (_) {
       if (isLowMemoryMode) return;
-      if (isReducedMemoryMode && _idleTicks % 3 != 0) {
+      if (isReducedMemoryMode && !_reducedIdleTick()) {
         _idleTicks++;
         return;
       }
-      callback();
-      if (_lastHadChange) {
+      final hadChange = callback();
+      if (hadChange) {
         _idleTicks = 0;
         _isIdleMode = false;
-        _lastHadChange = false;
+        _gcRequested = false;
         _restartWithInterval(activeInterval);
       } else {
         _idleTicks++;
