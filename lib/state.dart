@@ -299,7 +299,6 @@ class GlobalState {
     required Config config,
     AppFlowingState? appFlowingState,
   }) {
-    final onlyProxy = config.appSetting.onlyProxy;
     // 异步获取流量数据，同步返回 false（变化检测由 addTraffic 内部处理）
     _updateTrafficAsync(config: config, appFlowingState: appFlowingState);
     return false;
