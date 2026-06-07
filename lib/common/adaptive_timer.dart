@@ -19,6 +19,7 @@ class AdaptiveTimer {
   int _idleTicks = 0;
   bool _isIdleMode = false;
   bool _gcRequested = false;
+  int _wakeCount = 0;
 
   AdaptiveTimer({
     required this.activeInterval,
@@ -28,17 +29,21 @@ class AdaptiveTimer {
   });
 
   bool get isActive => _timer != null && _timer!.isActive;
+  int get wakeCount => _wakeCount;
+  bool get isIdleMode => _isIdleMode;
 
   void start() {
     stop();
     _idleTicks = 0;
     _isIdleMode = false;
     _gcRequested = false;
+    _wakeCount = 0;
     _timer = Timer.periodic(activeInterval, (_) {
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
         return;
       }
+      _wakeCount++;
       final hadChange = callback();
       _updateIdleState(hadChange);
     });
@@ -80,6 +85,7 @@ class AdaptiveTimer {
         _idleTicks++;
         return;
       }
+      _wakeCount++;
       final hadChange = callback();
       if (hadChange) {
         _idleTicks = 0;

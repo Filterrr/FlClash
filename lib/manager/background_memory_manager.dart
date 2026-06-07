@@ -10,6 +10,7 @@ class _PerformanceStats {
   final List<_ModeTransition> _modeTransitions = [];
   int _gcCount = 0;
   int _cacheClearCount = 0;
+  int _timerWakeCount = 0;
   DateTime? _backgroundEnteredAt;
   Duration _totalBackgroundDuration = Duration.zero;
   int _backgroundCount = 0;
@@ -27,6 +28,7 @@ class _PerformanceStats {
 
   void recordGc() => _gcCount++;
   void recordCacheClear() => _cacheClearCount++;
+  void recordTimerWake() => _timerWakeCount++;
   void recordBackgroundStart() {
     _backgroundEnteredAt = DateTime.now();
     _backgroundCount++;
@@ -43,6 +45,7 @@ class _PerformanceStats {
   Map<String, dynamic> toMap() => {
         'totalGcCount': _gcCount,
         'totalCacheClearCount': _cacheClearCount,
+        'totalTimerWakeCount': _timerWakeCount,
         'totalBackgroundCount': _backgroundCount,
         'totalBackgroundDuration': _totalBackgroundDuration.inSeconds,
         'recentModeTransitions': _modeTransitions
@@ -342,7 +345,19 @@ class BackgroundMemoryManager {
     _memoryMonitorTimer = null;
   }
 
-  Map<String, dynamic> getPerformanceStats() => _perfStats.toMap();
+  Map<String, dynamic> getPerformanceStats() {
+    final stats = _perfStats.toMap();
+    final timer = globalState.adaptiveTimer;
+    stats['adaptiveTimerWakeCount'] = timer?.wakeCount ?? 0;
+    stats['adaptiveTimerIsIdle'] = timer?.isIdleMode ?? false;
+    try {
+      final appController = globalState.appController;
+      stats['requestCount'] = appController.appState.requests.length;
+      stats['logCount'] = appController.appFlowingState.logs.length;
+      stats['trafficCount'] = appController.appFlowingState.traffics.length;
+    } catch (_) {}
+    return stats;
+  }
 
   void dispose() {
     _cancelEscalationTimer();

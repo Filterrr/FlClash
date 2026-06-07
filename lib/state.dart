@@ -27,7 +27,7 @@ class GlobalState {
   final navigatorKey = GlobalKey<NavigatorState>();
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
-  List<Function> updateFunctionLists = [];
+  List<bool Function()> updateFunctionLists = [];
   bool lastTunEnable = false;
   int? lastProfileModified;
   DateTime? _lastForegroundUpdate;
@@ -35,17 +35,20 @@ class GlobalState {
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
-  startListenUpdate() {
+  startListenUpdate({Duration? idleInterval}) {
     if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
     adaptiveTimer = AdaptiveTimer(
       activeInterval: const Duration(seconds: 1),
-      idleInterval: const Duration(seconds: 5),
+      idleInterval: idleInterval ?? const Duration(seconds: 5),
       idleThreshold: 3,
       callback: () {
+        bool hadChange = false;
         for (final function in updateFunctionLists) {
-          function();
+          if (function()) {
+            hadChange = true;
+          }
         }
-        return true;
+        return hadChange;
       },
     );
     adaptiveTimer!.start();
@@ -292,14 +295,23 @@ class GlobalState {
     );
   }
 
-  updateTraffic({
+  bool updateTraffic({
+    required Config config,
+    AppFlowingState? appFlowingState,
+  }) {
+    final onlyProxy = config.appSetting.onlyProxy;
+    // 异步获取流量数据，同步返回 false（变化检测由 addTraffic 内部处理）
+    _updateTrafficAsync(config: config, appFlowingState: appFlowingState);
+    return false;
+  }
+
+  void _updateTrafficAsync({
     required Config config,
     AppFlowingState? appFlowingState,
   }) async {
     final onlyProxy = config.appSetting.onlyProxy;
     final traffic = await clashCore.getTraffic(onlyProxy);
     if (Platform.isAndroid && isVpnService == true) {
-      // 节流前台通知更新，避免频繁唤醒系统通知管理器
       final now = DateTime.now();
       if (_lastForegroundUpdate == null ||
           now.difference(_lastForegroundUpdate!) >= _foregroundUpdateThrottle) {

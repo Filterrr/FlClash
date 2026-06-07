@@ -118,10 +118,11 @@ Future<void> vpnService() async {
       );
 
       // 使用 AdaptiveTimer 替代硬编码的更新列表，降低后台 CPU 唤醒频率
-      globalState.startListenUpdate();
+      // VPN Service 后台运行，使用更长的空闲间隔（15秒）减少唤醒
+      globalState.startListenUpdate(idleInterval: const Duration(seconds: 15));
       globalState.updateFunctionLists = [
         () {
-          globalState.updateTraffic(config: config);
+          return globalState.updateTraffic(config: config);
         }
       ];
     },

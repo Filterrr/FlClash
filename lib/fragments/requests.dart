@@ -64,7 +64,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
 
   void _startTimer() {
     _stopTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       final maxLength = Platform.isAndroid ? 1000 : 60;
       final appState = globalState.appController.appState;
       final requests = appState.requests.safeSublist(
@@ -82,7 +82,7 @@ class _RequestsFragmentState extends State<RequestsFragment> {
 
   void _startReducedTimer() {
     _stopTimer();
-    timer = Timer.periodic(const Duration(milliseconds: 2000), (timer) {
+    timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       final maxLength = Platform.isAndroid ? 200 : 20;
       final appState = globalState.appController.appState;
       final requests = appState.requests.safeSublist(

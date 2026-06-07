@@ -38,7 +38,7 @@ class AppState with ChangeNotifier {
         _selectedMap = selectedMap,
         _sortNum = 0,
         _checkIpNum = 0,
-        _requests = [],
+        _requests = <Connection>[],
         _mode = mode,
         _brightness = null,
         _delayMap = {},
@@ -145,9 +145,11 @@ class AppState with ChangeNotifier {
   }
 
   addRequest(Connection value) {
-    _requests = List.from(_requests)..add(value);
+    _requests.add(value);
     final maxLength = isLowMemoryMode ? 100 : (isReducedMemoryMode ? 500 : 1000);
-    _requests = _requests.safeSublist(_requests.length - maxLength);
+    if (_requests.length > maxLength) {
+      _requests = _requests.sublist(_requests.length - maxLength);
+    }
     if (!isLowMemoryMode && !isReducedMemoryMode) {
       notifyListeners();
     } else if (isReducedMemoryMode && _requests.length % 20 == 0) {
@@ -312,8 +314,8 @@ class AppFlowingState with ChangeNotifier {
   Traffic _totalTraffic;
 
   AppFlowingState()
-      : _logs = [],
-        _traffics = [],
+      : _logs = <Log>[],
+        _traffics = <Traffic>[],
         _totalTraffic = Traffic();
 
   bool get isStart => _runTime != null;
@@ -337,9 +339,11 @@ class AppFlowingState with ChangeNotifier {
   }
 
   addLog(Log log) {
-    _logs = List.from(_logs)..add(log);
+    _logs.add(log);
     final maxLength = isLowMemoryMode ? 30 : (isReducedMemoryMode ? 100 : 1000);
-    _logs = _logs.safeSublist(_logs.length - maxLength);
+    if (_logs.length > maxLength) {
+      _logs = _logs.sublist(_logs.length - maxLength);
+    }
     if (isNormalMemoryMode) {
       notifyListeners();
     } else if (isReducedMemoryMode && _logs.length % 50 == 0) {
@@ -357,9 +361,11 @@ class AppFlowingState with ChangeNotifier {
   }
 
   addTraffic(Traffic traffic) {
-    _traffics = List.from(_traffics)..add(traffic);
+    _traffics.add(traffic);
     final maxLength = isLowMemoryMode ? 10 : 60;
-    _traffics = _traffics.safeSublist(_traffics.length - maxLength);
+    if (_traffics.length > maxLength) {
+      _traffics = _traffics.sublist(_traffics.length - maxLength);
+    }
     if (!isLowMemoryMode) {
       notifyListeners();
     }

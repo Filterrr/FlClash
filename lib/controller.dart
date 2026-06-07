@@ -102,19 +102,24 @@ class AppController {
     }
   }
 
-  updateRunTime() {
+  bool updateRunTime() {
     final startTime = globalState.startTime;
     if (startTime != null) {
       final startTimeStamp = startTime.millisecondsSinceEpoch;
       final nowTimeStamp = DateTime.now().millisecondsSinceEpoch;
-      appFlowingState.runTime = nowTimeStamp - startTimeStamp;
+      final newRunTime = nowTimeStamp - startTimeStamp;
+      final changed = appFlowingState.runTime != newRunTime;
+      appFlowingState.runTime = newRunTime;
+      return changed;
     } else {
+      final changed = appFlowingState.runTime != null;
       appFlowingState.runTime = null;
+      return changed;
     }
   }
 
-  updateTraffic() {
-    globalState.updateTraffic(
+  bool updateTraffic() {
+    return globalState.updateTraffic(
       config: config,
       appFlowingState: appFlowingState,
     );

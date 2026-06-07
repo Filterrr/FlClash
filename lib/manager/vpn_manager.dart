@@ -37,6 +37,12 @@ class _VpnContainerState extends State<VpnManager> {
   }
 
   @override
+  void dispose() {
+    vpnTipDebounce = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Selector2<Config, ClashConfig, VPNState>(
       selector: (_, config, clashConfig) => VPNState(

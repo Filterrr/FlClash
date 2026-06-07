@@ -96,6 +96,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   @override
   Future<void> dispose() async {
     clashMessage.removeListener(this);
+    updateDelayDebounce = null;
     super.dispose();
   }
 
@@ -113,6 +114,11 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onLog(Log log) {
+    // 低内存模式下跳过 info 级别日志，减少后台内存累积
+    if (isLowMemoryMode && log.logLevel != LogLevel.error && log.logLevel != LogLevel.warning) {
+      super.onLog(log);
+      return;
+    }
     globalState.appController.appFlowingState.addLog(log);
     if (log.logLevel == LogLevel.error && isNormalMemoryMode) {
       globalState.appController.showSnackBar(log.payload ?? '');
