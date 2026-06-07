@@ -161,13 +161,17 @@ class BackgroundMemoryManager {
     _perfStats.recordBackgroundEnd();
 
     _cancelEscalationTimer();
-    _restoreGlobalStateTimerFrequency();
-    _resumeAllUpdates();
     _stopBackgroundGc();
     _stopMemoryMonitor();
 
+    // 先恢复内存模式，再恢复 timer，否则 AdaptiveTimer 内部的
+    // isLowMemoryMode 检查会阻止回调执行
+    _transitionToMode(LowMemoryMode.normal);
+
+    _restoreGlobalStateTimerFrequency();
+    _resumeAllUpdates();
+
     if (_optimizationLevel != BackgroundOptimizationLevel.disabled) {
-      _transitionToMode(LowMemoryMode.normal);
       _scheduleUiRefresh();
     }
   }
@@ -234,7 +238,11 @@ class BackgroundMemoryManager {
 
   void _restoreGlobalStateTimerFrequency() {
     if (globalState.isStart) {
-      globalState.startListenUpdate();
+      globalState.startListenUpdate(
+        idleInterval: globalState.isVpnService
+            ? const Duration(seconds: 15)
+            : null,
+      );
     }
   }
 
