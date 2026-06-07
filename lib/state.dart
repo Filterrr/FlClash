@@ -36,7 +36,13 @@ class GlobalState {
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
   startListenUpdate({Duration? idleInterval}) {
-    if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
+    if (adaptiveTimer != null && adaptiveTimer!.isActive) {
+      // timer 已在运行，但如果传入了新的 idleInterval 则更新
+      if (idleInterval != null) {
+        adaptiveTimer!.idleInterval = idleInterval;
+      }
+      return;
+    }
     adaptiveTimer = AdaptiveTimer(
       activeInterval: const Duration(seconds: 1),
       idleInterval: idleInterval ?? const Duration(seconds: 5),
