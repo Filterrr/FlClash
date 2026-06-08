@@ -62,4 +62,33 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ---
 
+## Examples & Anti-patterns
+
+See [EXAMPLES.md](EXAMPLES.md) for detailed before/after examples of:
+
+### Think Before Coding
+- ❌ Hidden assumptions (exporting all users without asking about pagination/privacy)
+- ❌ Picking solutions silently (optimizing search without clarifying which "faster")
+- ✅ Surfacing assumptions explicitly
+- ✅ Presenting multiple interpretations with tradeoffs
+
+### Simplicity First
+- ❌ Over-abstraction (30+ lines for simple discount calculation)
+- ❌ Speculative features (unnecessary caching/validation/notifications)
+- ✅ Single function for simple cases
+- ✅ Adding complexity only when requirements demand it
+
+### Surgical Changes
+- ❌ "Improving" unrelated code while fixing bugs
+- ❌ Refactoring things that aren't broken
+- ✅ Touching only what's necessary
+- ✅ Cleaning up only your own mess (orphans from your changes)
+
+### Goal-Driven Execution
+- ❌ Vague criteria ("make it work")
+- ✅ Verifiable goals ("write test for X, then make it pass")
+- ✅ Brief plans with verification steps
+
+---
+
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

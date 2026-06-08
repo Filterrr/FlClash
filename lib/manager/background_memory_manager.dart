@@ -79,14 +79,20 @@ class BackgroundMemoryManager {
 
   bool _isInitialized = false;
   bool _isInBackground = false;
-  Timer? _gcTimer;
-  Timer? _memoryMonitorTimer;
+  Timer? _backgroundMaintenanceTimer;
   Timer? _escalationTimer;
   int _backgroundDuration = 0;
   final _PerformanceStats _perfStats = _PerformanceStats();
 
-  static const Duration _gcInterval = Duration(seconds: 300);
-  static const Duration _memoryMonitorInterval = Duration(seconds: 600);
+  /// 后台持续时间阈值：动态调整维护间隔
+  static const int _mediumBgThreshold = 300; // 5 分钟后进入中期
+  static const int _longBgThreshold = 1800; // 30 分钟后进入长期
+
+  /// 各阶段维护间隔
+  static const Duration _initialMaintenanceInterval = Duration(seconds: 300);
+  static const Duration _mediumMaintenanceInterval = Duration(seconds: 600);
+  static const Duration _longMaintenanceInterval = Duration(seconds: 900);
+
   static const Duration _escalationDelay = Duration(seconds: 120);
   static const int _aggressiveGcThreshold = 600;
 
@@ -113,10 +119,10 @@ class BackgroundMemoryManager {
 
   void _setupResourceCallbacks() {
     resourceController.onEnterLowMemory(() {
-      _startBackgroundGc();
+      _startBackgroundMaintenance();
     });
     resourceController.onExitLowMemory(() {
-      _stopBackgroundGc();
+      _stopBackgroundMaintenance();
     });
   }
 
@@ -137,15 +143,14 @@ class BackgroundMemoryManager {
     switch (level) {
       case BackgroundOptimizationLevel.light:
         _transitionToMode(LowMemoryMode.reduced);
-        _startMemoryMonitor();
+        _startBackgroundMaintenance();
       case BackgroundOptimizationLevel.balanced:
         _transitionToMode(LowMemoryMode.reduced);
         _startEscalationTimer();
-        _startMemoryMonitor();
+        _startBackgroundMaintenance();
       case BackgroundOptimizationLevel.aggressive:
         _transitionToMode(LowMemoryMode.low);
-        _startBackgroundGc();
-        _startMemoryMonitor();
+        _startBackgroundMaintenance();
       case BackgroundOptimizationLevel.disabled:
         break;
     }
@@ -160,8 +165,7 @@ class BackgroundMemoryManager {
     _cancelEscalationTimer();
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
-    _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _stopBackgroundMaintenance();
 
     if (_optimizationLevel != BackgroundOptimizationLevel.disabled) {
       _transitionToMode(LowMemoryMode.normal);
@@ -175,7 +179,7 @@ class BackgroundMemoryManager {
       if (_isInBackground &&
           _optimizationLevel == BackgroundOptimizationLevel.balanced) {
         _transitionToMode(LowMemoryMode.low);
-        _startBackgroundGc();
+        // 已有 _backgroundMaintenanceTimer 在运行，无需额外启动
       }
     });
   }
@@ -260,21 +264,46 @@ class BackgroundMemoryManager {
     });
   }
 
-  void _startBackgroundGc() {
-    _stopBackgroundGc();
-    _gcTimer = Timer.periodic(_gcInterval, (_) {
+  /// 根据后台持续时间计算当前维护间隔
+  Duration _currentMaintenanceInterval() {
+    if (_backgroundDuration >= _longBgThreshold) {
+      return _longMaintenanceInterval;
+    }
+    if (_backgroundDuration >= _mediumBgThreshold) {
+      return _mediumMaintenanceInterval;
+    }
+    return _initialMaintenanceInterval;
+  }
+
+  /// 统一的后台维护定时器：合并了原 GC 定时器和内存监控定时器
+  /// 根据后台持续时间动态调整间隔，减少长时间后台时的 CPU 唤醒
+  void _startBackgroundMaintenance() {
+    _stopBackgroundMaintenance();
+    final interval = _currentMaintenanceInterval();
+    _backgroundMaintenanceTimer = Timer.periodic(interval, (_) {
+      if (!_isInBackground) return;
+
       _requestGc();
       _requestDartGc();
-      _backgroundDuration += _gcInterval.inSeconds;
+      resourceController.forceClearImageCache();
+      _perfStats.recordCacheClear();
+      _backgroundDuration += interval.inSeconds;
+
       if (_backgroundDuration >= _aggressiveGcThreshold) {
         _performAggressiveCleanup();
+      }
+
+      // 检查是否需要调整间隔（升级后重启定时器）
+      final newInterval = _currentMaintenanceInterval();
+      if (newInterval != interval) {
+        _startBackgroundMaintenance();
       }
     });
   }
 
-  void _stopBackgroundGc() {
-    _gcTimer?.cancel();
-    _gcTimer = null;
+  void _stopBackgroundMaintenance() {
+    _backgroundMaintenanceTimer?.cancel();
+    _backgroundMaintenanceTimer = null;
   }
 
   void _requestGc() {
@@ -321,33 +350,11 @@ class BackgroundMemoryManager {
     }
   }
 
-  void _startMemoryMonitor() {
-    _stopMemoryMonitor();
-    _memoryMonitorTimer = Timer.periodic(_memoryMonitorInterval, (_) {
-      if (_isInBackground) {
-        _requestGc();
-        _requestDartGc();
-        resourceController.forceClearImageCache();
-        _perfStats.recordCacheClear();
-        _backgroundDuration += _memoryMonitorInterval.inSeconds;
-        if (_backgroundDuration >= _aggressiveGcThreshold) {
-          _performAggressiveCleanup();
-        }
-      }
-    });
-  }
-
-  void _stopMemoryMonitor() {
-    _memoryMonitorTimer?.cancel();
-    _memoryMonitorTimer = null;
-  }
-
   Map<String, dynamic> getPerformanceStats() => _perfStats.toMap();
 
   void dispose() {
     _cancelEscalationTimer();
-    _stopBackgroundGc();
-    _stopMemoryMonitor();
+    _stopBackgroundMaintenance();
     resourceController.dispose();
     _isInitialized = false;
   }
