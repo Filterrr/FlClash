@@ -1,4 +1,4 @@
-# EXAMPLES.md（完整中文翻译版）
+# EXAMPLES.md
 
 # 示例
 
