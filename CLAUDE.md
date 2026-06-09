@@ -1,94 +1,146 @@
 # CLAUDE.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+用于减少 LLM 常见编码错误的行为准则。可根据需要与项目特定规则合并使用。
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+**权衡原则：** 这些准则更偏向谨慎而非速度。对于简单任务，可根据实际情况灵活判断。
 
-## 1. Think Before Coding
+## 1. 编码前先思考
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**不要臆测。不要掩饰困惑。明确说明权衡与取舍。**
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+在开始实现之前：
 
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+- 明确说明你的假设。
+- 如果存在不确定性，应主动询问。
+- 如果存在多种可能的理解方式，应全部列出，不要默默选择其中一种。
+- 如果存在更简单的方案，应明确指出。
+- 在必要时，应对需求提出合理质疑或建议。
+- 如果某些内容不清晰，应暂停实现。
+- 明确指出困惑点并提出问题。
 
 ---
 
-## Examples & Anti-patterns
+## 2. 简洁优先
 
-See [EXAMPLES.md](EXAMPLES.md) for detailed before/after examples of:
+**只编写解决问题所需的最少代码。不做任何推测性的扩展。**
 
-### Think Before Coding
-- ❌ Hidden assumptions (exporting all users without asking about pagination/privacy)
-- ❌ Picking solutions silently (optimizing search without clarifying which "faster")
-- ✅ Surfacing assumptions explicitly
-- ✅ Presenting multiple interpretations with tradeoffs
+- 不添加需求之外的功能。
+- 不为一次性代码设计抽象层。
+- 不引入未被要求的“灵活性”或“可配置性”。
+- 不为实际上不可能发生的场景编写错误处理逻辑。
+- 如果写了 200 行代码，而实际上 50 行就能完成，应重写。
 
-### Simplicity First
-- ❌ Over-abstraction (30+ lines for simple discount calculation)
-- ❌ Speculative features (unnecessary caching/validation/notifications)
-- ✅ Single function for simple cases
-- ✅ Adding complexity only when requirements demand it
+时刻自问：
 
-### Surgical Changes
-- ❌ "Improving" unrelated code while fixing bugs
-- ❌ Refactoring things that aren't broken
-- ✅ Touching only what's necessary
-- ✅ Cleaning up only your own mess (orphans from your changes)
+> “资深工程师会认为这段实现过度复杂吗？”
 
-### Goal-Driven Execution
-- ❌ Vague criteria ("make it work")
-- ✅ Verifiable goals ("write test for X, then make it pass")
-- ✅ Brief plans with verification steps
+如果答案是“会”，那就继续简化。
 
 ---
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+## 3. 外科手术式修改
+
+**只修改必须修改的部分。只清理自己造成的问题。**
+
+在修改现有代码时：
+
+- 不要顺手“优化”相邻代码、注释或格式。
+- 不要重构没有问题的代码。
+- 保持现有代码风格一致，即使你个人有不同偏好。
+- 如果发现无关的死代码，可以指出，但不要直接删除。
+
+当你的修改产生遗留问题时：
+
+- 删除因你的修改而变得未使用的导入、变量或函数。
+- 不要删除原本就存在的死代码，除非用户明确要求。
+
+检验标准：
+
+> 每一行变更都应当能够直接追溯到用户的需求。
+
+---
+
+## 4. 以目标驱动执行
+
+**先定义成功标准，再持续迭代直到验证通过。**
+
+将任务转换为可验证的目标：
+
+- “增加校验逻辑” → “先编写无效输入测试，然后让测试通过”
+- “修复 Bug” → “先编写能复现问题的测试，然后让测试通过”
+- “重构模块 X” → “确保重构前后所有测试均通过”
+
+对于多步骤任务，应提供简要计划：
+
+```text
+1. [步骤] → 验证：[检查项]
+2. [步骤] → 验证：[检查项]
+3. [步骤] → 验证：[检查项]
+```
+
+强有力的成功标准能够支持自主迭代。
+
+而模糊标准（例如“让它正常工作”）则会导致频繁需要额外确认。
+
+---
+
+# 示例与反面案例
+
+详见 [EXAMPLES.md](EXAMPLES.md) ，其中包含以下内容的详细前后对比示例：
+
+## 编码前先思考
+
+### ❌ 反例
+
+- 在未确认分页和隐私要求的情况下导出所有用户数据（隐藏假设）
+- 未澄清“更快”的具体含义就直接优化搜索（擅自选择方案）
+
+### ✅ 正例
+
+- 明确说明所有假设条件
+- 给出多个可选方案及其优缺点
+
+## 简洁优先
+
+### ❌ 反例
+
+- 简单折扣计算却设计出 30 多行的抽象框架
+- 提前加入缓存、额外校验、通知等未被要求的功能
+
+### ✅ 正例
+
+- 简单场景只使用单个函数实现
+- 仅在需求真正出现时才增加复杂度
+
+## 外科手术式修改
+
+### ❌ 反例
+
+- 修复 Bug 时顺手修改大量无关代码
+- 重构本身没有问题的模块
+
+### ✅ 正例
+
+- 只修改必要部分
+- 只清理由自身改动产生的遗留问题
+
+## 以目标驱动执行
+
+### ❌ 反例
+
+- “让它正常工作”这类模糊目标
+
+### ✅ 正例
+
+- “编写针对 X 的测试，并确保测试通过”
+- 包含验证步骤的简洁执行计划
+
+---
+
+## 判断这些准则是否发挥作用
+
+如果出现以下结果，则说明这些准则正在有效发挥作用：
+
+- 代码差异（Diff）中的无关改动更少
+- 因过度设计导致的重写次数减少
+- 在开始实现之前提出澄清问题，而不是在犯错之后再补救
