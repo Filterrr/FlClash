@@ -1,523 +1,522 @@
-# EXAMPLES.md
-
 # 示例
 
-通过真实世界的代码案例展示四项原则。每个示例都会说明 LLM 常见的错误做法，以及正确的改进方式。
+展示四大原则的真实代码示例。每个示例展示 LLM 常犯的错误以及如何纠正。
 
 ---
 
-# 1. 编码前先思考（Think Before Coding）
+## 1. 编码前先思考
 
-## 示例 1：隐藏假设（Hidden Assumptions）
+### 示例 1：隐藏的假设
 
-**用户请求：**
+**用户请求：** "添加一个导出用户数据的功能"
 
-> “添加一个导出用户数据的功能”
-
-### ❌ LLM 常见做法（错误的假设）
+**❌ LLM 常见做法（错误假设）**
 
 ```python
 def export_users(format='json'):
     """Export all users to a file."""
     users = User.query.all()
-
+    
     if format == 'json':
         with open('users.json', 'w') as f:
             json.dump([u.to_dict() for u in users], f)
     elif format == 'csv':
         with open('users.csv', 'w') as f:
-            writer = csv.DictWriter(
-                f,
-                fieldnames=['id', 'email', 'name']
-            )
+            writer = csv.DictWriter(f, fieldnames=['id', 'email', 'name'])
             writer.writeheader()
             writer.writerows([u.to_dict() for u in users])
-
+    
     return f"Exported {len(users)} users"
 ```
 
-### 存在的问题
+**问题：**
+- 假设要导出所有用户（分页呢？隐私呢？）
+- 未经询问就假设了文件位置
+- 假设了要包含哪些字段
+- 假设了 CSV 字段名而没有检查实际数据结构
 
-- 默认导出全部用户（是否需要分页？是否涉及隐私问题？）
-- 默认决定文件保存位置
-- 默认决定导出的字段
-- 默认决定 CSV 字段结构
-- 未确认实际业务需求
+**✅ 正确做法（暴露假设）**
 
-### ✅ 正确做法（主动暴露假设）
+```
+在实现之前，我需要澄清：
 
-在实现前应先澄清：
+1. **范围**：导出所有用户还是过滤后的子集？（涉及隐私）
+2. **格式**：你说的"导出"是指：
+   - 在浏览器中下载文件？
+   - 后台任务加邮件通知？
+   - 返回数据的 API 端点？
+3. **字段**：需要哪些用户字段？（某些可能是敏感信息）
+4. **数据量**：通常有多少用户？（影响实现方案）
 
-```text
-在开始实现之前，我需要确认以下问题：
+最简单的方案：添加一个返回分页 JSON 的 API 端点。
+基于文件的导出需要更多信息。
 
-1. 范围：导出全部用户还是部分用户？
-   （涉及隐私与数据规模问题）
-
-2. 导出方式：
-   - 浏览器下载文件
-   - 后台任务生成文件后邮件通知
-   - API 接口返回数据
-
-3. 导出字段：
-   需要包含哪些字段？
-   某些字段可能属于敏感信息。
-
-4. 数据量：
-   通常有多少用户？
-   这会影响具体实现方案。
-
-最简单的方案是：
-提供一个返回分页 JSON 数据的 API。
-
-如果需要文件导出，则需要更多信息。
+你倾向于哪种？
 ```
 
----
+### 示例 2：多种解读
 
-## 示例 2：多种解释可能（Multiple Interpretations）
+**用户请求：** "让搜索更快"
 
-**用户请求：**
-
-> “让搜索更快”
-
-### ❌ LLM 常见做法（擅自选择方案）
+**❌ LLM 常见做法（默默选择）**
 
 ```python
+# 添加缓存、数据库索引和异步处理
+# 却没有问清楚是哪种"更快"
 @lru_cache(maxsize=1000)
-async def search(query: str):
-    ...
+async def search(query: str) -> List[Result]:
+    # ... 200 行优化代码
 ```
 
-直接增加：
+**✅ 正确做法**
 
-- 缓存
-- 数据库索引
-- 异步处理
+```
+"让搜索更快"可能意味着：
 
-但没有确认“更快”究竟指什么。
+1. **更快的响应时间**（从 500ms 降到 < 100ms）
+   - 添加数据库索引
+   - 缓存高频查询
+   - 预估工作量：2 小时
 
-### ✅ 正确做法
+2. **处理更多并发搜索**（吞吐量）
+   - 添加 async/await
+   - 连接池
+   - 预估工作量：4 小时
 
-应先澄清目标：
+3. **更快的感知速度**（用户体验）
+   - 立即显示部分结果
+   - 渐进式加载
+   - 预估工作量：3 小时
 
-```text
-“让搜索更快”可能有多种含义：
-
-1. 响应时间更短
-   （500ms → 100ms）
-   方案：索引、缓存
-
-2. 并发能力更强
-   （吞吐量提升）
-   方案：异步处理、连接池
-
-3. 用户感知更快
-   （体验优化）
-   方案：渐进加载、先显示部分结果
-
-当前平均响应时间约为 500ms。
-
-请问您最关注哪一方面？
+当前搜索典型查询耗时约 500ms。
+你的场景中最看重哪个方面？
 ```
 
 ---
 
-# 2. 简洁优先（Simplicity First）
+## 2. 简洁优先
 
-## 示例 1：过度抽象（Over-abstraction）
+### 示例 1：过度抽象
 
-**用户请求：**
+**用户请求：** "添加一个计算折扣的函数"
 
-> “增加一个计算折扣的函数”
+**❌ LLM 常见做法（过度工程化）**
 
-### ❌ LLM 常见做法（过度设计）
+```python
+from abc import ABC, abstractmethod
+from enum import Enum
+from typing import Protocol, Union
+from dataclasses import dataclass
 
-为了一个简单折扣计算，构建：
+class DiscountStrategy(ABC):
+    @abstractmethod
+    def calculate(self, amount: float) -> float:
+        pass
 
-- Strategy 模式
-- 抽象基类
-- 配置对象
-- 多种折扣策略
-- 独立计算器类
+class PercentageDiscount(DiscountStrategy):
+    def __init__(self, percentage: float):
+        self.percentage = percentage
+    
+    def calculate(self, amount: float) -> float:
+        return amount * (self.percentage / 100)
 
-最终需要三十多行配置代码才能完成一次简单计算。
+class FixedDiscount(DiscountStrategy):
+    def __init__(self, fixed_amount: float):
+        self.fixed_amount = fixed_amount
+    
+    def calculate(self, amount: float) -> float:
+        return min(self.fixed_amount, amount)
 
-### ✅ 正确做法（保持简单）
+@dataclass
+class DiscountConfig:
+    strategy: DiscountStrategy
+    min_purchase: float = 0.0
+    max_discount: float = float('inf')
+
+class DiscountCalculator:
+    def __init__(self, config: DiscountConfig):
+        self.config = config
+    
+    def apply_discount(self, amount: float) -> float:
+        if amount < self.config.min_purchase:
+            return 0
+        discount = self.config.strategy.calculate(amount)
+        return min(discount, self.config.max_discount)
+
+# 一个简单计算需要 30+ 行的初始化代码
+```
+
+**✅ 正确做法（简洁）**
 
 ```python
 def calculate_discount(amount: float, percent: float) -> float:
-    """计算折扣金额，percent 范围为 0-100。"""
+    """Calculate discount amount. percent should be 0-100."""
     return amount * (percent / 100)
+
+# 使用
+discount = calculate_discount(100.0, 10.0)  # 减 $10
 ```
 
-使用方式：
+**何时增加复杂度：** 只在你确实需要多种折扣类型时。如果之后有这个需求，到时候再重构。
+
+### 示例 2：投机性功能
+
+**用户请求：** "把用户偏好设置保存到数据库"
+
+**❌ LLM 常见做法（不必要的功能）**
 
 ```python
-discount = calculate_discount(100.0, 10.0)
+class PreferenceManager:
+    def __init__(self, db, cache=None, validator=None):
+        self.db = db
+        self.cache = cache or InMemoryCache()
+        self.validator = validator or DefaultValidator()
+    
+    def save(self, user_id: int, prefs: dict, 
+             merge: bool = True, 
+             validate: bool = True,
+             notify: bool = False) -> bool:
+        """Save preferences with optional merging, validation, and notifications."""
+        
+        if validate:
+            errors = self.validator.validate(prefs)
+            if errors:
+                raise ValidationError(errors)
+        
+        existing = self.get(user_id) if merge else {}
+        
+        if merge:
+            existing.update(prefs)
+            prefs = existing
+        
+        self.db.execute(
+            "UPDATE users SET preferences = ? WHERE id = ?",
+            (json.dumps(prefs), user_id)
+        )
+        
+        if self.cache:
+            self.cache.set(f"prefs:{user_id}", prefs)
+        
+        if notify:
+            self.notify_preference_change(user_id, prefs)
+        
+        return True
+    
+    def notify_preference_change(self, user_id: int, prefs: dict):
+        # 为一个没人要的功能又写了 30 行
+        pass
 ```
 
-结果：
-
-```text
-10 元折扣
-```
-
-### 何时增加复杂度？
-
-仅当真正出现以下需求时：
-
-- 固定金额折扣
-- 满减折扣
-- 多种促销规则
-
-届时再重构。
-
-不要提前设计。
-
----
-
-## 示例 2：推测性功能（Speculative Features）
-
-**用户请求：**
-
-> “把用户偏好保存到数据库”
-
-### ❌ LLM 常见做法
-
-额外加入：
-
-- 缓存系统
-- 校验器
-- 自动合并逻辑
-- 通知系统
-- 可选参数
-
-虽然技术上合理，但用户根本没有要求。
-
-### ✅ 正确做法
+**✅ 正确做法（只做被要求的）**
 
 ```python
 def save_preferences(db, user_id: int, preferences: dict):
-    """保存用户偏好到数据库"""
+    """Save user preferences to database."""
     db.execute(
         "UPDATE users SET preferences = ? WHERE id = ?",
         (json.dumps(preferences), user_id)
     )
 ```
 
-### 原则
-
-后续真正需要时再增加：
-
-- 缓存
-- 数据校验
-- 自动合并
-- 消息通知
-
-不要提前实现未来需求。
+**按需补充：** 缓存（性能出问题时）、验证（出现脏数据时）、合并（需求出现时）。
 
 ---
 
-# 3. 外科手术式修改（Surgical Changes）
+## 3. 精准修改
 
-## 示例 1：顺手重构（Drive-by Refactoring）
+### 示例 1：随手重构
 
-**用户请求：**
+**用户请求：** "修复空邮箱导致验证器崩溃的 bug"
 
-> “修复空邮箱导致校验器崩溃的问题”
-
-### ❌ LLM 常见做法
-
-在修复 Bug 时同时：
-
-- 改进邮箱校验规则
-- 新增用户名规则
-- 修改注释
-- 添加 Docstring
-- 调整代码结构
-
-### 存在的问题
-
-这些修改与当前 Bug 无关。
-
-扩大了变更范围。
-
-增加了引入新 Bug 的风险。
-
-### ✅ 正确做法
-
-仅修改导致问题的代码：
+**❌ LLM 常见做法（改太多了）**
 
 ```diff
-- if not user_data.get('email'):
-+ email = user_data.get('email', '')
-+ if not email or not email.strip():
+  def validate_user(user_data):
+-     # Check email format
+-     if not user_data.get('email'):
++     """Validate user data."""
++     email = user_data.get('email', '').strip()
++     
++     # Validate email
++     if not email:
+          raise ValueError("Email required")
+-     
+-     # Basic email validation
+-     if '@' not in user_data['email']:
++     if '@' not in email or '.' not in email.split('@')[1]:
+          raise ValueError("Invalid email")
+      
+-     # Check username
+-     if not user_data.get('username'):
++     # Validate username
++     username = user_data.get('username', '').strip()
++     if not username:
+          raise ValueError("Username required")
++     if len(username) < 3:
++         raise ValueError("Username too short")
++     if not username.isalnum():
++         raise ValueError("Username must be alphanumeric")
+      
+      return True
 ```
 
-以及：
+**问题：**
+- 超出 bug 修复范围"改进"了邮箱验证
+- 添加了没人要的用户名验证
+- 改了注释
+- 加了 docstring
+
+**✅ 正确做法（精准）**
 
 ```diff
-- if '@' not in user_data['email']:
-+ if '@' not in email:
+  def validate_user(user_data):
+      # Check email format
+-     if not user_data.get('email'):
++     email = user_data.get('email', '')
++     if not email or not email.strip():
+          raise ValueError("Email required")
+      
+      # Basic email validation
+-     if '@' not in user_data['email']:
++     if '@' not in email:
+          raise ValueError("Invalid email")
+      
+      # Check username
+      if not user_data.get('username'):
+          raise ValueError("Username required")
+      
+      return True
 ```
 
-除此之外不做任何修改。
+**只改了：** 修复空邮箱处理的特定行。
 
-### 原则
+### 示例 2：风格漂移
 
-> 每一行修改都应直接对应用户需求。
+**用户请求：** "给上传函数添加日志"
+
+**❌ LLM 常见做法（顺手格式化）**
+
+```diff
+- def upload_file(file_path, destination):
++ def upload_file(file_path: str, destination: str) -> bool:
++     """Upload file to destination with logging."""
++     logger.info(f"Uploading {file_path} to {destination}")
++     
+      try:
+-         with open(file_path, 'rb') as f:
+-             data = f.read()
+-         
+-         response = requests.post(destination, files={'file': data})
+-         
+-         if response.status_code == 200:
+-             return True
+-         else:
+-             return False
++         with open(file_path, "rb") as f:
++             data = f.read()
++         response = requests.post(destination, files={"file": data})
++         success = response.status_code == 200
++         
++         if success:
++             logger.info(f"Upload successful: {file_path}")
++         else:
++             logger.error(f"Upload failed: {file_path}, status={response.status_code}")
++         
++         return success
+      except Exception as e:
+-         print(f"Error: {e}")
++         logger.exception(f"Upload error for {file_path}: {e}")
+          return False
+```
+
+**问题：**
+- 改了引号风格（'' 变 ""）
+- 加了没人要的类型注解
+- 加了 docstring
+- 改了空白格式
+- 改了布尔值返回逻辑
+
+**✅ 正确做法（匹配现有风格）**
+
+```diff
++ import logging
++ 
++ logger = logging.getLogger(__name__)
++ 
+  def upload_file(file_path, destination):
++     logger.info(f'Starting upload: {file_path}')
+      try:
+          with open(file_path, 'rb') as f:
+              data = f.read()
+          
+          response = requests.post(destination, files={'file': data})
+          
+          if response.status_code == 200:
++             logger.info(f'Upload successful: {file_path}')
+              return True
+          else:
++             logger.error(f'Upload failed: {file_path}, status={response.status_code}')
+              return False
+      except Exception as e:
+-         print(f"Error: {e}")
++         logger.exception(f'Upload error: {file_path}')
+          return False
+```
+
+**匹配了：** 单引号、无类型注解、现有布尔模式、缩进风格。
 
 ---
 
-## 示例 2：风格漂移（Style Drift）
+## 4. 目标驱动执行
 
-**用户请求：**
+### 示例 1：模糊 vs. 可验证
 
-> “给上传函数增加日志”
+**用户请求：** "修复认证系统"
 
-### ❌ LLM 常见做法
+**❌ LLM 常见做法（模糊方案）**
 
-同时修改：
+```
+我将通过以下步骤修复认证系统：
+1. 审查代码
+2. 发现问题
+3. 做出改进
+4. 测试变更
 
-- 引号风格
-- 类型标注
-- Docstring
-- 格式化方式
-- 返回逻辑
+[然后在没有明确成功标准的情况下开始改代码]
+```
 
-虽然代码变“现代化”了，但这些都不是当前任务。
+**✅ 正确做法（可验证的目标）**
 
-### ✅ 正确做法
+```
+要"修复认证"，我需要定义成功标准。
+具体要解决什么问题？
 
-只增加日志：
+如果问题是"用户修改密码后仍处于登录状态"：
+
+计划：
+1. 编写测试：修改密码 → 验证旧会话已失效
+   验证：测试失败（复现了 bug）
+
+2. 实现：密码修改时使会话失效
+   验证：测试通过
+
+3. 检查边界情况：多个活跃会话、并发修改
+   验证：额外测试通过
+
+4. 验证无回归：现有认证测试仍然通过
+   验证：完整测试套件为绿
+
+当前认证测试覆盖率：[显示覆盖率]
+你遇到的具体认证问题是什么？
+```
+
+### 示例 2：带验证的多步骤
+
+**用户请求：** "给 API 添加限流"
+
+**❌ LLM 常见做法（一步到位）**
 
 ```python
-logger.info(...)
-logger.error(...)
-logger.exception(...)
+# 在一次 300 行的提交中实现了完整的限流：
+# Redis、多种策略、配置系统和监控
+# 没有清晰的验证步骤
 ```
 
-其余部分保持原样。
+**✅ 正确做法（增量迭代 + 验证）**
 
-### 原则
+```
+限流实施计划：
 
-遵循项目现有风格。
+1. 添加基本的内存限流（单个端点）
+   验证：
+   - 测试：100 次请求 → 前 10 次成功，其余返回 429
+   - 手动：curl 端点 11 次，看到限流错误
 
-不要借修 Bug 或加功能的机会进行重构。
+2. 抽取为中间件（应用到所有端点）
+   验证：
+   - 测试：限流对 /users 和 /posts 都生效
+   - 现有端点测试仍通过
 
----
+3. 添加 Redis 后端（多服务器支持）
+   验证：
+   - 测试：限流在应用重启后仍有效
+   - 测试：两个应用实例共享限流计数器
 
-# 4. 以目标驱动执行（Goal-Driven Execution）
+4. 添加配置（按端点设置不同速率）
+   验证：
+   - 测试：/search 允许 10 次/分钟，/users 允许 100 次/分钟
+   - 配置文件正确解析
 
-## 示例 1：模糊目标 vs 可验证目标
-
-**用户请求：**
-
-> “修复认证系统”
-
-### ❌ LLM 常见做法
-
-```text
-1. 查看代码
-2. 找出问题
-3. 做一些优化
-4. 测试
+每一步都可以独立验证和部署。
+从第 1 步开始？
 ```
 
-问题：
+### 示例 3：测试先行验证
 
-没有成功标准。
+**用户请求：** "分数相同时排序会出错"
 
-无法判断任务是否完成。
-
-### ✅ 正确做法
-
-首先明确问题：
-
-例如：
-
-> 用户修改密码后旧会话依然有效
-
-然后制定可验证计划：
-
-```text
-1. 编写测试
-   验证旧会话未失效
-
-2. 运行测试
-   确认失败
-   （复现 Bug）
-
-3. 修改代码
-   密码变更后使旧会话失效
-
-4. 再次运行测试
-   确认通过
-
-5. 运行完整认证测试
-   确认无回归问题
-```
-
----
-
-## 示例 2：多步骤验证
-
-**用户请求：**
-
-> “为 API 增加限流”
-
-### ❌ LLM 常见做法
-
-一次性实现：
-
-- Redis
-- 多策略支持
-- 配置中心
-- 监控系统
-
-提交一个数百行的超大改动。
-
-### ✅ 正确做法
-
-逐步推进：
-
-#### 第一步
-
-增加内存限流。
-
-验证：
-
-```text
-100 次请求
-前 10 次成功
-其余返回 429
-```
-
-#### 第二步
-
-提取为中间件。
-
-验证：
-
-```text
-多个接口均生效
-```
-
-#### 第三步
-
-增加 Redis 支持。
-
-验证：
-
-```text
-多实例共享计数器
-```
-
-#### 第四步
-
-增加配置化。
-
-验证：
-
-```text
-不同接口支持不同限额
-```
-
-每一步都可以：
-
-- 单独测试
-- 单独部署
-- 单独回滚
-
----
-
-## 示例 3：测试优先验证
-
-**用户请求：**
-
-> “存在重复分数时排序会出错”
-
-### ❌ LLM 常见做法
-
-直接修改排序逻辑。
-
-没有确认问题是否真实存在。
-
-没有验证修改是否有效。
-
-### ✅ 正确做法
-
-第一步：编写测试。
+**❌ LLM 常见做法（不复现就修）**
 
 ```python
-def test_sort_with_duplicate_scores():
-    ...
-```
-
-验证：
-
-```text
-测试失败
-成功复现 Bug
-```
-
-第二步：修复代码。
-
-```python
+# 没有确认 bug 就直接修改排序逻辑
 def sort_scores(scores):
-    return sorted(
-        scores,
-        key=lambda x: (-x['score'], x['name'])
-    )
+    return sorted(scores, key=lambda x: (-x['score'], x['name']))
 ```
 
-第三步：再次验证。
+**✅ 正确做法（先复现）**
 
-```text
-测试通过
-排序结果稳定
+```python
+# 1. 首先，编写复现问题的测试
+def test_sort_with_duplicate_scores():
+    """Test sorting when multiple items have same score."""
+    scores = [
+        {'name': 'Alice', 'score': 100},
+        {'name': 'Bob', 'score': 100},
+        {'name': 'Charlie', 'score': 90},
+    ]
+    
+    result = sort_scores(scores)
+    
+    # bug：重复分数时排序不确定
+    # 多次运行这个测试，结果应该一致
+    assert result[0]['score'] == 100
+    assert result[1]['score'] == 100
+    assert result[2]['score'] == 90
+
+# 验证：运行测试 10 次 → 因排序不一致而失败
+
+# 2. 现在用稳定排序修复
+def sort_scores(scores):
+    """Sort by score descending, then name ascending for ties."""
+    return sorted(scores, key=lambda x: (-x['score'], x['name']))
+
+# 验证：测试一致通过
 ```
 
 ---
 
-# 反模式总结
+## 反模式总结
 
-| 原则 | 反模式 | 正确做法 |
-|--------|--------|--------|
-| 编码前先思考 | 默默做假设 | 显式列出假设并确认 |
-| 简洁优先 | 为简单需求设计复杂架构 | 先使用最简单方案 |
-| 外科手术式修改 | 修 Bug 时顺手重构 | 只修改必要代码 |
-| 目标驱动执行 | “我来优化一下代码” | 编写测试 → 修复 → 验证 |
+| 原则 | 反模式 | 修正 |
+|------|--------|------|
+| 编码前先思考 | 默默假设文件格式、字段、范围 | 明确列出假设，请求澄清 |
+| 简洁优先 | 为单个折扣计算使用策略模式 | 一个函数就够，等真的需要复杂度再说 |
+| 精准修改 | 修 bug 时顺手改引号风格、加类型注解 | 只改修复问题的行 |
+| 目标驱动 | "我来审查和改进代码" | "为 bug X 写测试 → 让测试通过 → 验证无回归" |
 
----
+## 核心洞察
 
-# 核心洞察（Key Insight）
-
-这些复杂实现并非完全错误。
-
-它们的问题在于：
-
-**复杂度出现得太早。**
-
-其后果包括：
+那些"过度复杂"的示例并非明显错误——它们遵循设计模式和最佳实践。问题在于**时机**：它们在需要之前就引入了复杂度，导致：
 
 - 代码更难理解
-- Bug 更多
-- 实现时间更长
-- 测试更困难
+- 引入更多 bug
+- 实现耗时更长
+- 更难测试
 
-而简单实现通常：
+而"简洁"版本：
+- 更易理解
+- 实现更快
+- 更易测试
+- 真正需要复杂度时再重构也不迟
 
-- 更容易理解
-- 更容易维护
-- 更容易测试
-- 更容易交付
-
-并且在未来真正需要复杂度时，依然可以逐步重构。
-
-## 最终原则
-
-**优秀代码并不是提前解决未来的问题。**
-
-**优秀代码是在今天，用最简单的方式解决今天的问题。**
+**好的代码是简洁地解决今天的问题，而不是过早地解决明天的问题。**
