@@ -31,12 +31,14 @@ class GlobalState {
   bool lastTunEnable = false;
   int? lastProfileModified;
   DateTime? _lastForegroundUpdate;
+  Traffic? _lastTraffic;
   static const Duration _foregroundUpdateThrottle = Duration(seconds: 5);
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
   startListenUpdate() {
     if (adaptiveTimer != null && adaptiveTimer!.isActive) return;
+    _lastTraffic = null;
     adaptiveTimer = AdaptiveTimer(
       activeInterval: const Duration(seconds: 1),
       idleInterval: const Duration(seconds: 5),
@@ -45,7 +47,10 @@ class GlobalState {
         for (final function in updateFunctionLists) {
           function();
         }
-        return true;
+        // 检查是否有实际的网络流量活动
+        final traffic = _lastTraffic;
+        if (traffic == null) return false;
+        return traffic.up.value > 0 || traffic.down.value > 0;
       },
     );
     adaptiveTimer!.start();
@@ -298,6 +303,7 @@ class GlobalState {
   }) async {
     final onlyProxy = config.appSetting.onlyProxy;
     final traffic = await clashCore.getTraffic(onlyProxy);
+    _lastTraffic = traffic;
     if (Platform.isAndroid && isVpnService == true) {
       // 节流前台通知更新，避免频繁唤醒系统通知管理器
       final now = DateTime.now();
