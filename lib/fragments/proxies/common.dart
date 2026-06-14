@@ -91,9 +91,21 @@ double getScrollToSelectedOffset({
 proxySpeedTest(Proxy proxy, String groupName) async {
   final appController = globalState.appController;
   final proxyName = appController.appState.getRealProxyName(proxy.name);
+  appController.appState.showSpeed = true;
   appController.appState.setSpeed(proxyName, -1);
-  final speed = await _testProxySpeed(proxyName, groupName);
-  appController.appState.setSpeed(proxyName, speed);
+
+  // 先测延迟，延迟通过才测速度
+  appController.setDelay(Delay(name: proxyName, value: 0));
+  final delay = await clashCore.getDelay(proxyName);
+  appController.setDelay(delay);
+
+  if (delay.value != null && delay.value! > 0) {
+    final speed = await _testProxySpeed(proxyName, groupName);
+    appController.appState.setSpeed(proxyName, speed);
+  } else {
+    appController.appState.setSpeed(proxyName, null);
+  }
+  appController.appState.sortNum++;
 }
 
 speedTest(List<Proxy> proxies, String groupName) async {
@@ -103,25 +115,24 @@ speedTest(List<Proxy> proxies, String groupName) async {
       .toSet()
       .toList();
 
+  appController.appState.showSpeed = true;
   final concurrency = appController.config.appSetting.testConcurrency;
 
-  // Step 1: 流量测试 (Speed test)
-  appController.appState.showSpeed = true;
+  // 每个代理独立执行：先测延迟 → 延迟通过再测速度（参考 v2rayN RunMixedTestAsync）
   await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
-    appController.appState.setSpeed(proxyName, -1);
-    final speed = await _testProxySpeed(proxyName, groupName);
-    appController.appState.setSpeed(proxyName, speed);
-  });
-
-  // Step 2: 代理延迟测试 (Proxy delay test)
-  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+    // Step 1: 测延迟
     appController.setDelay(Delay(name: proxyName, value: 0));
-    appController.setDelay(await clashCore.getDelay(proxyName));
-  });
+    final delay = await clashCore.getDelay(proxyName);
+    appController.setDelay(delay);
 
-  // Step 3: 目标连通性测试 (Target connectivity test)
-  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
-    appController.setDelay(await clashCore.getDelay(proxyName));
+    // Step 2: 延迟通过才测速度
+    appController.appState.setSpeed(proxyName, -1);
+    if (delay.value != null && delay.value! > 0) {
+      final speed = await _testProxySpeed(proxyName, groupName);
+      appController.appState.setSpeed(proxyName, speed);
+    } else {
+      appController.appState.setSpeed(proxyName, null);
+    }
   });
 
   appController.appState.sortNum++;
