@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/clash/clash.dart';
@@ -60,21 +61,11 @@ delayTest(List<Proxy> proxies) async {
       .toSet()
       .toList();
 
-  final delayProxies = proxyNames.map<Future>((proxyName) async {
-    globalState.appController.setDelay(
-      Delay(
-        name: proxyName,
-        value: 0,
-      ),
-    );
-    globalState.appController.setDelay(await clashCore.getDelay(proxyName));
-  }).toList();
-
   final concurrency = appController.config.appSetting.testConcurrency;
-  final batchesDelayProxies = delayProxies.batch(concurrency);
-  for (final batchDelayProxies in batchesDelayProxies) {
-    await Future.wait(batchDelayProxies);
-  }
+  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+    appController.setDelay(Delay(name: proxyName, value: 0));
+    appController.setDelay(await clashCore.getDelay(proxyName));
+  });
   appController.appState.sortNum++;
 }
 
@@ -100,7 +91,6 @@ double getScrollToSelectedOffset({
 proxySpeedTest(Proxy proxy, String groupName) async {
   final appController = globalState.appController;
   final proxyName = appController.appState.getRealProxyName(proxy.name);
-  // Set speed to -1 to indicate testing
   appController.appState.setSpeed(proxyName, -1);
   final speed = await _testProxySpeed(proxyName, groupName);
   appController.appState.setSpeed(proxyName, speed);
@@ -108,24 +98,71 @@ proxySpeedTest(Proxy proxy, String groupName) async {
 
 speedTest(List<Proxy> proxies, String groupName) async {
   final appController = globalState.appController;
-  appController.appState.showSpeed = true;
   final proxyNames = proxies
       .map((proxy) => appController.appState.getRealProxyName(proxy.name))
       .toSet()
       .toList();
 
-  final speedProxies = proxyNames.map<Future>((proxyName) async {
+  final concurrency = appController.config.appSetting.testConcurrency;
+
+  // Step 1: 流量测试 (Speed test)
+  appController.appState.showSpeed = true;
+  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
     appController.appState.setSpeed(proxyName, -1);
     final speed = await _testProxySpeed(proxyName, groupName);
     appController.appState.setSpeed(proxyName, speed);
-  }).toList();
+  });
 
-  final concurrency = appController.config.appSetting.testConcurrency;
-  final batchesSpeedProxies = speedProxies.batch(concurrency);
-  for (final batchSpeedProxies in batchesSpeedProxies) {
-    await Future.wait(batchSpeedProxies);
-  }
+  // Step 2: 代理延迟测试 (Proxy delay test)
+  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+    appController.setDelay(Delay(name: proxyName, value: 0));
+    appController.setDelay(await clashCore.getDelay(proxyName));
+  });
+
+  // Step 3: 目标连通性测试 (Target connectivity test)
+  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+    appController.setDelay(await clashCore.getDelay(proxyName));
+  });
+
   appController.appState.sortNum++;
+}
+
+/// Run tasks with limited concurrency.
+/// Unlike batching pre-created Futures, this actually limits concurrency
+/// by only starting new tasks when a slot is available.
+Future<void> _runWithConcurrency<T>(
+  List<T> items,
+  int concurrency,
+  Future<void> Function(T item) task,
+) async {
+  var running = 0;
+  final completer = Completer<void>();
+  var remaining = items.length;
+  var index = 0;
+
+  if (items.isEmpty) {
+    return;
+  }
+
+  void startNext() {
+    while (running < concurrency && index < items.length) {
+      final item = items[index];
+      index++;
+      running++;
+      task(item).whenComplete(() {
+        running--;
+        remaining--;
+        if (remaining == 0) {
+          completer.complete();
+        } else {
+          startNext();
+        }
+      });
+    }
+  }
+
+  startNext();
+  await completer.future;
 }
 
 Future<double?> _testProxySpeed(String proxyName, String groupName) async {
