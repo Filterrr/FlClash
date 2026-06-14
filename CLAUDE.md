@@ -68,4 +68,4 @@
 
 # 示例与案例
 
-详见 [EXAMPLES.md](EXAMPLES.md) ，其中包含以下内容的详细前后对比示例：
+展示四大原则的真实代码示例。每个示例展示 LLM 常犯的错误以及如何纠正。详见 [EXAMPLES.md](EXAMPLES.md) 示例：
