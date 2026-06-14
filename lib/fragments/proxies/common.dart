@@ -92,7 +92,6 @@ proxySpeedTest(Proxy proxy, String groupName) async {
   final appController = globalState.appController;
   final proxyName = appController.appState.getRealProxyName(proxy.name);
   appController.appState.showSpeed = true;
-  appController.appState.setSpeed(proxyName, -1);
 
   // 先测延迟，延迟通过才测速度
   appController.setDelay(Delay(name: proxyName, value: 0));
@@ -100,6 +99,7 @@ proxySpeedTest(Proxy proxy, String groupName) async {
   appController.setDelay(delay);
 
   if (delay.value != null && delay.value! > 0) {
+    appController.appState.setSpeed(proxyName, -1);
     final speed = await _testProxySpeed(proxyName, groupName);
     appController.appState.setSpeed(proxyName, speed);
   } else {
@@ -118,22 +118,24 @@ speedTest(List<Proxy> proxies, String groupName) async {
   appController.appState.showSpeed = true;
   final concurrency = appController.config.appSetting.testConcurrency;
 
-  // 每个代理独立执行：先测延迟 → 延迟通过再测速度（参考 v2rayN RunMixedTestAsync）
+  // Step 1: 并发测延迟（getDelay 直接走 core URLTest，不涉及 changeProxy，可安全并发）
   await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
-    // Step 1: 测延迟
     appController.setDelay(Delay(name: proxyName, value: 0));
     final delay = await clashCore.getDelay(proxyName);
     appController.setDelay(delay);
+  });
 
-    // Step 2: 延迟通过才测速度
-    appController.appState.setSpeed(proxyName, -1);
-    if (delay.value != null && delay.value! > 0) {
+  // Step 2: 逐个测速度（changeProxy 影响整个组，必须串行，确保 a 流量走 a、b 流量走 b）
+  for (final proxyName in proxyNames) {
+    final delay = appController.appState.getDelay(proxyName);
+    if (delay != null && delay > 0) {
+      appController.appState.setSpeed(proxyName, -1);
       final speed = await _testProxySpeed(proxyName, groupName);
       appController.appState.setSpeed(proxyName, speed);
     } else {
       appController.appState.setSpeed(proxyName, null);
     }
-  });
+  }
 
   appController.appState.sortNum++;
 }
