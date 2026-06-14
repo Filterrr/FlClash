@@ -28,6 +28,7 @@ mixin _$AppSetting {
   bool get openLogs => throw _privateConstructorUsedError;
   bool get closeConnections => throw _privateConstructorUsedError;
   String get testUrl => throw _privateConstructorUsedError;
+  String get speedTestUrl => throw _privateConstructorUsedError;
   bool get isAnimateToPage => throw _privateConstructorUsedError;
   bool get autoCheckUpdate => throw _privateConstructorUsedError;
   bool get showLabel => throw _privateConstructorUsedError;
@@ -59,6 +60,7 @@ abstract class $AppSettingCopyWith<$Res> {
       bool openLogs,
       bool closeConnections,
       String testUrl,
+      String speedTestUrl,
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
@@ -90,6 +92,7 @@ class _$AppSettingCopyWithImpl<$Res, $Val extends AppSetting>
     Object? openLogs = null,
     Object? closeConnections = null,
     Object? testUrl = null,
+    Object? speedTestUrl = null,
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
@@ -131,6 +134,10 @@ class _$AppSettingCopyWithImpl<$Res, $Val extends AppSetting>
       testUrl: null == testUrl
           ? _value.testUrl
           : testUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      speedTestUrl: null == speedTestUrl
+          ? _value.speedTestUrl
+          : speedTestUrl // ignore: cast_nullable_to_non_nullable
               as String,
       isAnimateToPage: null == isAnimateToPage
           ? _value.isAnimateToPage
@@ -185,6 +192,7 @@ abstract class _$$AppSettingImplCopyWith<$Res>
       bool openLogs,
       bool closeConnections,
       String testUrl,
+      String speedTestUrl,
       bool isAnimateToPage,
       bool autoCheckUpdate,
       bool showLabel,
@@ -214,6 +222,7 @@ class __$$AppSettingImplCopyWithImpl<$Res>
     Object? openLogs = null,
     Object? closeConnections = null,
     Object? testUrl = null,
+    Object? speedTestUrl = null,
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
@@ -255,6 +264,10 @@ class __$$AppSettingImplCopyWithImpl<$Res>
       testUrl: null == testUrl
           ? _value.testUrl
           : testUrl // ignore: cast_nullable_to_non_nullable
+              as String,
+      speedTestUrl: null == speedTestUrl
+          ? _value.speedTestUrl
+          : speedTestUrl // ignore: cast_nullable_to_non_nullable
               as String,
       isAnimateToPage: null == isAnimateToPage
           ? _value.isAnimateToPage
@@ -304,6 +317,7 @@ class _$AppSettingImpl implements _AppSetting {
       this.openLogs = false,
       this.closeConnections = true,
       this.testUrl = defaultTestUrl,
+      this.speedTestUrl = defaultSpeedTestUrl,
       this.isAnimateToPage = true,
       this.autoCheckUpdate = false,
       this.showLabel = false,
@@ -341,6 +355,9 @@ class _$AppSettingImpl implements _AppSetting {
   final String testUrl;
   @override
   @JsonKey()
+  final String speedTestUrl;
+  @override
+  @JsonKey()
   final bool isAnimateToPage;
   @override
   @JsonKey()
@@ -366,7 +383,7 @@ class _$AppSettingImpl implements _AppSetting {
 
   @override
   String toString() {
-    return 'AppSetting(locale: $locale, onlyProxy: $onlyProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, backgroundOptimization: $backgroundOptimization, backgroundOptimizationLevel: $backgroundOptimizationLevel)';
+    return 'AppSetting(locale: $locale, onlyProxy: $onlyProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, testUrl: $testUrl, speedTestUrl: $speedTestUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, minimizeOnExit: $minimizeOnExit, hidden: $hidden, backgroundOptimization: $backgroundOptimization, backgroundOptimizationLevel: $backgroundOptimizationLevel)';
   }
 
   @override
@@ -387,6 +404,8 @@ class _$AppSettingImpl implements _AppSetting {
             (identical(other.closeConnections, closeConnections) ||
                 other.closeConnections == closeConnections) &&
             (identical(other.testUrl, testUrl) || other.testUrl == testUrl) &&
+            (identical(other.speedTestUrl, speedTestUrl) ||
+                other.speedTestUrl == speedTestUrl) &&
             (identical(other.isAnimateToPage, isAnimateToPage) ||
                 other.isAnimateToPage == isAnimateToPage) &&
             (identical(other.autoCheckUpdate, autoCheckUpdate) ||
@@ -418,6 +437,7 @@ class _$AppSettingImpl implements _AppSetting {
       openLogs,
       closeConnections,
       testUrl,
+      speedTestUrl,
       isAnimateToPage,
       autoCheckUpdate,
       showLabel,
@@ -451,6 +471,7 @@ abstract class _AppSetting implements AppSetting {
           final bool openLogs,
           final bool closeConnections,
           final String testUrl,
+          final String speedTestUrl,
           final bool isAnimateToPage,
           final bool autoCheckUpdate,
           final bool showLabel,
@@ -480,6 +501,8 @@ abstract class _AppSetting implements AppSetting {
   bool get closeConnections;
   @override
   String get testUrl;
+  @override
+  String get speedTestUrl;
   @override
   bool get isAnimateToPage;
   @override

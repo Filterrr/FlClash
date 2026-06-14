@@ -63,6 +63,7 @@ const maxLaptopWidth = 840;
 const geodataLoaderMemconservative = "memconservative";
 const geodataLoaderStandard = "standard";
 const defaultTestUrl = "https://www.gstatic.com/generate_204";
+const defaultSpeedTestUrl = "https://speed.cloudflare.com/__down?bytes=9999999";
 final commonFilter = ImageFilter.blur(
   sigmaX: 5,
   sigmaY: 5,

@@ -194,7 +194,7 @@
   "cut": "剪切",
   "copy": "复制",
   "paste": "粘贴",
-  "testUrl": "测速链接",
+  "testUrl": "测延迟链接",
   "sync": "同步",
   "exclude": "从最近任务中隐藏",
   "excludeDesc": "应用在后台时,从最近任务中隐藏应用",
@@ -346,5 +346,8 @@
   "backgroundOptimizationLevel_disabled": "关闭",
   "backgroundOptimizationLevel_light": "轻度",
   "backgroundOptimizationLevel_balanced": "均衡",
-  "backgroundOptimizationLevel_aggressive": "激进"
+  "backgroundOptimizationLevel_aggressive": "激进",
+  "speedTestUrl": "测速链接",
+  "speedTest": "测速",
+  "latencyTest": "测延迟"
 }

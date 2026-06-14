@@ -367,7 +367,15 @@ class _ListHeaderState extends State<ListHeader> {
   _delayTest(List<Proxy> proxies) async {
     if (isLock) return;
     isLock = true;
+    globalState.appController.appState.showSpeed = false;
     await delayTest(proxies);
+    isLock = false;
+  }
+
+  _speedTest(List<Proxy> proxies) async {
+    if (isLock) return;
+    isLock = true;
+    await speedTest(proxies, groupName);
     isLock = false;
   }
 
@@ -545,6 +553,19 @@ class _ListHeaderState extends State<ListHeader> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     icon: const Icon(Icons.network_ping),
+                  ),
+                  const SizedBox(width: 2),
+                  IconButton(
+                    iconSize: 20,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.all(2),
+                    onPressed: () {
+                      _speedTest(widget.group.all);
+                    },
+                    style: ButtonStyle(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: const Icon(Icons.speed),
                   ),
                   const SizedBox(width: 6),
                 ] else

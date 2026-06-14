@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -91,4 +94,81 @@ double getScrollToSelectedOffset({
   final selectedIndex = findSelectedIndex != -1 ? findSelectedIndex : 0;
   final rows = (selectedIndex / columns).floor();
   return rows * getItemHeight(proxyCardType) + (rows - 1) * 8;
+}
+
+proxySpeedTest(Proxy proxy, String groupName) async {
+  final appController = globalState.appController;
+  final proxyName = appController.appState.getRealProxyName(proxy.name);
+  // Set speed to -1 to indicate testing
+  appController.appState.setSpeed(proxyName, -1);
+  final speed = await _testProxySpeed(proxyName, groupName);
+  appController.appState.setSpeed(proxyName, speed);
+}
+
+speedTest(List<Proxy> proxies, String groupName) async {
+  final appController = globalState.appController;
+  appController.appState.showSpeed = true;
+  final proxyNames = proxies
+      .map((proxy) => appController.appState.getRealProxyName(proxy.name))
+      .toSet()
+      .toList();
+
+  for (final proxyName in proxyNames) {
+    appController.appState.setSpeed(proxyName, -1);
+    final speed = await _testProxySpeed(proxyName, groupName);
+    appController.appState.setSpeed(proxyName, speed);
+  }
+  appController.appState.sortNum++;
+}
+
+Future<double?> _testProxySpeed(String proxyName, String groupName) async {
+  final appController = globalState.appController;
+  final speedTestUrl = appController.config.appSetting.speedTestUrl;
+  final mixedPort = appController.clashConfig.mixedPort;
+  final originalProxyName = appController.getCurrentSelectedName(groupName);
+
+  try {
+    // Switch to the target proxy
+    await clashCore.changeProxy(ChangeProxyParams(
+      groupName: groupName,
+      proxyName: proxyName,
+    ));
+
+    final client = HttpClient();
+    client.findProxy = (uri) => 'PROXY 127.0.0.1:$mixedPort';
+    client.connectionTimeout = const Duration(seconds: 10);
+
+    final stopwatch = Stopwatch()..start();
+    final request = await client.getUrl(Uri.parse(speedTestUrl));
+    final response = await request.close();
+
+    int totalBytes = 0;
+    double maxSpeed = 0;
+
+    await for (final chunk in response) {
+      totalBytes += chunk.length;
+      final elapsedSeconds = stopwatch.elapsedMilliseconds / 1000;
+      if (elapsedSeconds > 0) {
+        final currentSpeed = totalBytes / elapsedSeconds;
+        if (currentSpeed > maxSpeed) {
+          maxSpeed = currentSpeed;
+        }
+      }
+    }
+
+    stopwatch.stop();
+    client.close();
+
+    return maxSpeed > 0 ? maxSpeed : null;
+  } catch (e) {
+    return null;
+  } finally {
+    // Restore the original proxy
+    if (originalProxyName.isNotEmpty) {
+      await clashCore.changeProxy(ChangeProxyParams(
+        groupName: groupName,
+        proxyName: originalProxyName,
+      ));
+    }
+  }
 }

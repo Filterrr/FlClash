@@ -156,6 +156,49 @@ class TestUrlItem extends StatelessWidget {
   }
 }
 
+class SpeedTestUrlItem extends StatelessWidget {
+  const SpeedTestUrlItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, String>(
+      selector: (_, config) => config.appSetting.speedTestUrl,
+      builder: (_, value, __) {
+        return ListItem.input(
+          leading: const Icon(Icons.speed),
+          title: Text(appLocalizations.speedTestUrl),
+          subtitle: Text(value),
+          delegate: InputDelegate(
+            resetValue: defaultSpeedTestUrl,
+            title: appLocalizations.speedTestUrl,
+            value: value,
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  if (!value.isUrl) {
+                    throw "Invalid url";
+                  }
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    speedTestUrl: value,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.speedTestUrl,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class MixedPortItem extends StatelessWidget {
   const MixedPortItem({super.key});
 
@@ -447,6 +490,7 @@ final generalItems = const [
   UaItem(),
   KeepAliveIntervalItem(),
   TestUrlItem(),
+  SpeedTestUrlItem(),
   MixedPortItem(),
   HostsItem(),
   Ipv6Item(),

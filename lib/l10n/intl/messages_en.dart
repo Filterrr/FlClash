@@ -120,6 +120,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "backgroundOptimizationLevel_aggressive":
         MessageLookupByLibrary.simpleMessage("Aggressive"),
+    "speedTestUrl":
+        MessageLookupByLibrary.simpleMessage("Speed test url"),
+    "speedTest":
+        MessageLookupByLibrary.simpleMessage("Speed test"),
+    "latencyTest":
+        MessageLookupByLibrary.simpleMessage("Latency test"),
     "backgroundOptimizationLevel_balanced":
         MessageLookupByLibrary.simpleMessage("Balanced"),
     "backgroundOptimizationLevel_disabled":
@@ -568,7 +574,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling it will allow TCP concurrency",
     ),
-    "testUrl": MessageLookupByLibrary.simpleMessage("Test url"),
+    "testUrl": MessageLookupByLibrary.simpleMessage("Latency test url"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme color"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

@@ -80,6 +80,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "backgroundOptimizationLevel_aggressive":
         MessageLookupByLibrary.simpleMessage("激进"),
+    "speedTestUrl":
+        MessageLookupByLibrary.simpleMessage("测速链接"),
+    "speedTest":
+        MessageLookupByLibrary.simpleMessage("测速"),
+    "latencyTest":
+        MessageLookupByLibrary.simpleMessage("测延迟"),
     "backgroundOptimizationLevel_balanced":
         MessageLookupByLibrary.simpleMessage("均衡"),
     "backgroundOptimizationLevel_disabled":
@@ -380,7 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tcpConcurrent": MessageLookupByLibrary.simpleMessage("TCP并发"),
     "tcpConcurrentDesc": MessageLookupByLibrary.simpleMessage("开启后允许TCP并发"),
-    "testUrl": MessageLookupByLibrary.simpleMessage("测速链接"),
+    "testUrl": MessageLookupByLibrary.simpleMessage("测延迟链接"),
     "theme": MessageLookupByLibrary.simpleMessage("主题"),
     "themeColor": MessageLookupByLibrary.simpleMessage("主题色彩"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("设置深色模式，调整色彩"),
