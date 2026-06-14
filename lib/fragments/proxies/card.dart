@@ -49,20 +49,24 @@ class ProxyCard extends StatelessWidget {
                   alignment: type == ProxyCardType.expand
                       ? Alignment.centerLeft
                       : Alignment.centerRight,
-                  child: speed == null || speed == 0
+                  child: speed == -1
                       ? SizedBox(
                           height: measure.labelSmallHeight,
                           width: measure.labelSmallHeight,
-                          child: speed == -1
-                              ? const CircularProgressIndicator(strokeWidth: 2)
-                              : IconButton(
-                                  icon: const Icon(Icons.speed),
-                                  iconSize: globalState.measure.labelSmallHeight,
-                                  padding: EdgeInsets.zero,
-                                  onPressed: _handleTestCurrentSpeed,
-                                ),
+                          child: const CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : GestureDetector(
+                      : speed == null || speed == 0
+                          ? SizedBox(
+                              height: measure.labelSmallHeight,
+                              width: measure.labelSmallHeight,
+                              child: IconButton(
+                                icon: const Icon(Icons.speed),
+                                iconSize: globalState.measure.labelSmallHeight,
+                                padding: EdgeInsets.zero,
+                                onPressed: _handleTestCurrentSpeed,
+                              ),
+                            )
+                          : GestureDetector(
                           onTap: _handleTestCurrentSpeed,
                           child: SpeedChip(
                             speed: speed,

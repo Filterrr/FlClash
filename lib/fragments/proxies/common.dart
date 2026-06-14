@@ -127,16 +127,15 @@ Future<double?> _testProxySpeed(String proxyName, String groupName) async {
   final mixedPort = appController.clashConfig.mixedPort;
   final originalProxyName = appController.getCurrentSelectedName(groupName);
 
+  final client = HttpClient();
+  client.findProxy = (uri) => 'PROXY 127.0.0.1:$mixedPort';
+  client.connectionTimeout = const Duration(seconds: 10);
+
   try {
-    // Switch to the target proxy
     await clashCore.changeProxy(ChangeProxyParams(
       groupName: groupName,
       proxyName: proxyName,
     ));
-
-    final client = HttpClient();
-    client.findProxy = (uri) => 'PROXY 127.0.0.1:$mixedPort';
-    client.connectionTimeout = const Duration(seconds: 10);
 
     final stopwatch = Stopwatch()..start();
     final request = await client.getUrl(Uri.parse(speedTestUrl));
@@ -157,13 +156,12 @@ Future<double?> _testProxySpeed(String proxyName, String groupName) async {
     }
 
     stopwatch.stop();
-    client.close();
 
     return maxSpeed > 0 ? maxSpeed : null;
   } catch (e) {
     return null;
   } finally {
-    // Restore the original proxy
+    client.close();
     if (originalProxyName.isNotEmpty) {
       await clashCore.changeProxy(ChangeProxyParams(
         groupName: groupName,
