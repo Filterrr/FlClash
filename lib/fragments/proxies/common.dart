@@ -70,7 +70,8 @@ delayTest(List<Proxy> proxies) async {
     globalState.appController.setDelay(await clashCore.getDelay(proxyName));
   }).toList();
 
-  final batchesDelayProxies = delayProxies.batch(100);
+  final concurrency = appController.config.appSetting.testConcurrency;
+  final batchesDelayProxies = delayProxies.batch(concurrency);
   for (final batchDelayProxies in batchesDelayProxies) {
     await Future.wait(batchDelayProxies);
   }
@@ -113,10 +114,16 @@ speedTest(List<Proxy> proxies, String groupName) async {
       .toSet()
       .toList();
 
-  for (final proxyName in proxyNames) {
+  final speedProxies = proxyNames.map<Future>((proxyName) async {
     appController.appState.setSpeed(proxyName, -1);
     final speed = await _testProxySpeed(proxyName, groupName);
     appController.appState.setSpeed(proxyName, speed);
+  }).toList();
+
+  final concurrency = appController.config.appSetting.testConcurrency;
+  final batchesSpeedProxies = speedProxies.batch(concurrency);
+  for (final batchSpeedProxies in batchesSpeedProxies) {
+    await Future.wait(batchSpeedProxies);
   }
   appController.appState.sortNum++;
 }

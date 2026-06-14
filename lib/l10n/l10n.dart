@@ -2758,6 +2758,15 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  String get testConcurrency {
+    return Intl.message(
+      'Test concurrency',
+      name: 'testConcurrency',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

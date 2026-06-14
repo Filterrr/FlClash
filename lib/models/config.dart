@@ -26,6 +26,7 @@ class AppSetting with _$AppSetting {
     @Default(true) bool closeConnections,
     @Default(defaultTestUrl) String testUrl,
     @Default(defaultSpeedTestUrl) String speedTestUrl,
+    @Default(defaultTestConcurrency) int testConcurrency,
     @Default(true) bool isAnimateToPage,
     @Default(false) bool autoCheckUpdate,
     @Default(false) bool showLabel,

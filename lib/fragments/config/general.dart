@@ -199,6 +199,50 @@ class SpeedTestUrlItem extends StatelessWidget {
   }
 }
 
+class TestConcurrencyItem extends StatelessWidget {
+  const TestConcurrencyItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, int>(
+      selector: (_, config) => config.appSetting.testConcurrency,
+      builder: (_, value, __) {
+        return ListItem.input(
+          leading: const Icon(Icons.sync_alt),
+          title: Text(appLocalizations.testConcurrency),
+          subtitle: Text("$value"),
+          delegate: InputDelegate(
+            title: appLocalizations.testConcurrency,
+            value: "$value",
+            resetValue: "$defaultTestConcurrency",
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  final intValue = int.parse(value);
+                  if (intValue <= 0) {
+                    throw "Invalid concurrency";
+                  }
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    testConcurrency: intValue,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.testConcurrency,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class MixedPortItem extends StatelessWidget {
   const MixedPortItem({super.key});
 
@@ -491,6 +535,7 @@ final generalItems = const [
   KeepAliveIntervalItem(),
   TestUrlItem(),
   SpeedTestUrlItem(),
+  TestConcurrencyItem(),
   MixedPortItem(),
   HostsItem(),
   Ipv6Item(),

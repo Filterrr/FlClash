@@ -349,5 +349,6 @@
   "backgroundOptimizationLevel_aggressive": "激进",
   "speedTestUrl": "测速链接",
   "speedTest": "测速",
-  "latencyTest": "测延迟"
+  "latencyTest": "测延迟",
+  "testConcurrency": "测试并发数"
 }

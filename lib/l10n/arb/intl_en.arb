@@ -349,5 +349,6 @@
   "backgroundOptimizationLevel_aggressive": "Aggressive",
   "speedTestUrl": "Speed test url",
   "speedTest": "Speed test",
-  "latencyTest": "Latency test"
+  "latencyTest": "Latency test",
+  "testConcurrency": "Test concurrency"
 }
