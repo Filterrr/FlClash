@@ -7,7 +7,6 @@ import 'dart:isolate';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/state.dart';
 import 'package:flutter/services.dart';
 
 class Vpn {
@@ -29,10 +28,6 @@ class Vpn {
         case "dnsChanged":
           final dns = call.arguments as String;
           clashLib?.updateDns(dns);
-        case "screenStateChanged":
-          final screenOn = call.arguments as bool;
-          globalState.onScreenStateChanged(screenOn);
-          break;
         default:
           throw MissingPluginException();
       }

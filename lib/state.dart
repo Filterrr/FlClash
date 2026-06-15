@@ -61,11 +61,6 @@ class GlobalState {
     adaptiveTimer!.stop();
   }
 
-  /// 屏幕状态变化时调整定时器频率
-  void onScreenStateChanged(bool screenOn) {
-    adaptiveTimer?.onScreenStateChanged(screenOn);
-  }
-
   Future<void> initCore({
     required AppState appState,
     required ClashConfig clashConfig,
