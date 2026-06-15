@@ -12,6 +12,7 @@ import 'package:fl_clash/common/low_memory_mode.dart';
 class AdaptiveTimer {
   final Duration activeInterval;
   final Duration idleInterval;
+  final Duration backgroundInterval;
   final int idleThreshold;
   final bool Function() callback;
 
@@ -19,10 +20,12 @@ class AdaptiveTimer {
   int _idleTicks = 0;
   bool _isIdleMode = false;
   bool _gcRequested = false;
+  bool _isScreenOn = true;
 
   AdaptiveTimer({
     required this.activeInterval,
     required this.idleInterval,
+    this.backgroundInterval = const Duration(seconds: 15),
     this.idleThreshold = 3,
     required this.callback,
   });
@@ -34,7 +37,8 @@ class AdaptiveTimer {
     _idleTicks = 0;
     _isIdleMode = false;
     _gcRequested = false;
-    _timer = Timer.periodic(activeInterval, (_) {
+    final initialInterval = _isScreenOn ? activeInterval : backgroundInterval;
+    _timer = Timer.periodic(initialInterval, (_) {
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
         return;
@@ -47,6 +51,19 @@ class AdaptiveTimer {
   void stop() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  /// 屏幕状态变化时调整定时器间隔
+  void onScreenStateChanged(bool screenOn) {
+    if (_isScreenOn == screenOn) return;
+    _isScreenOn = screenOn;
+    if (!isActive) return;
+    
+    // 屏幕关闭时切换到后台长间隔，屏幕打开时恢复到活跃间隔
+    final targetInterval = screenOn ? activeInterval : backgroundInterval;
+    _restartWithInterval(targetInterval);
+    _idleTicks = 0;
+    _isIdleMode = false;
   }
 
   void _updateIdleState(bool hadChange) {

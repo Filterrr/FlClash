@@ -166,6 +166,10 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         flutterMethodChannel.invokeMethod("gc", null)
     }
 
+    fun onScreenStateChanged(screenOn: Boolean) {
+        flutterMethodChannel.invokeMethod("screenStateChanged", screenOn)
+    }
+
     val networks = mutableSetOf<Network>()
 
     fun onUpdateNetwork() {
