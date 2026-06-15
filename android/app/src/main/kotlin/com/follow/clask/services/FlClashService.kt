@@ -6,7 +6,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.os.Binder
 import android.os.Build
@@ -23,6 +26,41 @@ import kotlinx.coroutines.launch
 
 
 class FlClashService : Service(), BaseServiceInterface {
+
+    private var isScreenOn = true
+    private lateinit var screenReceiver: BroadcastReceiver
+
+    override fun onCreate() {
+        super.onCreate()
+        registerScreenReceiver()
+    }
+
+    private fun registerScreenReceiver() {
+        screenReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                when (intent.action) {
+                    Intent.ACTION_SCREEN_OFF -> {
+                        isScreenOn = false
+                        GlobalState.getCurrentVPNPlugin()?.onScreenStateChanged(false)
+                    }
+                    Intent.ACTION_SCREEN_ON -> {
+                        isScreenOn = true
+                        GlobalState.getCurrentVPNPlugin()?.onScreenStateChanged(true)
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        registerReceiver(screenReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(screenReceiver)
+        super.onDestroy()
+    }
 
     private val binder = LocalBinder()
 
