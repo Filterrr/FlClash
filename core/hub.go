@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -14,7 +15,6 @@ import (
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
-	"github.com/metacubex/mihomo/component/ca"
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -334,13 +334,9 @@ func handleAsyncTestSpeed(paramsString string, fn func(string)) {
 		}
 
 		if parsedUrl.Scheme == "https" {
-			tlsConfig, err := ca.GetTLSConfig(ca.Option{})
-			if err != nil {
-				data, _ := json.Marshal(speedResult)
-				fn(string(data))
-				return false, nil
+			transport.TLSClientConfig = &tls.Config{
+				MinVersion: tls.VersionTLS12,
 			}
-			transport.TLSClientConfig = tlsConfig
 		}
 
 		client := nhttp.Client{
