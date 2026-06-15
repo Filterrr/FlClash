@@ -22,6 +22,7 @@ class ProxiesSetting extends StatelessWidget {
       ProxiesSortType.none => Icons.sort,
       ProxiesSortType.delay => Icons.network_ping,
       ProxiesSortType.name => Icons.sort_by_alpha,
+      ProxiesSortType.speed => Icons.speed,
     };
   }
 
@@ -30,6 +31,7 @@ class ProxiesSetting extends StatelessWidget {
       ProxiesSortType.none => appLocalizations.defaultText,
       ProxiesSortType.delay => appLocalizations.delay,
       ProxiesSortType.name => appLocalizations.name,
+      ProxiesSortType.speed => appLocalizations.speed,
     };
   }
 

@@ -128,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("Latency test"),
     "testConcurrency":
         MessageLookupByLibrary.simpleMessage("Test concurrency"),
+    "speed":
+        MessageLookupByLibrary.simpleMessage("Speed"),
     "backgroundOptimizationLevel_balanced":
         MessageLookupByLibrary.simpleMessage("Balanced"),
     "backgroundOptimizationLevel_disabled":

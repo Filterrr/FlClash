@@ -539,11 +539,32 @@ class AppController {
       );
   }
 
+  List<Proxy> _sortOfSpeed(List<Proxy> proxies) {
+    return List.of(proxies)
+      ..sort(
+        (a, b) {
+          final aSpeed = appState.getSpeed(a.name);
+          final bSpeed = appState.getSpeed(b.name);
+          if (aSpeed == null && bSpeed == null) {
+            return 0;
+          }
+          if (aSpeed == null || aSpeed == -1) {
+            return 1;
+          }
+          if (bSpeed == null || bSpeed == -1) {
+            return -1;
+          }
+          return bSpeed.compareTo(aSpeed);
+        },
+      );
+  }
+
   List<Proxy> getSortProxies(List<Proxy> proxies) {
     return switch (config.proxiesStyle.sortType) {
       ProxiesSortType.none => proxies,
       ProxiesSortType.delay => _sortOfDelay(proxies),
       ProxiesSortType.name => _sortOfName(proxies),
+      ProxiesSortType.speed => _sortOfSpeed(proxies),
     };
   }
 

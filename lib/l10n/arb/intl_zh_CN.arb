@@ -350,5 +350,6 @@
   "speedTestUrl": "测速链接",
   "speedTest": "测速",
   "latencyTest": "测延迟",
-  "testConcurrency": "测试并发数"
+  "testConcurrency": "测试并发数",
+  "speed": "速度"
 }
