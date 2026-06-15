@@ -7,6 +7,7 @@ import 'core.dart';
 import 'profile.dart';
 
 typedef DelayMap = Map<String, int?>;
+typedef SpeedMap = Map<String, double?>;
 
 class AppState with ChangeNotifier {
   List<NavigationItem> _navigationItems;
@@ -17,6 +18,8 @@ class AppState with ChangeNotifier {
   num _sortNum;
   Mode _mode;
   DelayMap _delayMap;
+  SpeedMap _speedMap;
+  bool _showSpeed;
   SelectedMap _selectedMap;
   List<Group> _groups;
   double _viewWidth;
@@ -42,6 +45,8 @@ class AppState with ChangeNotifier {
         _mode = mode,
         _brightness = null,
         _delayMap = {},
+        _speedMap = {},
+        _showSpeed = false,
         _groups = [],
         _providers = [],
         _packages = [],
@@ -250,6 +255,36 @@ class AppState with ChangeNotifier {
   setDelay(Delay delay) {
     if (_delayMap[delay.name] != delay.value) {
       _delayMap = Map.from(_delayMap)..[delay.name] = delay.value;
+      notifyListeners();
+    }
+  }
+
+  double? getSpeed(String proxyName) {
+    return _speedMap[getRealProxyName(proxyName)];
+  }
+
+  SpeedMap get speedMap {
+    return _speedMap;
+  }
+
+  set speedMap(SpeedMap value) {
+    _speedMap = value;
+    notifyListeners();
+  }
+
+  setSpeed(String proxyName, double? speed) {
+    final realName = getRealProxyName(proxyName);
+    if (_speedMap[realName] != speed) {
+      _speedMap = Map.from(_speedMap)..[realName] = speed;
+      notifyListeners();
+    }
+  }
+
+  bool get showSpeed => _showSpeed;
+
+  set showSpeed(bool value) {
+    if (_showSpeed != value) {
+      _showSpeed = value;
       notifyListeners();
     }
   }

@@ -1534,9 +1534,9 @@ class AppLocalizations {
     return Intl.message('Paste', name: 'paste', desc: '', args: []);
   }
 
-  /// `Test url`
+  /// `Latency test url`
   String get testUrl {
-    return Intl.message('Test url', name: 'testUrl', desc: '', args: []);
+    return Intl.message('Latency test url', name: 'testUrl', desc: '', args: []);
   }
 
   /// `Sync`
@@ -2724,6 +2724,45 @@ class AppLocalizations {
     return Intl.message(
       'Aggressive',
       name: 'backgroundOptimizationLevel_aggressive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Speed test url`
+  String get speedTestUrl {
+    return Intl.message(
+      'Speed test url',
+      name: 'speedTestUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Speed test`
+  String get speedTest {
+    return Intl.message(
+      'Speed test',
+      name: 'speedTest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency test`
+  String get latencyTest {
+    return Intl.message(
+      'Latency test',
+      name: 'latencyTest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  String get testConcurrency {
+    return Intl.message(
+      'Test concurrency',
+      name: 'testConcurrency',
       desc: '',
       args: [],
     );

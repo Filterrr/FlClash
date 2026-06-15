@@ -29,37 +29,83 @@ class ProxyCard extends StatelessWidget {
     proxyDelayTest(proxy);
   }
 
+  _handleTestCurrentSpeed() {
+    proxySpeedTest(proxy, groupName);
+  }
+
   Widget _buildDelayText() {
     return SizedBox(
       height: measure.labelSmallHeight,
-      child: Selector<AppState, int?>(
-        selector: (context, appState) => appState.getDelay(
-          proxy.name,
-        ),
-        builder: (context, delay, __) {
-          return FadeThroughBox(
-            alignment: type == ProxyCardType.expand
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
-            child: delay == 0 || delay == null
-                ? SizedBox(
-                    height: measure.labelSmallHeight,
-                    width: measure.labelSmallHeight,
-                    child: delay == 0
-                        ? const CircularProgressIndicator(strokeWidth: 2)
-                        : IconButton(
-                            icon: const Icon(Icons.bolt),
-                            iconSize: globalState.measure.labelSmallHeight,
-                            padding: EdgeInsets.zero,
-                            onPressed: _handleTestCurrentDelay,
+      child: Selector<AppState, bool>(
+        selector: (context, appState) => appState.showSpeed,
+        builder: (context, showSpeed, __) {
+          if (showSpeed) {
+            return Selector<AppState, double?>(
+              selector: (context, appState) => appState.getSpeed(
+                proxy.name,
+              ),
+              builder: (context, speed, __) {
+                return FadeThroughBox(
+                  alignment: type == ProxyCardType.expand
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: speed == -1
+                      ? SizedBox(
+                          height: measure.labelSmallHeight,
+                          width: measure.labelSmallHeight,
+                          child: const CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : speed == null || speed == 0
+                          ? SizedBox(
+                              height: measure.labelSmallHeight,
+                              width: measure.labelSmallHeight,
+                              child: IconButton(
+                                icon: const Icon(Icons.speed),
+                                iconSize: globalState.measure.labelSmallHeight,
+                                padding: EdgeInsets.zero,
+                                onPressed: _handleTestCurrentSpeed,
+                              ),
+                            )
+                          : GestureDetector(
+                          onTap: _handleTestCurrentSpeed,
+                          child: SpeedChip(
+                            speed: speed,
                           ),
-                  )
-                : GestureDetector(
-                    onTap: _handleTestCurrentDelay,
-                    child: DelayChip(
-                      delay: delay,
-                    ),
-                  ),
+                        ),
+                );
+              },
+            );
+          }
+          return Selector<AppState, int?>(
+            selector: (context, appState) => appState.getDelay(
+              proxy.name,
+            ),
+            builder: (context, delay, __) {
+              return FadeThroughBox(
+                alignment: type == ProxyCardType.expand
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+                child: delay == 0 || delay == null
+                    ? SizedBox(
+                        height: measure.labelSmallHeight,
+                        width: measure.labelSmallHeight,
+                        child: delay == 0
+                            ? const CircularProgressIndicator(strokeWidth: 2)
+                            : IconButton(
+                                icon: const Icon(Icons.bolt),
+                                iconSize: globalState.measure.labelSmallHeight,
+                                padding: EdgeInsets.zero,
+                                onPressed: _handleTestCurrentDelay,
+                              ),
+                      )
+                    : GestureDetector(
+                        onTap: _handleTestCurrentDelay,
+                        child: DelayChip(
+                          delay: delay,
+                        ),
+                      ),
+              );
+            },
           );
         },
       ),
@@ -281,6 +327,52 @@ class DelayChip extends StatelessWidget {
         style: context.textTheme.labelSmall?.copyWith(
           overflow: TextOverflow.ellipsis,
           color: delayColor,
+        ),
+      ),
+    );
+  }
+}
+
+class SpeedChip extends StatelessWidget {
+  final double speed;
+
+  const SpeedChip({
+    super.key,
+    required this.speed,
+  });
+
+  String _formatSpeed(double bytesPerSecond) {
+    if (bytesPerSecond < 0) return 'Timeout';
+    if (bytesPerSecond >= 1024 * 1024) {
+      return '${(bytesPerSecond / (1024 * 1024)).toStringAsFixed(1)} MB/s';
+    } else if (bytesPerSecond >= 1024) {
+      return '${(bytesPerSecond / 1024).toStringAsFixed(0)} KB/s';
+    } else {
+      return '${bytesPerSecond.toStringAsFixed(0)} B/s';
+    }
+  }
+
+  Color _getSpeedColor() {
+    if (speed < 0) return Colors.red;
+    if (speed >= 1024 * 1024) return Colors.green;
+    if (speed >= 100 * 1024) return const Color(0xFFC57F0A);
+    return Colors.red;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final speedColor = _getSpeedColor();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: speedColor.opacity15,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        _formatSpeed(speed),
+        style: context.textTheme.labelSmall?.copyWith(
+          overflow: TextOverflow.ellipsis,
+          color: speedColor,
         ),
       ),
     );

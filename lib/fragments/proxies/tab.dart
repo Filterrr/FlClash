@@ -314,12 +314,23 @@ class ProxyGroupViewState extends State<ProxyGroupView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final commonScaffoldState =
           context.findAncestorStateOfType<CommonScaffoldState>();
-      commonScaffoldState?.floatingActionButton = DelayTestButton(
-        onClick: () async {
+      commonScaffoldState?.floatingActionButton = ProxiesFab(
+        onDelayTest: () async {
+          globalState.appController.appState.showSpeed = false;
           await _delayTest();
+        },
+        onSpeedTest: () async {
+          await _speedTest();
         },
       );
     });
+  }
+
+  _speedTest() async {
+    if (isLock) return;
+    isLock = true;
+    await speedTest(currentProxies, groupName);
+    isLock = false;
   }
 
   @override
@@ -460,6 +471,133 @@ class _DelayTestButtonState extends State<DelayTestButton>
         onPressed: _healthcheck,
         child: const Icon(Icons.network_ping),
       ),
+    );
+  }
+}
+
+class ProxiesFab extends StatefulWidget {
+  final Future Function() onDelayTest;
+  final Future Function() onSpeedTest;
+
+  const ProxiesFab({
+    super.key,
+    required this.onDelayTest,
+    required this.onSpeedTest,
+  });
+
+  @override
+  State<ProxiesFab> createState() => _ProxiesFabState();
+}
+
+class _ProxiesFabState extends State<ProxiesFab>
+    with SingleTickerProviderStateMixin {
+  bool _isExpanded = false;
+  late AnimationController _controller;
+  late Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  _toggle() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  _handleDelayTest() async {
+    _toggle();
+    await widget.onDelayTest();
+  }
+
+  _handleSpeedTest() async {
+    _toggle();
+    await widget.onSpeedTest();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (_isExpanded) ...[
+          FadeScaleEnterBox(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  appLocalizations.latencyTest,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FloatingActionButton.small(
+                  heroTag: null,
+                  onPressed: _handleDelayTest,
+                  child: const Icon(Icons.network_ping, size: 20),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          FadeScaleEnterBox(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  appLocalizations.speedTest,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FloatingActionButton.small(
+                  heroTag: null,
+                  onPressed: _handleSpeedTest,
+                  child: const Icon(Icons.speed, size: 20),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        FloatingActionButton(
+          heroTag: null,
+          onPressed: _toggle,
+          child: AnimatedBuilder(
+            animation: _expandAnimation,
+            builder: (_, child) {
+              return Transform.rotate(
+                angle: _expandAnimation.value * 0.75 * 3.14159,
+                child: child,
+              );
+            },
+            child: Icon(_isExpanded ? Icons.close : Icons.bolt),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2,8 +2,15 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net"
+	nhttp "net/http"
+	"net/url"
+	"strconv"
+	"time"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/observable"
@@ -19,7 +26,6 @@ import (
 	"runtime"
 	"runtime/debug"
 	"sort"
-	"time"
 )
 
 var (
@@ -238,6 +244,134 @@ func handleAsyncTestDelay(paramsString string, fn func(string)) {
 
 		delayData.Value = int32(delay)
 		data, _ := json.Marshal(delayData)
+		fn(string(data))
+		return false, nil
+	})
+}
+
+func handleAsyncTestSpeed(paramsString string, fn func(string)) {
+	b.Go(paramsString, func() (bool, error) {
+		var params = &TestSpeedParams{}
+		err := json.Unmarshal([]byte(paramsString), params)
+		if err != nil {
+			fn("")
+			return false, nil
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(params.Timeout))
+		defer cancel()
+
+		proxies := proxiesWithProviders()
+		proxy := proxies[params.ProxyName]
+
+		speedResult := &SpeedResult{
+			Name: params.ProxyName,
+		}
+
+		if proxy == nil {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+
+		adapterProxy, ok := proxy.(*adapter.Proxy)
+		if !ok {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+
+		// Parse URL to get host and port for metadata
+		parsedUrl, err := url.Parse(params.Url)
+		if err != nil {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+
+		port := parsedUrl.Port()
+		dstPort := uint16(80)
+		if port != "" {
+			p, _ := strconv.Atoi(port)
+			dstPort = uint16(p)
+		} else if parsedUrl.Scheme == "https" {
+			dstPort = 443
+		}
+
+		addr := constant.Metadata{
+			NetWork: constant.TCP,
+			Host:    parsedUrl.Hostname(),
+			DstPort: dstPort,
+		}
+
+		// Dial directly through the proxy (no changeProxy needed)
+		proxyConn, err := adapterProxy.DialContext(ctx, &addr)
+		if err != nil {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+		defer proxyConn.Close()
+
+		// Build HTTP request through the dialed connection
+		req, err := nhttp.NewRequest(nhttp.MethodGet, params.Url, nil)
+		if err != nil {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+		req = req.WithContext(ctx)
+
+		// Use custom transport that routes through the dialed connection
+		transport := &nhttp.Transport{
+			DialContext: func(context.Context, string, string) (net.Conn, error) {
+				return proxyConn, nil
+			},
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		}
+
+		if parsedUrl.Scheme == "https" {
+			transport.TLSClientConfig = &tls.Config{
+				MinVersion: tls.VersionTLS12,
+			}
+		}
+
+		client := nhttp.Client{
+			Timeout:   time.Duration(params.Timeout) * time.Millisecond,
+			Transport: transport,
+		}
+		defer client.CloseIdleConnections()
+
+		resp, err := client.Do(req)
+		if err != nil {
+			data, _ := json.Marshal(speedResult)
+			fn(string(data))
+			return false, nil
+		}
+		defer resp.Body.Close()
+
+		// Measure download speed
+		start := time.Now()
+		var totalBytes int64
+		buf := make([]byte, 32*1024)
+		for {
+			n, err := resp.Body.Read(buf)
+			totalBytes += int64(n)
+			if err != nil {
+				break
+			}
+		}
+
+		elapsed := time.Since(start).Seconds()
+		if elapsed > 0 && totalBytes > 0 {
+			speed := float64(totalBytes) / elapsed
+			speedResult.Speed = &speed
+		}
+
+		data, _ := json.Marshal(speedResult)
 		fn(string(data))
 		return false, nil
 	})

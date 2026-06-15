@@ -140,6 +140,17 @@ class Delay with _$Delay {
 }
 
 @freezed
+class SpeedResult with _$SpeedResult {
+  const factory SpeedResult({
+    required String name,
+    double? speed,
+  }) = _SpeedResult;
+
+  factory SpeedResult.fromJson(Map<String, Object?> json) =>
+      _$SpeedResultFromJson(json);
+}
+
+@freezed
 class Now with _$Now {
   const factory Now({
     required String name,

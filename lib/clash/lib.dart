@@ -272,6 +272,31 @@ class ClashLib with ClashInterface {
   }
 
   @override
+  Future<String> asyncTestSpeed(String proxyName, String url, int timeout) {
+    final speedParams = {
+      "proxy-name": proxyName,
+      "url": url,
+      "timeout": timeout,
+    };
+    final completer = Completer<String>();
+    final receiver = ReceivePort();
+    receiver.listen((message) {
+      if (!completer.isCompleted) {
+        completer.complete(message);
+        receiver.close();
+      }
+    });
+    final speedParamsChar =
+        json.encode(speedParams).toNativeUtf8().cast<Char>();
+    clashFFI.asyncTestSpeed(
+      speedParamsChar,
+      receiver.sendPort.nativePort,
+    );
+    malloc.free(speedParamsChar);
+    return completer.future;
+  }
+
+  @override
   String getTraffic(bool value) {
     final trafficRaw = clashFFI.getTraffic(value ? 1 : 0);
     final trafficString = trafficRaw.cast<Utf8>().toDartString();

@@ -156,6 +156,93 @@ class TestUrlItem extends StatelessWidget {
   }
 }
 
+class SpeedTestUrlItem extends StatelessWidget {
+  const SpeedTestUrlItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, String>(
+      selector: (_, config) => config.appSetting.speedTestUrl,
+      builder: (_, value, __) {
+        return ListItem.input(
+          leading: const Icon(Icons.speed),
+          title: Text(appLocalizations.speedTestUrl),
+          subtitle: Text(value),
+          delegate: InputDelegate(
+            resetValue: defaultSpeedTestUrl,
+            title: appLocalizations.speedTestUrl,
+            value: value,
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  if (!value.isUrl) {
+                    throw "Invalid url";
+                  }
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    speedTestUrl: value,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.speedTestUrl,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class TestConcurrencyItem extends StatelessWidget {
+  const TestConcurrencyItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, int>(
+      selector: (_, config) => config.appSetting.testConcurrency,
+      builder: (_, value, __) {
+        return ListItem.input(
+          leading: const Icon(Icons.sync_alt),
+          title: Text(appLocalizations.testConcurrency),
+          subtitle: Text("$value"),
+          delegate: InputDelegate(
+            title: appLocalizations.testConcurrency,
+            value: "$value",
+            resetValue: "$defaultTestConcurrency",
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  final intValue = int.parse(value);
+                  if (intValue <= 0) {
+                    throw "Invalid concurrency";
+                  }
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    testConcurrency: intValue,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.testConcurrency,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class MixedPortItem extends StatelessWidget {
   const MixedPortItem({super.key});
 
@@ -447,6 +534,8 @@ final generalItems = const [
   UaItem(),
   KeepAliveIntervalItem(),
   TestUrlItem(),
+  SpeedTestUrlItem(),
+  TestConcurrencyItem(),
   MixedPortItem(),
   HostsItem(),
   Ipv6Item(),

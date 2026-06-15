@@ -195,6 +195,11 @@ class ClashCore {
     return Delay.fromJson(json.decode(data));
   }
 
+  Future<SpeedResult> getSpeed(String proxyName, String url, int timeout) async {
+    final data = await clashInterface.asyncTestSpeed(proxyName, url, timeout);
+    return SpeedResult.fromJson(json.decode(data));
+  }
+
   Future<Traffic> getTraffic(bool value) async {
     final trafficString = await clashInterface.getTraffic(value);
     return Traffic.fromMap(json.decode(trafficString));

@@ -1868,6 +1868,159 @@ abstract class _Delay implements Delay {
       throw _privateConstructorUsedError;
 }
 
+SpeedResult _$SpeedResultFromJson(Map<String, dynamic> json) {
+  return _SpeedResult.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SpeedResult {
+  String get name => throw _privateConstructorUsedError;
+  double? get speed => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $SpeedResultCopyWith<SpeedResult> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SpeedResultCopyWith<$Res> {
+  factory $SpeedResultCopyWith(
+          SpeedResult value, $Res Function(SpeedResult) then) =
+      _$SpeedResultCopyWithImpl<$Res, SpeedResult>;
+  @useResult
+  $Res call({String name, double? speed});
+}
+
+/// @nodoc
+class _$SpeedResultCopyWithImpl<$Res, $Val extends SpeedResult>
+    implements $SpeedResultCopyWith<$Res> {
+  _$SpeedResultCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? speed = freezed,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      speed: freezed == speed
+          ? _value.speed
+          : speed // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SpeedResultImplCopyWith<$Res>
+    implements $SpeedResultCopyWith<$Res> {
+  factory _$$SpeedResultImplCopyWith(
+          _$SpeedResultImpl value, $Res Function(_$SpeedResultImpl) then) =
+      __$$SpeedResultImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String name, double? speed});
+}
+
+/// @nodoc
+class __$$SpeedResultImplCopyWith<$Res>
+    extends _$SpeedResultCopyWithImpl<$Res, _$SpeedResultImpl>
+    implements _$$SpeedResultImplCopyWith<$Res> {
+  __$$SpeedResultImplCopyWithImpl(
+      _$SpeedResultImpl _value, $Res Function(_$SpeedResultImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? speed = freezed,
+  }) {
+    return _then(_$SpeedResultImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      speed: freezed == speed
+          ? _value.speed
+          : speed // ignore: cast_nullable_to_non_nullable
+              as double?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SpeedResultImpl implements _SpeedResult {
+  const _$SpeedResultImpl({required this.name, this.speed});
+
+  factory _$SpeedResultImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SpeedResultImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final double? speed;
+
+  @override
+  String toString() {
+    return 'SpeedResult(name: $name, speed: $speed)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SpeedResultImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.speed, speed) || other.speed == speed));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, name, speed);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SpeedResultImplCopyWith<_$SpeedResultImpl> get copyWith =>
+      __$$SpeedResultImplCopyWithImpl<_$SpeedResultImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SpeedResultImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _SpeedResult implements SpeedResult {
+  const factory _SpeedResult(
+      {required final String name, final double? speed}) = _$SpeedResultImpl;
+
+  factory _SpeedResult.fromJson(Map<String, dynamic> json) =
+      _$SpeedResultImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  double? get speed;
+  @override
+  @JsonKey(ignore: true)
+  _$$SpeedResultImplCopyWith<_$SpeedResultImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 Now _$NowFromJson(Map<String, dynamic> json) {
   return _Now.fromJson(json);
 }
