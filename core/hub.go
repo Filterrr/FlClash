@@ -300,7 +300,6 @@ func handleAsyncTestSpeed(paramsString string, fn func(string)) {
 
 		addr := constant.Metadata{
 			NetWork: constant.TCP,
-			Type:    constant.HTTPCONNECT,
 			Host:    parsedUrl.Hostname(),
 			DstPort: dstPort,
 		}
@@ -312,11 +311,11 @@ func handleAsyncTestSpeed(paramsString string, fn func(string)) {
 			fn(string(data))
 			return false, nil
 		}
+		defer proxyConn.Close()
 
 		// Build HTTP request through the dialed connection
 		req, err := nhttp.NewRequest(nhttp.MethodGet, params.Url, nil)
 		if err != nil {
-			proxyConn.Close()
 			data, _ := json.Marshal(speedResult)
 			fn(string(data))
 			return false, nil
