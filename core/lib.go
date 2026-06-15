@@ -115,6 +115,15 @@ func asyncTestDelay(s *C.char, port C.longlong) {
 	})
 }
 
+//export asyncTestSpeed
+func asyncTestSpeed(s *C.char, port C.longlong) {
+	i := int64(port)
+	paramsString := C.GoString(s)
+	handleAsyncTestSpeed(paramsString, func(value string) {
+		bridge.SendToPort(i, value)
+	})
+}
+
 //export getConnections
 func getConnections() *C.char {
 	return C.CString(handleGetConnections())
