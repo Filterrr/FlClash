@@ -102,7 +102,7 @@ class AdaptiveTimer {
         _idleTicks = 0;
         _isIdleMode = false;
         _gcRequested = false;
-        _restartWithInterval(activeInterval);
+        _restartWithInterval(_isScreenOn ? activeInterval : backgroundInterval);
       } else {
         _idleTicks++;
       }
