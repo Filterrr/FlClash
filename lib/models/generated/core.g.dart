@@ -182,6 +182,18 @@ Map<String, dynamic> _$$DelayImplToJson(_$DelayImpl instance) =>
       'value': instance.value,
     };
 
+_$SpeedResultImpl _$$SpeedResultImplFromJson(Map<String, dynamic> json) =>
+    _$SpeedResultImpl(
+      name: json['name'] as String,
+      speed: (json['speed'] as num?)?.toDouble(),
+    );
+
+Map<String, dynamic> _$$SpeedResultImplToJson(_$SpeedResultImpl instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'speed': instance.speed,
+    };
+
 _$NowImpl _$$NowImplFromJson(Map<String, dynamic> json) => _$NowImpl(
       name: json['name'] as String,
       value: json['value'] as String,
@@ -321,6 +333,7 @@ const _$ActionMethodEnumMap = {
   ActionMethod.getTotalTraffic: 'getTotalTraffic',
   ActionMethod.resetTraffic: 'resetTraffic',
   ActionMethod.asyncTestDelay: 'asyncTestDelay',
+  ActionMethod.asyncTestSpeed: 'asyncTestSpeed',
   ActionMethod.getConnections: 'getConnections',
   ActionMethod.closeConnections: 'closeConnections',
   ActionMethod.closeConnection: 'closeConnection',

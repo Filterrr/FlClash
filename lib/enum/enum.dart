@@ -193,6 +193,7 @@ enum ActionMethod {
   getTotalTraffic,
   resetTraffic,
   asyncTestDelay,
+  asyncTestSpeed,
   getConnections,
   closeConnections,
   closeConnection,

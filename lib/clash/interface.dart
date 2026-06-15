@@ -15,6 +15,8 @@ mixin ClashInterface {
 
   Future<String> asyncTestDelay(String proxyName);
 
+  Future<String> asyncTestSpeed(String proxyName, String url, int timeout);
+
   FutureOr<String> updateConfig(UpdateConfigParams updateConfigParams);
 
   FutureOr<String> getProxies();

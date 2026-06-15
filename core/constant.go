@@ -32,6 +32,17 @@ type TestDelayParams struct {
 	Timeout   int64  `json:"timeout"`
 }
 
+type TestSpeedParams struct {
+	ProxyName string `json:"proxy-name"`
+	Url       string `json:"url"`
+	Timeout   int64  `json:"timeout"`
+}
+
+type SpeedResult struct {
+	Name  string   `json:"name"`
+	Speed *float64 `json:"speed"`
+}
+
 type ProcessMapItem struct {
 	Id    int64  `json:"id"`
 	Value string `json:"value"`
@@ -61,6 +72,7 @@ const (
 	getTotalTrafficMethod          Method = "getTotalTraffic"
 	resetTrafficMethod             Method = "resetTraffic"
 	asyncTestDelayMethod           Method = "asyncTestDelay"
+	asyncTestSpeedMethod           Method = "asyncTestSpeed"
 	getConnectionsMethod           Method = "getConnections"
 	closeConnectionsMethod         Method = "closeConnections"
 	closeConnectionMethod          Method = "closeConnection"

@@ -2571,6 +2571,23 @@ class ClashFFI {
   late final _asyncTestDelay = _asyncTestDelayPtr
       .asFunction<void Function(ffi.Pointer<ffi.Char>, int)>();
 
+  void asyncTestSpeed(
+    ffi.Pointer<ffi.Char> s,
+    int port,
+  ) {
+    return _asyncTestSpeed(
+      s,
+      port,
+    );
+  }
+
+  late final _asyncTestSpeedPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<ffi.Char>, ffi.LongLong)>>('asyncTestSpeed');
+  late final _asyncTestSpeed = _asyncTestSpeedPtr
+      .asFunction<void Function(ffi.Pointer<ffi.Char>, int)>();
+
   ffi.Pointer<ffi.Char> getConnections() {
     return _getConnections();
   }

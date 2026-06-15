@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
@@ -100,8 +99,12 @@ proxySpeedTest(Proxy proxy, String groupName) async {
 
   if (delay.value != null && delay.value! > 0) {
     appController.appState.setSpeed(proxyName, -1);
-    final speed = await _testProxySpeed(proxyName, groupName);
-    appController.appState.setSpeed(proxyName, speed);
+    final speedResult = await clashCore.getSpeed(
+      proxyName,
+      appController.config.appSetting.speedTestUrl,
+      10000,
+    );
+    appController.appState.setSpeed(proxyName, speedResult.speed);
   } else {
     appController.appState.setSpeed(proxyName, null);
   }
@@ -117,25 +120,26 @@ speedTest(List<Proxy> proxies, String groupName) async {
 
   appController.appState.showSpeed = true;
   final concurrency = appController.config.appSetting.testConcurrency;
+  final speedTestUrl = appController.config.appSetting.speedTestUrl;
 
-  // Step 1: 并发测延迟（getDelay 直接走 core URLTest，不涉及 changeProxy，可安全并发）
+  // 每个代理独立执行：先测延迟 → 延迟通过再测速度
+  // getSpeed 使用 proxy.DialContext 直接建连，不需要 changeProxy，可安全并发
   await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+    // Step 1: 测延迟
     appController.setDelay(Delay(name: proxyName, value: 0));
     final delay = await clashCore.getDelay(proxyName);
     appController.setDelay(delay);
-  });
 
-  // Step 2: 逐个测速度（changeProxy 影响整个组，必须串行，确保 a 流量走 a、b 流量走 b）
-  for (final proxyName in proxyNames) {
-    final delay = appController.appState.getDelay(proxyName);
-    if (delay != null && delay > 0) {
+    // Step 2: 延迟通过才测速度
+    if (delay.value != null && delay.value! > 0) {
       appController.appState.setSpeed(proxyName, -1);
-      final speed = await _testProxySpeed(proxyName, groupName);
-      appController.appState.setSpeed(proxyName, speed);
+      final speedResult =
+          await clashCore.getSpeed(proxyName, speedTestUrl, 10000);
+      appController.appState.setSpeed(proxyName, speedResult.speed);
     } else {
       appController.appState.setSpeed(proxyName, null);
     }
-  }
+  });
 
   appController.appState.sortNum++;
 }
@@ -176,54 +180,4 @@ Future<void> _runWithConcurrency<T>(
 
   startNext();
   await completer.future;
-}
-
-Future<double?> _testProxySpeed(String proxyName, String groupName) async {
-  final appController = globalState.appController;
-  final speedTestUrl = appController.config.appSetting.speedTestUrl;
-  final mixedPort = appController.clashConfig.mixedPort;
-  final originalProxyName = appController.getCurrentSelectedName(groupName);
-
-  final client = HttpClient();
-  client.findProxy = (uri) => 'PROXY 127.0.0.1:$mixedPort';
-  client.connectionTimeout = const Duration(seconds: 10);
-
-  try {
-    await clashCore.changeProxy(ChangeProxyParams(
-      groupName: groupName,
-      proxyName: proxyName,
-    ));
-
-    final stopwatch = Stopwatch()..start();
-    final request = await client.getUrl(Uri.parse(speedTestUrl));
-    final response = await request.close();
-
-    int totalBytes = 0;
-    double maxSpeed = 0;
-
-    await for (final chunk in response) {
-      totalBytes += chunk.length;
-      final elapsedSeconds = stopwatch.elapsedMilliseconds / 1000;
-      if (elapsedSeconds > 0) {
-        final currentSpeed = totalBytes / elapsedSeconds;
-        if (currentSpeed > maxSpeed) {
-          maxSpeed = currentSpeed;
-        }
-      }
-    }
-
-    stopwatch.stop();
-
-    return maxSpeed > 0 ? maxSpeed : null;
-  } catch (e) {
-    return null;
-  } finally {
-    client.close();
-    if (originalProxyName.isNotEmpty) {
-      await clashCore.changeProxy(ChangeProxyParams(
-        groupName: groupName,
-        proxyName: originalProxyName,
-      ));
-    }
-  }
 }

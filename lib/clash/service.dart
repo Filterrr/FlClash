@@ -146,6 +146,7 @@ class ClashService with ClashInterface {
       case ActionMethod.getTraffic:
       case ActionMethod.getTotalTraffic:
       case ActionMethod.asyncTestDelay:
+      case ActionMethod.asyncTestSpeed:
       case ActionMethod.getConnections:
       case ActionMethod.getExternalProviders:
       case ActionMethod.getExternalProvider:
@@ -413,6 +414,29 @@ class ClashService with ClashInterface {
           Delay(
             name: proxyName,
             value: -1,
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Future<String> asyncTestSpeed(String proxyName, String url, int timeout) {
+    final speedParams = {
+      "proxy-name": proxyName,
+      "url": url,
+      "timeout": timeout,
+    };
+    return _invoke<String>(
+      method: ActionMethod.asyncTestSpeed,
+      data: json.encode(speedParams),
+      timeout: Duration(
+        milliseconds: timeout + 5000,
+      ),
+      onTimeout: () {
+        return json.encode(
+          SpeedResult(
+            name: proxyName,
           ),
         );
       },

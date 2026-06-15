@@ -95,6 +95,12 @@ func handleAction(action *Action) {
 			action.callback(value)
 		})
 		return
+	case asyncTestSpeedMethod:
+		data := action.Data.(string)
+		handleAsyncTestSpeed(data, func(value string) {
+			action.callback(value)
+		})
+		return
 	case getConnectionsMethod:
 		action.callback(handleGetConnections())
 		return
