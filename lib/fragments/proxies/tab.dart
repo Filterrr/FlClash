@@ -543,42 +543,18 @@ class _ProxiesFabState extends State<ProxiesFab>
       children: [
         if (_isExpanded) ...[
           FadeScaleEnterBox(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  appLocalizations.latencyTest,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FloatingActionButton.small(
-                  heroTag: null,
-                  onPressed: _handleDelayTest,
-                  child: const Icon(Icons.network_ping, size: 20),
-                ),
-              ],
+            child: FloatingActionButton.small(
+              heroTag: null,
+              onPressed: _handleDelayTest,
+              child: const Icon(Icons.network_ping, size: 20),
             ),
           ),
           const SizedBox(height: 8),
           FadeScaleEnterBox(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  appLocalizations.speedTest,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FloatingActionButton.small(
-                  heroTag: null,
-                  onPressed: _handleSpeedTest,
-                  child: const Icon(Icons.speed, size: 20),
-                ),
-              ],
+            child: FloatingActionButton.small(
+              heroTag: null,
+              onPressed: _handleSpeedTest,
+              child: const Icon(Icons.speed, size: 20),
             ),
           ),
           const SizedBox(height: 8),
