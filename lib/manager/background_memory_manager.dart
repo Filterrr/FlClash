@@ -82,6 +82,7 @@ class BackgroundMemoryManager {
   Timer? _backgroundMaintenanceTimer;
   Timer? _escalationTimer;
   int _backgroundDuration = 0;
+  DateTime? _backgroundEnterTime;
   final _PerformanceStats _perfStats = _PerformanceStats();
 
   /// 后台持续时间阈值：动态调整维护间隔
@@ -130,6 +131,7 @@ class BackgroundMemoryManager {
     if (_isInBackground) return;
     _isInBackground = true;
     _backgroundDuration = 0;
+    _backgroundEnterTime = DateTime.now();
     _perfStats.recordBackgroundStart();
 
     final level = _optimizationLevel;
@@ -160,6 +162,7 @@ class BackgroundMemoryManager {
     if (!_isInBackground) return;
     _isInBackground = false;
     _backgroundDuration = 0;
+    _backgroundEnterTime = null;
     _perfStats.recordBackgroundEnd();
 
     _cancelEscalationTimer();
@@ -284,7 +287,7 @@ class BackgroundMemoryManager {
       if (!_isInBackground) return;
 
       final now = DateTime.now();
-      _backgroundDuration = now.difference(_backgroundEnteredAt ?? now).inSeconds;
+      _backgroundDuration = now.difference(_backgroundEnterTime ?? now).inSeconds;
 
       _requestGc();
       _perfStats.recordCacheClear();
