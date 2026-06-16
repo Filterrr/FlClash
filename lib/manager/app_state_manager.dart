@@ -82,11 +82,14 @@ class _AppStateManagerState extends State<AppStateManager>
       case AppLifecycleState.paused:
         globalState.appController.savePreferencesDebounce();
         backgroundMemoryManager.onAppPaused();
+      case AppLifecycleState.hidden:
+        // 提前进入后台模式，减少隐藏状态下的资源占用
+        backgroundMemoryManager.onWindowHidden();
       case AppLifecycleState.resumed:
         backgroundMemoryManager.onAppResumed();
+        backgroundMemoryManager.onWindowShown();
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
-      case AppLifecycleState.hidden:
         break;
     }
   }

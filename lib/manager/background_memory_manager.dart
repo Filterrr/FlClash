@@ -283,19 +283,19 @@ class BackgroundMemoryManager {
     _backgroundMaintenanceTimer = Timer.periodic(interval, (_) {
       if (!_isInBackground) return;
 
+      final now = DateTime.now();
+      _backgroundDuration = now.difference(_backgroundEnteredAt ?? now).inSeconds;
+
       _requestGc();
-      _requestDartGc();
-      resourceController.forceClearImageCache();
       _perfStats.recordCacheClear();
-      _backgroundDuration += interval.inSeconds;
 
-      if (_backgroundDuration >= _aggressiveGcThreshold) {
-        _performAggressiveCleanup();
-      }
-
-      // 检查是否需要调整间隔（升级后重启定时器）
+      // 仅在模式升级时清理缓存，避免重复清理
       final newInterval = _currentMaintenanceInterval();
       if (newInterval != interval) {
+        resourceController.forceClearImageCache();
+        if (_backgroundDuration >= _aggressiveGcThreshold) {
+          _performAggressiveCleanup();
+        }
         _startBackgroundMaintenance();
       }
     });
@@ -309,13 +309,6 @@ class BackgroundMemoryManager {
   void _requestGc() {
     clashCore.requestGc();
     _perfStats.recordGc();
-  }
-
-  void _requestDartGc() {
-    try {
-      Future.microtask(() {});
-      SchedulerBinding.instance.scheduleFrame();
-    } catch (_) {}
   }
 
   void _performAggressiveCleanup() {
