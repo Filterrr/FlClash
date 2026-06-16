@@ -82,6 +82,7 @@ class BackgroundMemoryManager {
   Timer? _backgroundMaintenanceTimer;
   Timer? _escalationTimer;
   int _backgroundDuration = 0;
+  DateTime? _backgroundEnterTime;
   final _PerformanceStats _perfStats = _PerformanceStats();
 
   /// 后台持续时间阈值：动态调整维护间隔
@@ -130,6 +131,7 @@ class BackgroundMemoryManager {
     if (_isInBackground) return;
     _isInBackground = true;
     _backgroundDuration = 0;
+    _backgroundEnterTime = DateTime.now();
     _perfStats.recordBackgroundStart();
 
     final level = _optimizationLevel;
@@ -160,6 +162,7 @@ class BackgroundMemoryManager {
     if (!_isInBackground) return;
     _isInBackground = false;
     _backgroundDuration = 0;
+    _backgroundEnterTime = null;
     _perfStats.recordBackgroundEnd();
 
     _cancelEscalationTimer();
@@ -283,19 +286,19 @@ class BackgroundMemoryManager {
     _backgroundMaintenanceTimer = Timer.periodic(interval, (_) {
       if (!_isInBackground) return;
 
+      final now = DateTime.now();
+      _backgroundDuration = now.difference(_backgroundEnterTime ?? now).inSeconds;
+
       _requestGc();
-      _requestDartGc();
-      resourceController.forceClearImageCache();
       _perfStats.recordCacheClear();
-      _backgroundDuration += interval.inSeconds;
 
-      if (_backgroundDuration >= _aggressiveGcThreshold) {
-        _performAggressiveCleanup();
-      }
-
-      // 检查是否需要调整间隔（升级后重启定时器）
+      // 仅在模式升级时清理缓存，避免重复清理
       final newInterval = _currentMaintenanceInterval();
       if (newInterval != interval) {
+        resourceController.forceClearImageCache();
+        if (_backgroundDuration >= _aggressiveGcThreshold) {
+          _performAggressiveCleanup();
+        }
         _startBackgroundMaintenance();
       }
     });
@@ -309,13 +312,6 @@ class BackgroundMemoryManager {
   void _requestGc() {
     clashCore.requestGc();
     _perfStats.recordGc();
-  }
-
-  void _requestDartGc() {
-    try {
-      Future.microtask(() {});
-      SchedulerBinding.instance.scheduleFrame();
-    } catch (_) {}
   }
 
   void _performAggressiveCleanup() {

@@ -18,6 +18,7 @@ class ThrottledTimer {
   int _tickCount = 0;
   final int _reducedSkipFactor;
   final int _lowSkipFactor;
+  bool _isPaused = false;
 
   ThrottledTimer({
     required this.normalDuration,
@@ -32,10 +33,13 @@ class ThrottledTimer {
         _lowSkipFactor = lowSkipFactor;
 
   bool get isActive => _timer != null && _timer!.isActive;
+  bool get isPaused => _isPaused;
 
   void start() {
     cancel();
+    _isPaused = false;
     _timer = Timer.periodic(normalDuration, (_) {
+      if (_isPaused) return;
       _tickCount++;
       final mode = lowMemoryModeNotifier.value;
       switch (mode) {
@@ -53,10 +57,19 @@ class ThrottledTimer {
     });
   }
 
+  void pause() {
+    _isPaused = true;
+  }
+
+  void resume() {
+    _isPaused = false;
+  }
+
   void cancel() {
     _timer?.cancel();
     _timer = null;
     _tickCount = 0;
+    _isPaused = false;
   }
 }
 
@@ -285,7 +298,6 @@ class ResourceController {
     }
     _setImageCacheLimits(_lowImageCacheLimit, _lowImageCacheBytes);
     _clearImageCache();
-    _clearListViewCache();
     for (final callback in _onEnterLowMemory) {
       callback();
     }
@@ -321,17 +333,12 @@ class ResourceController {
     cache.clearLiveImages();
   }
 
-  void _clearListViewCache() {
-    PaintingBinding.instance.imageCache.clearLiveImages();
-  }
-
   void forceClearImageCache() {
     _clearImageCache();
   }
 
   void forceClearAllCaches() {
     _clearImageCache();
-    _clearListViewCache();
   }
 
   void pauseAllNonCriticalTimers() {
@@ -340,10 +347,16 @@ class ResourceController {
         timer.pause();
       }
     }
+    for (final timer in _throttledTimers) {
+      timer.pause();
+    }
   }
 
   void resumeAllTimers() {
     for (final timer in _pausableTimers) {
+      timer.resume();
+    }
+    for (final timer in _throttledTimers) {
       timer.resume();
     }
   }
