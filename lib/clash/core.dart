@@ -42,18 +42,20 @@ class ClashCore {
       asnFileName,
     ];
     try {
-      for (final geoFileName in geoFileNameList) {
+      // 并行拷贝 geo 文件，加速初始化
+      final futures = geoFileNameList.map((geoFileName) async {
         final geoFile = File(
           join(homePath, geoFileName),
         );
         final isExists = await geoFile.exists();
         if (isExists) {
-          continue;
+          return;
         }
         final data = await rootBundle.load('assets/data/$geoFileName');
         List<int> bytes = data.buffer.asUint8List();
         await geoFile.writeAsBytes(bytes, flush: true);
-      }
+      });
+      await Future.wait(futures);
     } catch (e) {
       exit(0);
     }

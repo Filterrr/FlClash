@@ -184,8 +184,11 @@ class GlobalState {
       config: config,
       isPatch: false,
     );
-    await updateGroups(appState);
-    await updateProviders(appState);
+    // 并行更新 groups 和 providers，加速初始化
+    await Future.wait([
+      updateGroups(appState),
+      updateProviders(appState),
+    ]);
   }
 
   updateProviders(AppState appState) async {
