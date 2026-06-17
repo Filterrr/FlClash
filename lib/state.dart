@@ -185,7 +185,7 @@ class GlobalState {
       isPatch: false,
     );
     // 并行更新 groups 和 providers，加速初始化
-    await Future.wait([
+    await Future.wait<void>([
       updateGroups(appState),
       updateProviders(appState),
     ]);
