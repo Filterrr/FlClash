@@ -384,8 +384,11 @@ func applyConfig(rawConfig *config.RawConfig) error {
 		patchConfig()
 	} else {
 		handleCloseConnectionsUnLock()
-		runtime.GC()
-		debug.FreeOSMemory()
+		// 将阻塞式 GC 移到后台执行，避免阻塞配置应用
+		go func() {
+			runtime.GC()
+			debug.FreeOSMemory()
+		}()
 		hub.ApplyConfig(currentConfig)
 		patchSelectGroup()
 	}
