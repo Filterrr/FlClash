@@ -30,12 +30,14 @@ Future<void> main() async {
   final config = (results[2] as Config?) ?? Config();
   final clashConfig = (results[3] as ClashConfig?) ?? ClashConfig();
 
-  // 本地化加载和平台初始化可以并行
+  // 本地化加载依赖 config，需在 config 之后
+  await AppLocalizations.load(
+    other.getLocaleForString(config.appSetting.locale) ??
+        WidgetsBinding.instance.platformDispatcher.locale,
+  );
+
+  // 平台初始化可并行
   await Future.wait<dynamic>([
-    AppLocalizations.load(
-      other.getLocaleForString(config.appSetting.locale) ??
-          WidgetsBinding.instance.platformDispatcher.locale,
-    ),
     android?.init() ?? Future.value(),
     window?.init(config.windowProps, version) ?? Future.value(),
   ]);
