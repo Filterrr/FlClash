@@ -79,16 +79,14 @@ class _AppStateManagerState extends State<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
-      case AppLifecycleState.hidden:
-        // 提前进入后台模式，减少隐藏状态下的资源占用
-        backgroundMemoryManager.onAppPaused();
       case AppLifecycleState.paused:
-        // hidden 已处理进入后台，此处仅保存配置
         globalState.appController.savePreferencesDebounce();
+        backgroundMemoryManager.onAppPaused();
       case AppLifecycleState.resumed:
         backgroundMemoryManager.onAppResumed();
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
         break;
     }
   }
