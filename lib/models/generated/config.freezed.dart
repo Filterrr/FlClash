@@ -231,6 +231,7 @@ class __$$AppSettingImplCopyWithImpl<$Res>
     Object? closeConnections = null,
     Object? testUrl = null,
     Object? speedTestUrl = null,
+    Object? testConcurrency = null,
     Object? isAnimateToPage = null,
     Object? autoCheckUpdate = null,
     Object? showLabel = null,
