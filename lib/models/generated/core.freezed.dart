@@ -1933,7 +1933,7 @@ abstract class _$$SpeedResultImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$SpeedResultImplCopyWith<$Res>
+class __$$SpeedResultImplCopyWithImpl<$Res>
     extends _$SpeedResultCopyWithImpl<$Res, _$SpeedResultImpl>
     implements _$$SpeedResultImplCopyWith<$Res> {
   __$$SpeedResultImplCopyWithImpl(

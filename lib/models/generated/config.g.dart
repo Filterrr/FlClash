@@ -62,7 +62,8 @@ _$AppSettingImpl _$$AppSettingImplFromJson(Map<String, dynamic> json) =>
       closeConnections: json['closeConnections'] as bool? ?? true,
       testUrl: json['testUrl'] as String? ?? defaultTestUrl,
       speedTestUrl: json['speedTestUrl'] as String? ?? defaultSpeedTestUrl,
-      testConcurrency: json['testConcurrency'] as int? ?? defaultTestConcurrency,
+      testConcurrency:
+          (json['testConcurrency'] as num?)?.toInt() ?? defaultTestConcurrency,
       isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
       showLabel: json['showLabel'] as bool? ?? false,
