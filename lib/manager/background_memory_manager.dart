@@ -212,6 +212,8 @@ class BackgroundMemoryManager {
 
     // 标记 HTTP 客户端回到前台模式，恢复正常空闲超时
     FlClashHttpOverrides.exitBackground();
+    // 重建 Dio 实例，后台期间底层 HttpClient 连接可能已失效
+    request.rebuildDio();
     // 恢复 ClashMessage 全部消息处理
     clashMessage.exitBackground();
 
