@@ -5,6 +5,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 class _PerformanceStats {
   final List<_ModeTransition> _modeTransitions = [];
@@ -313,8 +314,7 @@ class BackgroundMemoryManager {
 
   void _requestDartGc() {
     try {
-      Future.microtask(() {});
-      SchedulerBinding.instance.scheduleFrame();
+      WidgetsBinding.instance.handleMemoryPressure();
     } catch (_) {}
   }
 
