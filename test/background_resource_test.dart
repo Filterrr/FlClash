@@ -41,8 +41,7 @@ void main() {
       expect(timer.isActive, isFalse);
 
       await Future.delayed(const Duration(milliseconds: 200));
-      expect(callCount, equals(countBeforePause),
-          reason: '暂停后不应再触发回调');
+      expect(callCount, equals(countBeforePause), reason: '暂停后不应再触发回调');
 
       timer.stop();
     });
@@ -70,8 +69,7 @@ void main() {
       expect(timer.isActive, isTrue);
 
       await Future.delayed(const Duration(milliseconds: 120));
-      expect(callCount, greaterThan(countAtPause),
-          reason: '恢复后应继续触发回调');
+      expect(callCount, greaterThan(countAtPause), reason: '恢复后应继续触发回调');
 
       timer.stop();
     });
@@ -115,18 +113,14 @@ void main() {
       expect(() => FlClashHttpOverrides.exitBackground(), returnsNormally);
     });
 
-    test('closeIdleConnections 在无客户端时不抛出异常', () {
-      expect(() => FlClashHttpOverrides.closeIdleConnections(), returnsNormally);
-    });
-
-    test('forceCloseAllConnections 在无客户端时不抛出异常', () {
-      expect(() => FlClashHttpOverrides.forceCloseAllConnections(), returnsNormally);
+    test('forceIdleConnectionsExpire 在无客户端时不抛出异常', () {
+      expect(() => FlClashHttpOverrides.forceIdleConnectionsExpire(),
+          returnsNormally);
     });
 
     test('后台/前台切换循环不会崩溃', () {
       for (int i = 0; i < 20; i++) {
         FlClashHttpOverrides.enterBackground();
-        FlClashHttpOverrides.closeIdleConnections();
         FlClashHttpOverrides.exitBackground();
       }
     });
@@ -145,7 +139,8 @@ void main() {
       expect(stats.containsKey('currentMode'), isTrue);
     });
 
-    test('hasActiveNonCriticalTimers / hasActiveNonCriticalSubscriptions 可用', () {
+    test('hasActiveNonCriticalTimers / hasActiveNonCriticalSubscriptions 可用',
+        () {
       resourceController.init();
       // 初始状态下应无活跃的非关键资源
       expect(resourceController.hasActiveNonCriticalTimers(), isFalse);
@@ -224,6 +219,7 @@ void main() {
       void listener() {
         changeCount++;
       }
+
       lowMemoryModeNotifier.addListener(listener);
 
       for (int i = 0; i < 10; i++) {
@@ -259,15 +255,13 @@ void main() {
       expect(timer.isPaused, isTrue);
 
       await Future.delayed(const Duration(milliseconds: 150));
-      expect(callCount, equals(countBeforePause),
-          reason: '暂停后不应触发回调');
+      expect(callCount, equals(countBeforePause), reason: '暂停后不应触发回调');
 
       timer.resume();
       expect(timer.isPaused, isFalse);
 
       await Future.delayed(const Duration(milliseconds: 120));
-      expect(callCount, greaterThan(countBeforePause),
-          reason: '恢复后应继续触发回调');
+      expect(callCount, greaterThan(countBeforePause), reason: '恢复后应继续触发回调');
 
       timer.stop();
     });
@@ -314,10 +308,8 @@ void main() {
       normalTimer.start();
 
       resourceController.pauseAllNonCriticalTimers();
-      expect(criticalTimer.isPaused, isFalse,
-          reason: 'critical 定时器不应被暂停');
-      expect(normalTimer.isPaused, isTrue,
-          reason: 'normal 定时器应被暂停');
+      expect(criticalTimer.isPaused, isFalse, reason: 'critical 定时器不应被暂停');
+      expect(normalTimer.isPaused, isTrue, reason: 'normal 定时器应被暂停');
 
       resourceController.resumeAllTimers();
       expect(normalTimer.isPaused, isFalse);
@@ -415,8 +407,8 @@ void main() {
     test('场景4: 后台时 HTTP 连接清理不中断活跃请求', () {
       // enterBackground 仅缩短空闲超时，不影响活跃连接
       FlClashHttpOverrides.enterBackground();
-      // closeIdleConnections 仅关闭空闲连接
-      FlClashHttpOverrides.closeIdleConnections();
+      // forceIdleConnectionsExpire 使空闲连接自然过期，不关闭客户端
+      FlClashHttpOverrides.forceIdleConnectionsExpire();
       // exitBackground 恢复正常超时
       FlClashHttpOverrides.exitBackground();
     });
@@ -426,7 +418,7 @@ void main() {
 
       // 激进清理
       resourceController.forceClearAllCaches();
-      FlClashHttpOverrides.forceCloseAllConnections();
+      FlClashHttpOverrides.forceIdleConnectionsExpire();
 
       final stats = resourceController.getResourceStats();
       expect(stats['imageCacheSize'], equals(0));

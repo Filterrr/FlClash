@@ -291,8 +291,8 @@ class BackgroundMemoryManager {
     resourceController.pauseAllNonCriticalTimers();
     resourceController.pauseAllNonCriticalSubscriptions();
     resourceController.forceClearImageCache();
-    // 关闭空闲 HTTP 连接，释放网络资源（保留活跃连接）
-    FlClashHttpOverrides.closeIdleConnections();
+    // HTTP 空闲连接由 enterBackground() 缩短 idleTimeout 自然释放，
+    // 不调用 close() 以免永久关闭客户端导致回前台后请求失败
     _perfStats.recordCacheClear();
   }
 
@@ -370,8 +370,8 @@ class BackgroundMemoryManager {
 
   void _performAggressiveCleanup() {
     resourceController.forceClearAllCaches();
-    // 强制关闭所有 HTTP 连接，最大化资源释放
-    FlClashHttpOverrides.forceCloseAllConnections();
+    // 强制空闲 HTTP 连接立即过期（不关闭客户端本身）
+    FlClashHttpOverrides.forceIdleConnectionsExpire();
     _perfStats.recordCacheClear();
     _trimAppStateData();
     _trimFlowingStateData();

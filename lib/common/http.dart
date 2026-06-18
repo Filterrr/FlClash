@@ -34,25 +34,15 @@ class FlClashHttpOverrides extends HttpOverrides {
     return client;
   }
 
-  /// 关闭所有活跃 HttpClient 的空闲连接，释放网络资源。
-  /// 在应用进入后台时调用，保留活跃连接避免中断进行中的请求。
-  static void closeIdleConnections() {
+  /// 强制空闲连接立即过期，用于激进清理场景。
+  /// 通过将 idleTimeout 设为零使空闲连接自然过期，
+  /// 而非调用 close() 导致客户端永久不可用。
+  static void forceIdleConnectionsExpire() {
     for (final client in _activeClients) {
       try {
-        client.close(force: false);
+        client.idleTimeout = Duration.zero;
       } catch (_) {}
     }
-    _activeClients.removeWhere((c) => false);
-  }
-
-  /// 强制关闭所有 HttpClient 连接，用于激进清理场景。
-  static void forceCloseAllConnections() {
-    for (final client in _activeClients) {
-      try {
-        client.close(force: true);
-      } catch (_) {}
-    }
-    _activeClients.clear();
   }
 
   /// 标记应用进入后台状态，缩短新创建连接的空闲超时。
