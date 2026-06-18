@@ -21,8 +21,6 @@ class ClashService with ClashInterface {
   Process? process;
 
   Timer? _completerCleanupTimer;
-  StreamSubscription? _socketSubscription;
-  StreamSubscription? _stdoutSubscription;
 
   factory ClashService() {
     _instance ??= ClashService._internal();
@@ -68,7 +66,7 @@ class ClashService with ClashInterface {
     await for (final socket in server) {
       await _destroySocket();
       socketCompleter.complete(socket);
-      _socketSubscription = socket
+      socket
           .transform(
             StreamTransformer<Uint8List, String>.fromHandlers(
               handleData: (Uint8List data, EventSink<String> sink) {
@@ -110,7 +108,7 @@ class ClashService with ClashInterface {
         arg,
       ],
     );
-    _stdoutSubscription = process!.stdout.listen((_) {});
+    process!.stdout.listen((_) {});
   }
 
   _deleteSocketFile() async {
@@ -123,8 +121,6 @@ class ClashService with ClashInterface {
   }
 
   _destroySocket() async {
-    await _socketSubscription?.cancel();
-    _socketSubscription = null;
     if (socketCompleter.isCompleted) {
       final lastSocket = await socketCompleter.future;
       await lastSocket.close();
@@ -457,14 +453,6 @@ class ClashService with ClashInterface {
       }
     }
     callbackCompleterMap.clear();
-    // 取消 socket 订阅
-    await _socketSubscription?.cancel();
-    _socketSubscription = null;
-    // 终止 core 进程
-    await _stdoutSubscription?.cancel();
-    _stdoutSubscription = null;
-    process?.kill();
-    process = null;
     final server = await serverCompleter.future;
     await server.close();
     await _deleteSocketFile();

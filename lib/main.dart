@@ -71,7 +71,6 @@ Future<void> main() async {
 @pragma('vm:entry-point')
 Future<void> vpnService() async {
   WidgetsFlutterBinding.ensureInitialized();
-  clashLib?.initMessage();
   globalState.isVpnService = true;
   globalState.packageInfo = await PackageInfo.fromPlatform();
   final version = await system.version;

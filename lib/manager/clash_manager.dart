@@ -21,7 +21,7 @@ class ClashManager extends StatefulWidget {
 }
 
 class _ClashContainerState extends State<ClashManager> with AppMessageListener {
-  Debouncer? updateDelayDebounce;
+  Function? updateDelayDebounce;
 
   Widget _updateContainer(Widget child) {
     return Selector2<Config, ClashConfig, ClashConfigState>(
@@ -96,8 +96,6 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
   @override
   Future<void> dispose() async {
     clashMessage.removeListener(this);
-    updateDelayDebounce?.cancel();
-    updateDelayDebounce = null;
     super.dispose();
   }
 
@@ -106,11 +104,11 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
     final appController = globalState.appController;
     appController.setDelay(delay);
     super.onDelay(delay);
-    updateDelayDebounce ??= Debouncer(delay: const Duration(milliseconds: 5000));
-    updateDelayDebounce!.call(() async {
+    updateDelayDebounce ??= debounce(() async {
       await appController.updateGroupDebounce();
       await appController.addCheckIpNumDebounce();
-    }, []);
+    }, milliseconds: 5000);
+    updateDelayDebounce!();
   }
 
   @override

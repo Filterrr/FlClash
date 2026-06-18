@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -33,16 +32,12 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      if (_isVisible && !backgroundMemoryManager.isInBackground) _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.onEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.onExitBackground(_onExitBackground);
   }
 
   void _onLowMemoryModeChanged() {
-    // 后台时由 _onEnterBackground / _onExitBackground 管理定时器
-    if (backgroundMemoryManager.isInBackground) return;
     if (isLowMemoryMode) {
       _stopTimer();
     } else if (isReducedMemoryMode) {
@@ -56,8 +51,6 @@ class _RequestsFragmentState extends State<RequestsFragment> {
     if (_isVisible == visible) return;
     _isVisible = visible;
     if (visible) {
-      // 后台时不启动定时器，等回到前台时由 _onExitBackground 启动
-      if (backgroundMemoryManager.isInBackground) return;
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode) {
         _startReducedTimer();
@@ -66,20 +59,6 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       }
     } else {
       _stopTimer();
-    }
-  }
-
-  void _onEnterBackground() {
-    _stopTimer();
-  }
-
-  void _onExitBackground() {
-    if (!_isVisible) return;
-    if (isLowMemoryMode) return;
-    if (isReducedMemoryMode) {
-      _startReducedTimer();
-    } else {
-      _startTimer();
     }
   }
 
@@ -174,8 +153,6 @@ class _RequestsFragmentState extends State<RequestsFragment> {
     timer?.cancel();
     _scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.removeOnEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.removeOnExitBackground(_onExitBackground);
     timer = null;
   }
 

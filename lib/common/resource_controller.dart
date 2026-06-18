@@ -364,49 +364,6 @@ class ResourceController {
     }
   }
 
-  /// 获取当前跟踪的资源统计信息，用于诊断和测试。
-  Map<String, dynamic> getResourceStats() {
-    int pausedTimers = 0;
-    int pausedSubscriptions = 0;
-    for (final timer in _pausableTimers) {
-      if (timer.isPaused) pausedTimers++;
-    }
-    for (final sub in _pausableSubscriptions) {
-      if (sub.subscription.isPaused) pausedSubscriptions++;
-    }
-    return {
-      'totalPausableTimers': _pausableTimers.length,
-      'pausedTimers': pausedTimers,
-      'totalThrottledTimers': _throttledTimers.length,
-      'totalPausableSubscriptions': _pausableSubscriptions.length,
-      'pausedSubscriptions': pausedSubscriptions,
-      'currentMode': lowMemoryModeNotifier.value.name,
-      'imageCacheSize': PaintingBinding.instance.imageCache.currentSize,
-      'imageCacheBytes': PaintingBinding.instance.imageCache.currentSizeBytes,
-    };
-  }
-
-  /// 检查是否有非关键定时器仍在运行（未暂停）。
-  bool hasActiveNonCriticalTimers() {
-    for (final timer in _pausableTimers) {
-      if (timer.priority != ResourcePriority.critical && !timer.isPaused) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /// 检查是否有非关键订阅仍在运行（未暂停）。
-  bool hasActiveNonCriticalSubscriptions() {
-    for (final sub in _pausableSubscriptions) {
-      if (sub.priority != ResourcePriority.critical &&
-          !sub.subscription.isPaused) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void dispose() {
     lowMemoryModeNotifier.removeListener(_handleModeChange);
     _pausableTimers.clear();

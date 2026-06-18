@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -31,15 +30,12 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      if (_isVisible && !backgroundMemoryManager.isInBackground) _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.onEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.onExitBackground(_onExitBackground);
   }
 
   void _onLowMemoryModeChanged() {
-    if (backgroundMemoryManager.isInBackground) return;
     if (isLowMemoryMode) {
       _stopTimer();
     } else if (isReducedMemoryMode) {
@@ -53,7 +49,6 @@ class _LogsFragmentState extends State<LogsFragment> {
     if (_isVisible == visible) return;
     _isVisible = visible;
     if (visible) {
-      if (backgroundMemoryManager.isInBackground) return;
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode) {
         _startReducedTimer();
@@ -62,20 +57,6 @@ class _LogsFragmentState extends State<LogsFragment> {
       }
     } else {
       _stopTimer();
-    }
-  }
-
-  void _onEnterBackground() {
-    _stopTimer();
-  }
-
-  void _onExitBackground() {
-    if (!_isVisible) return;
-    if (isLowMemoryMode) return;
-    if (isReducedMemoryMode) {
-      _startReducedTimer();
-    } else {
-      _startTimer();
     }
   }
 
@@ -123,8 +104,6 @@ class _LogsFragmentState extends State<LogsFragment> {
     logsNotifier.dispose();
     scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.removeOnEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.removeOnExitBackground(_onExitBackground);
     timer = null;
   }
 

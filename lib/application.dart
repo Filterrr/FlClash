@@ -115,9 +115,6 @@ class ApplicationState extends State<Application> {
     );
     // 监听低内存模式变化，控制 groupUpdateTimer
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
-    // 注册后台回调：进入后台时暂停 groupUpdateTimer，退出时恢复
-    backgroundMemoryManager.onEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.onExitBackground(_onExitBackground);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final currentContext = globalState.navigatorKey.currentContext;
       if (currentContext != null) {
@@ -132,29 +129,8 @@ class ApplicationState extends State<Application> {
   void _onLowMemoryModeChanged() {
     if (isLowMemoryMode) {
       _cancelTimer();
-    } else if (isNormalMemoryMode) {
-      // 从 low/reduced 模式回到 normal 时，若不在后台则重启定时器
-      // 后台退出时由 _onExitBackground 负责恢复
-      if (!backgroundMemoryManager.isInBackground) {
-        if (groupUpdateTimer == null || !groupUpdateTimer!.isActive) {
-          _initTimer();
-        }
-      }
     }
-    // reduced 模式下 timer 继续运行（AdaptiveTimer 自身已处理降频）
-  }
-
-  void _onEnterBackground() {
-    groupUpdateTimer?.pause();
-  }
-
-  void _onExitBackground() {
-    if (isLowMemoryMode) return;
-    if (groupUpdateTimer != null && groupUpdateTimer!.isPaused) {
-      groupUpdateTimer!.resume();
-    } else if (groupUpdateTimer == null || !groupUpdateTimer!.isActive) {
-      _initTimer();
-    }
+    // reduced 和 normal 模式下 timer 继续运行（AdaptiveTimer 自身已处理降频）
   }
 
   _initTimer() {
@@ -312,8 +288,6 @@ class ApplicationState extends State<Application> {
     linkManager.destroy();
     _cancelTimer();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.removeOnEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.removeOnExitBackground(_onExitBackground);
     if (connectivitySubscription != null) {
       resourceController.unregisterPausableSubscription(connectivitySubscription!);
     }
