@@ -59,11 +59,11 @@ delayTest(List<Proxy> proxies) async {
       .toSet()
       .toList();
 
-  final concurrency = appController.config.appSetting.testConcurrency;
-  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
+  // 延迟测试不使用并发限制，全量同时测试
+  await Future.wait(proxyNames.map((proxyName) async {
     appController.setDelay(Delay(name: proxyName, value: 0));
     appController.setDelay(await clashCore.getDelay(proxyName));
-  });
+  }));
   appController.appState.sortNum++;
 }
 
