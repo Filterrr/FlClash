@@ -307,8 +307,9 @@ class ClashLib with ClashInterface {
   @override
   String getTotalTraffic(bool value) {
     final trafficRaw = clashFFI.getTotalTraffic(value ? 1 : 0);
+    final trafficString = trafficRaw.cast<Utf8>().toDartString();
     clashFFI.freeCString(trafficRaw);
-    return trafficRaw.cast<Utf8>().toDartString();
+    return trafficString;
   }
 
   @override
