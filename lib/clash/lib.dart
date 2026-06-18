@@ -55,20 +55,6 @@ class ClashLib with ClashInterface {
   @override
   bool get isInit => clashFFI.getIsInit() == 1;
 
-  /// 为 ReceivePort + Completer 模式添加超时保护，
-  /// 防止 native 侧无响应时 ReceivePort 和 Completer 永久泄漏。
-  Future<String> _completerWithTimeout(
-    Completer<String> completer,
-    ReceivePort receiver, {
-    Duration timeout = const Duration(seconds: 30),
-    required String methodName,
-  }) {
-    return completer.future.timeout(timeout, onTimeout: () {
-      receiver.close();
-      throw TimeoutException('$methodName timed out');
-    });
-  }
-
   @override
   Future<String> validateConfig(String data) {
     final completer = Completer<String>();
@@ -85,12 +71,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(dataChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 15),
-      methodName: 'validateConfig',
-    );
+    return completer.future;
   }
 
   @override
@@ -110,12 +91,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(paramsChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 20),
-      methodName: 'updateConfig',
-    );
+    return completer.future;
   }
 
   @override
@@ -170,12 +146,7 @@ class ClashLib with ClashInterface {
     );
     malloc.free(geoTypeChar);
     malloc.free(geoNameChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 120),
-      methodName: 'updateGeoData',
-    );
+    return completer.future;
   }
 
   @override
@@ -200,12 +171,7 @@ class ClashLib with ClashInterface {
     );
     malloc.free(providerNameChar);
     malloc.free(dataChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 30),
-      methodName: 'sideLoadExternalProvider',
-    );
+    return completer.future;
   }
 
   @override
@@ -224,12 +190,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(providerNameChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 120),
-      methodName: 'updateExternalProvider',
-    );
+    return completer.future;
   }
 
   @override
@@ -249,12 +210,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(paramsChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 10),
-      methodName: 'changeProxy',
-    );
+    return completer.future;
   }
 
   @override
@@ -312,12 +268,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(delayParamsChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: const Duration(seconds: 15),
-      methodName: 'asyncTestDelay',
-    );
+    return completer.future;
   }
 
   @override
@@ -342,12 +293,7 @@ class ClashLib with ClashInterface {
       receiver.sendPort.nativePort,
     );
     malloc.free(speedParamsChar);
-    return _completerWithTimeout(
-      completer,
-      receiver,
-      timeout: Duration(milliseconds: timeout + 10000),
-      methodName: 'asyncTestSpeed',
-    );
+    return completer.future;
   }
 
   @override
@@ -361,9 +307,8 @@ class ClashLib with ClashInterface {
   @override
   String getTotalTraffic(bool value) {
     final trafficRaw = clashFFI.getTotalTraffic(value ? 1 : 0);
-    final trafficString = trafficRaw.cast<Utf8>().toDartString();
     clashFFI.freeCString(trafficRaw);
-    return trafficString;
+    return trafficRaw.cast<Utf8>().toDartString();
   }
 
   @override

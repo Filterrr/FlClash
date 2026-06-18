@@ -19,8 +19,6 @@ class AdaptiveTimer {
   int _idleTicks = 0;
   bool _isIdleMode = false;
   bool _gcRequested = false;
-  bool _isPaused = false;
-  Duration? _resumedInterval;
 
   AdaptiveTimer({
     required this.activeInterval,
@@ -30,16 +28,13 @@ class AdaptiveTimer {
   });
 
   bool get isActive => _timer != null && _timer!.isActive;
-  bool get isPaused => _isPaused;
 
   void start() {
     stop();
-    _isPaused = false;
     _idleTicks = 0;
     _isIdleMode = false;
     _gcRequested = false;
     _timer = Timer.periodic(activeInterval, (_) {
-      if (_isPaused) return;
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
         return;
@@ -52,33 +47,6 @@ class AdaptiveTimer {
   void stop() {
     _timer?.cancel();
     _timer = null;
-  }
-
-  /// 暂停定时器，停止所有轮询。用于应用进入后台时释放 CPU 资源。
-  /// 记录当前间隔以便恢复时使用正确的频率。
-  void pause() {
-    if (_isPaused) return;
-    _isPaused = true;
-    _resumedInterval = _isIdleMode ? idleInterval : activeInterval;
-    _timer?.cancel();
-    _timer = null;
-  }
-
-  /// 恢复定时器，回到暂停前的运行状态。
-  void resume() {
-    if (!_isPaused) return;
-    _isPaused = false;
-    final interval = _resumedInterval ?? activeInterval;
-    _resumedInterval = null;
-    _timer = Timer.periodic(interval, (_) {
-      if (_isPaused) return;
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode && !(_isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
-        return;
-      }
-      final hadChange = callback();
-      _updateIdleState(hadChange);
-    });
   }
 
   void _updateIdleState(bool hadChange) {
@@ -139,7 +107,6 @@ class VisibilityAwareTimer {
 
   Timer? _timer;
   bool _isRunning = false;
-  bool _isPaused = false;
 
   VisibilityAwareTimer({
     required this.interval,
@@ -148,14 +115,11 @@ class VisibilityAwareTimer {
   });
 
   bool get isActive => _isRunning;
-  bool get isPaused => _isPaused;
 
   void start() {
     if (_isRunning) return;
     _isRunning = true;
-    _isPaused = false;
     _timer = Timer.periodic(interval, (_) {
-      if (_isPaused) return;
       if (!isVisible()) return;
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode) {
@@ -166,20 +130,9 @@ class VisibilityAwareTimer {
     });
   }
 
-  /// 暂停定时器，用于应用进入后台时停止轮询。
-  void pause() {
-    _isPaused = true;
-  }
-
-  /// 恢复定时器。
-  void resume() {
-    _isPaused = false;
-  }
-
   void stop() {
     _timer?.cancel();
     _timer = null;
     _isRunning = false;
-    _isPaused = false;
   }
 }

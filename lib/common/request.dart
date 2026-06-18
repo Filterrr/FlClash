@@ -9,14 +9,10 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/cupertino.dart';
 
 class Request {
-  late Dio _dio;
+  late final Dio _dio;
   String? userAgent;
 
   Request() {
-    _initDio();
-  }
-
-  void _initDio() {
     _dio = Dio();
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -25,13 +21,6 @@ class Request {
         },
       ),
     );
-  }
-
-  /// 重建 Dio 实例，在底层 HttpClient 失效后调用。
-  /// 当 HttpClient 连接异常或被系统回收后，Dio 缓存的
-  /// HttpClient 引用可能失效，需要重建以获取新连接。
-  void rebuildDio() {
-    _initDio();
   }
 
   Future<Response> getFileResponseForUrl(String url) async {

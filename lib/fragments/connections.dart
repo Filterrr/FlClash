@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -33,15 +32,12 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       connectionsNotifier.value = connectionsNotifier.value.copyWith(
         connections: await clashCore.getConnections(),
       );
-      if (_isVisible && !backgroundMemoryManager.isInBackground) _startTimer();
+      if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.onEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.onExitBackground(_onExitBackground);
   }
 
   void _onLowMemoryModeChanged() {
-    if (backgroundMemoryManager.isInBackground) return;
     if (isLowMemoryMode) {
       _stopTimer();
     } else if (isReducedMemoryMode) {
@@ -55,7 +51,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     if (_isVisible == visible) return;
     _isVisible = visible;
     if (visible) {
-      if (backgroundMemoryManager.isInBackground) return;
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode) {
         _startReducedTimer();
@@ -64,20 +59,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       }
     } else {
       _stopTimer();
-    }
-  }
-
-  void _onEnterBackground() {
-    _stopTimer();
-  }
-
-  void _onExitBackground() {
-    if (!_isVisible) return;
-    if (isLowMemoryMode) return;
-    if (isReducedMemoryMode) {
-      _startReducedTimer();
-    } else {
-      _startTimer();
     }
   }
 
@@ -186,8 +167,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     connectionsNotifier.dispose();
     _scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
-    backgroundMemoryManager.removeOnEnterBackground(_onEnterBackground);
-    backgroundMemoryManager.removeOnExitBackground(_onExitBackground);
     timer = null;
   }
 
