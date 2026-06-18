@@ -34,10 +34,11 @@ class ClashService with ClashInterface {
   }
 
   /// 定期清理已完成的 completer，防止内存累积
+  /// 后台时降低清理频率以减少 CPU 唤醒
   void _startCompleterCleanup() {
     _completerCleanupTimer?.cancel();
     _completerCleanupTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 60),
       (_) {
         callbackCompleterMap.removeWhere((key, completer) {
           return completer.isCompleted;

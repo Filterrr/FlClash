@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
+import 'manager/background_memory_manager.dart';
 import 'models/models.dart';
 
 class GlobalState {
@@ -32,7 +33,9 @@ class GlobalState {
   int? lastProfileModified;
   DateTime? _lastForegroundUpdate;
   Traffic? _lastTraffic;
+  Traffic? get lastTraffic => _lastTraffic;
   static const Duration _foregroundUpdateThrottle = Duration(seconds: 5);
+  static const Duration _backgroundUpdateThrottle = Duration(seconds: 30);
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
@@ -305,10 +308,14 @@ class GlobalState {
     final traffic = await clashCore.getTraffic(onlyProxy);
     _lastTraffic = traffic;
     if (Platform.isAndroid && isVpnService == true) {
-      // 节流前台通知更新，避免频繁唤醒系统通知管理器
+      // 后台时大幅降低通知更新频率，避免频繁唤醒系统通知管理器
       final now = DateTime.now();
+      final isInBackground = backgroundMemoryManager.isInBackground;
+      final throttle = isInBackground
+          ? _backgroundUpdateThrottle
+          : _foregroundUpdateThrottle;
       if (_lastForegroundUpdate == null ||
-          now.difference(_lastForegroundUpdate!) >= _foregroundUpdateThrottle) {
+          now.difference(_lastForegroundUpdate!) >= throttle) {
         _lastForegroundUpdate = now;
         vpn?.startForeground(
           title: clashLib?.getCurrentProfileName() ?? "",
@@ -316,7 +323,8 @@ class GlobalState {
         );
       }
     } else {
-      if (appFlowingState != null) {
+      // 后台时跳过 UI 状态更新，减少不必要的重建
+      if (appFlowingState != null && !backgroundMemoryManager.isInBackground) {
         appFlowingState.addTraffic(traffic);
         appFlowingState.totalTraffic =
             await clashCore.getTotalTraffic(onlyProxy);

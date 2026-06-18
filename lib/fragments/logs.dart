@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,20 @@ class _LogsFragmentState extends State<LogsFragment> {
       if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
+    backgroundMemoryManager.addListener(_onBackgroundStateChanged);
+  }
+
+  void _onBackgroundStateChanged() {
+    if (backgroundMemoryManager.isInBackground) {
+      _stopTimer();
+    } else if (_isVisible) {
+      if (isLowMemoryMode) return;
+      if (isReducedMemoryMode) {
+        _startReducedTimer();
+      } else {
+        _startTimer();
+      }
+    }
   }
 
   void _onLowMemoryModeChanged() {
@@ -48,6 +63,11 @@ class _LogsFragmentState extends State<LogsFragment> {
   void _onVisibilityChanged(bool visible) {
     if (_isVisible == visible) return;
     _isVisible = visible;
+    // 应用在后台时完全停止定时器
+    if (backgroundMemoryManager.isInBackground) {
+      _stopTimer();
+      return;
+    }
     if (visible) {
       if (isLowMemoryMode) return;
       if (isReducedMemoryMode) {
@@ -104,6 +124,7 @@ class _LogsFragmentState extends State<LogsFragment> {
     logsNotifier.dispose();
     scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
+    backgroundMemoryManager.removeListener(_onBackgroundStateChanged);
     timer = null;
   }
 
