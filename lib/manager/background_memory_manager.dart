@@ -72,7 +72,7 @@ class _ModeTransition {
   });
 }
 
-class BackgroundMemoryManager {
+class BackgroundMemoryManager extends ChangeNotifier {
   static final BackgroundMemoryManager _instance =
       BackgroundMemoryManager._internal();
   factory BackgroundMemoryManager() => _instance;
@@ -99,7 +99,7 @@ class BackgroundMemoryManager {
   static const Duration _escalationDelay = Duration(seconds: 180);
   static const int _aggressiveGcThreshold = 1200;
 
-  bool get isInBackground => _isInBackground;
+  bool get isInBackground => _isInBackground && _optimizationLevel != BackgroundOptimizationLevel.disabled;
 
   BackgroundOptimizationLevel get _optimizationLevel {
     try {
@@ -134,6 +134,7 @@ class BackgroundMemoryManager {
     _isInBackground = true;
     _backgroundDuration = 0;
     _perfStats.recordBackgroundStart();
+    notifyListeners();
 
     final level = _optimizationLevel;
     if (level == BackgroundOptimizationLevel.disabled) return;
@@ -169,6 +170,7 @@ class BackgroundMemoryManager {
     _isInBackground = false;
     _backgroundDuration = 0;
     _perfStats.recordBackgroundEnd();
+    notifyListeners();
 
     _cancelEscalationTimer();
     _restoreGlobalStateTimerFrequency();
@@ -375,6 +377,7 @@ class BackgroundMemoryManager {
     _stopBackgroundMaintenance();
     resourceController.dispose();
     _isInitialized = false;
+    super.dispose();
   }
 }
 

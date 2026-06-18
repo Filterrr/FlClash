@@ -36,6 +36,20 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
       if (_isVisible) _startTimer();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
+    backgroundMemoryManager.addListener(_onBackgroundStateChanged);
+  }
+
+  void _onBackgroundStateChanged() {
+    if (backgroundMemoryManager.isInBackground) {
+      _stopTimer();
+    } else if (_isVisible) {
+      if (isLowMemoryMode) return;
+      if (isReducedMemoryMode) {
+        _startReducedTimer();
+      } else {
+        _startTimer();
+      }
+    }
   }
 
   void _onLowMemoryModeChanged() {
@@ -173,6 +187,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     connectionsNotifier.dispose();
     _scrollController.dispose();
     lowMemoryModeNotifier.removeListener(_onLowMemoryModeChanged);
+    backgroundMemoryManager.removeListener(_onBackgroundStateChanged);
     timer = null;
   }
 
