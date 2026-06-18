@@ -156,6 +156,12 @@ class BackgroundMemoryManager {
     _backgroundDuration = 0;
     _perfStats.recordBackgroundStart();
 
+    final level = _optimizationLevel;
+    if (level == BackgroundOptimizationLevel.disabled) {
+      // 后台优化关闭时，仅执行最基本的后台标记
+      return;
+    }
+
     // 通知所有注册的回调暂停非必要资源（定时器、订阅等）
     for (final callback in _onEnterBackgroundCallbacks) {
       try {
@@ -167,9 +173,6 @@ class BackgroundMemoryManager {
     FlClashHttpOverrides.enterBackground();
     // 节流 ClashMessage 非关键消息处理，减少后台 CPU 占用
     clashMessage.enterBackground();
-
-    final level = _optimizationLevel;
-    if (level == BackgroundOptimizationLevel.disabled) return;
 
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
@@ -198,6 +201,12 @@ class BackgroundMemoryManager {
     _backgroundDuration = 0;
     _perfStats.recordBackgroundEnd();
 
+    final level = _optimizationLevel;
+    if (level == BackgroundOptimizationLevel.disabled) {
+      // 后台优化关闭时，无需恢复任何资源
+      return;
+    }
+
     _cancelEscalationTimer();
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
@@ -217,10 +226,8 @@ class BackgroundMemoryManager {
     // 恢复 ClashMessage 全部消息处理
     clashMessage.exitBackground();
 
-    if (_optimizationLevel != BackgroundOptimizationLevel.disabled) {
-      _transitionToMode(LowMemoryMode.normal);
-      _scheduleUiRefresh();
-    }
+    _transitionToMode(LowMemoryMode.normal);
+    _scheduleUiRefresh();
   }
 
   void _startEscalationTimer() {
