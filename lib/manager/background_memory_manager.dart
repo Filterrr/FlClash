@@ -372,6 +372,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
 
   Map<String, dynamic> getPerformanceStats() => _perfStats.toMap();
 
+  @override
   void dispose() {
     _cancelEscalationTimer();
     _stopBackgroundMaintenance();

@@ -36,7 +36,6 @@ class GlobalState {
   Traffic? get lastTraffic => _lastTraffic;
   static const Duration _foregroundUpdateThrottle = Duration(seconds: 5);
   static const Duration _backgroundUpdateThrottle = Duration(seconds: 30);
-  DateTime? _lastBackgroundTrafficUpdate;
 
   bool get isStart => startTime != null && startTime!.isBeforeNow;
 
