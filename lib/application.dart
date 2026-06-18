@@ -8,6 +8,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/manager/manager.dart';
+import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -138,9 +139,13 @@ class ApplicationState extends State<Application> {
     groupUpdateTimer = AdaptiveTimer(
       activeInterval: const Duration(seconds: 20),
       idleInterval: const Duration(seconds: 60),
+      deepIdleInterval: const Duration(seconds: 120),
       idleThreshold: 3,
+      deepIdleThreshold: 8,
       callback: () {
         if (isLowMemoryMode) return false;
+        // 后台时跳过代理组更新，减少不必要的 FFI 调用
+        if (backgroundMemoryManager.isInBackground) return false;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           globalState.appController.updateGroupDebounce();
         });

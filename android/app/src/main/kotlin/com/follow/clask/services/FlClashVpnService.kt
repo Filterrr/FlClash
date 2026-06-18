@@ -159,11 +159,23 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
             setShowWhen(false)
             setOnlyAlertOnce(true)
             setAutoCancel(true)
+            // 省电优化：减少通知声音和震动
+            setSilent(true)
         }
     }
 
+    // 缓存上次通知内容，避免相同内容重复更新
+    private var lastNotificationTitle: String = ""
+    private var lastNotificationContent: String = ""
+
     @SuppressLint("ForegroundServiceType", "WrongConstant")
     override fun startForeground(title: String, content: String) {
+        // 跳过内容完全相同的通知更新，减少系统通知管理器的 CPU 唤醒
+        if (title == lastNotificationTitle && content == lastNotificationContent) {
+            return
+        }
+        lastNotificationTitle = title
+        lastNotificationContent = content
         CoroutineScope(Dispatchers.Default).launch {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val manager = getSystemService(NotificationManager::class.java)
@@ -189,7 +201,10 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        GlobalState.getCurrentVPNPlugin()?.requestGc()
+        // 仅在中高内存压力时触发 GC，低级别时跳过以减少 CPU 唤醒
+        if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            GlobalState.getCurrentVPNPlugin()?.requestGc()
+        }
     }
 
     private val binder = LocalBinder()

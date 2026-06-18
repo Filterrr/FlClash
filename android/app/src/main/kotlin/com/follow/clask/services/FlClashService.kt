@@ -78,8 +78,13 @@ class FlClashService : Service(), BaseServiceInterface {
             setShowWhen(false)
             setOnlyAlertOnce(true)
             setAutoCancel(true)
+            setSilent(true)
         }
     }
+
+    // 缓存上次通知内容，避免相同内容重复更新
+    private var lastNotificationTitle: String = ""
+    private var lastNotificationContent: String = ""
 
     override fun start(options: VpnOptions) = 0
 
@@ -92,6 +97,12 @@ class FlClashService : Service(), BaseServiceInterface {
 
     @SuppressLint("ForegroundServiceType", "WrongConstant")
     override fun startForeground(title: String, content: String) {
+        // 跳过内容完全相同的通知更新，减少系统通知管理器的 CPU 唤醒
+        if (title == lastNotificationTitle && content == lastNotificationContent) {
+            return
+        }
+        lastNotificationTitle = title
+        lastNotificationContent = content
         CoroutineScope(Dispatchers.Default).launch {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val manager = getSystemService(NotificationManager::class.java)

@@ -86,16 +86,18 @@ class BackgroundMemoryManager {
   final _PerformanceStats _perfStats = _PerformanceStats();
 
   /// 后台持续时间阈值：动态调整维护间隔
-  static const int _mediumBgThreshold = 300; // 5 分钟后进入中期
-  static const int _longBgThreshold = 1800; // 30 分钟后进入长期
+  static const int _mediumBgThreshold = 180; // 3 分钟后进入中期
+  static const int _longBgThreshold = 600; // 10 分钟后进入长期
+  static const int _deepBgThreshold = 1800; // 30 分钟后进入深度后台
 
-  /// 各阶段维护间隔
-  static const Duration _initialMaintenanceInterval = Duration(seconds: 300);
-  static const Duration _mediumMaintenanceInterval = Duration(seconds: 600);
-  static const Duration _longMaintenanceInterval = Duration(seconds: 900);
+  /// 各阶段维护间隔（逐步延长，减少唤醒频率）
+  static const Duration _initialMaintenanceInterval = Duration(seconds: 600); // 10 分钟
+  static const Duration _mediumMaintenanceInterval = Duration(seconds: 1200); // 20 分钟
+  static const Duration _longMaintenanceInterval = Duration(seconds: 1800); // 30 分钟
+  static const Duration _deepMaintenanceInterval = Duration(seconds: 3600); // 60 分钟
 
-  static const Duration _escalationDelay = Duration(seconds: 120);
-  static const int _aggressiveGcThreshold = 600;
+  static const Duration _escalationDelay = Duration(seconds: 180);
+  static const int _aggressiveGcThreshold = 1200;
 
   bool get isInBackground => _isInBackground;
 
@@ -138,8 +140,13 @@ class BackgroundMemoryManager {
 
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
-    _clearNonEssentialCaches();
-    _requestGc();
+    // 延迟清理缓存，避免进入后台瞬间的 CPU 峰值
+    Future.delayed(const Duration(seconds: 2), () {
+      if (_isInBackground) {
+        _clearNonEssentialCaches();
+        _requestGc();
+      }
+    });
 
     switch (level) {
       case BackgroundOptimizationLevel.light:
@@ -267,6 +274,9 @@ class BackgroundMemoryManager {
 
   /// 根据后台持续时间计算当前维护间隔
   Duration _currentMaintenanceInterval() {
+    if (_backgroundDuration >= _deepBgThreshold) {
+      return _deepMaintenanceInterval;
+    }
     if (_backgroundDuration >= _longBgThreshold) {
       return _longMaintenanceInterval;
     }
@@ -284,11 +294,19 @@ class BackgroundMemoryManager {
     _backgroundMaintenanceTimer = Timer.periodic(interval, (_) {
       if (!_isInBackground) return;
 
-      _requestGc();
-      _requestDartGc();
-      resourceController.forceClearImageCache();
-      _perfStats.recordCacheClear();
       _backgroundDuration += interval.inSeconds;
+
+      // 仅在长期后台时才执行 GC，避免频繁 GC 导致的 CPU 唤醒
+      if (_backgroundDuration >= _mediumBgThreshold) {
+        _requestGc();
+        _requestDartGc();
+      }
+
+      // 仅在深度后台时才清理缓存
+      if (_backgroundDuration >= _longBgThreshold) {
+        resourceController.forceClearImageCache();
+        _perfStats.recordCacheClear();
+      }
 
       if (_backgroundDuration >= _aggressiveGcThreshold) {
         _performAggressiveCleanup();

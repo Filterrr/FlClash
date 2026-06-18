@@ -1,6 +1,7 @@
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/low_memory_mode.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -113,6 +114,8 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onLog(Log log) {
+    // 后台时跳过日志 UI 更新，减少 CPU 消耗
+    if (backgroundMemoryManager.isInBackground) return;
     globalState.appController.appFlowingState.addLog(log);
     if (log.logLevel == LogLevel.error && isNormalMemoryMode) {
       globalState.appController.showSnackBar(log.payload ?? '');
@@ -128,9 +131,9 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
 
   @override
   void onRequest(Connection connection) async {
-    if (!isLowMemoryMode) {
-      globalState.appController.appState.addRequest(connection);
-    }
+    // 后台或低内存模式下跳过请求记录，减少内存和 CPU 开销
+    if (isLowMemoryMode || backgroundMemoryManager.isInBackground) return;
+    globalState.appController.appState.addRequest(connection);
     super.onRequest(connection);
   }
 
