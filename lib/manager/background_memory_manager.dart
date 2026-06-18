@@ -156,23 +156,20 @@ class BackgroundMemoryManager {
     _backgroundDuration = 0;
     _perfStats.recordBackgroundStart();
 
-    final level = _optimizationLevel;
-    if (level == BackgroundOptimizationLevel.disabled) {
-      // 后台优化关闭时，仅执行最基本的后台标记
-      return;
-    }
-
+    // 以下操作是后台状态标记，不属于优化，disabled 时也必须执行
     // 通知所有注册的回调暂停非必要资源（定时器、订阅等）
     for (final callback in _onEnterBackgroundCallbacks) {
       try {
         callback();
       } catch (_) {}
     }
-
     // 标记 HTTP 客户端进入后台模式，缩短空闲超时加速连接释放
     FlClashHttpOverrides.enterBackground();
     // 节流 ClashMessage 非关键消息处理，减少后台 CPU 占用
     clashMessage.enterBackground();
+
+    final level = _optimizationLevel;
+    if (level == BackgroundOptimizationLevel.disabled) return;
 
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
@@ -201,30 +198,27 @@ class BackgroundMemoryManager {
     _backgroundDuration = 0;
     _perfStats.recordBackgroundEnd();
 
-    final level = _optimizationLevel;
-    if (level == BackgroundOptimizationLevel.disabled) {
-      // 后台优化关闭时，无需恢复任何资源
-      return;
-    }
-
-    _cancelEscalationTimer();
-    _restoreGlobalStateTimerFrequency();
-    _resumeAllUpdates();
-    _stopBackgroundMaintenance();
-
-    // 在模式转换前通知回调恢复资源，确保定时器在 normal 模式前恢复
-    for (final callback in _onExitBackgroundCallbacks) {
-      try {
-        callback();
-      } catch (_) {}
-    }
-
+    // 以下操作是前台状态恢复，不属于优化，disabled 时也必须执行
     // 标记 HTTP 客户端回到前台模式，恢复正常空闲超时
     FlClashHttpOverrides.exitBackground();
     // 重建 Dio 实例，后台期间底层 HttpClient 连接可能已失效
     request.rebuildDio();
     // 恢复 ClashMessage 全部消息处理
     clashMessage.exitBackground();
+    // 通知所有注册的回调恢复资源
+    for (final callback in _onExitBackgroundCallbacks) {
+      try {
+        callback();
+      } catch (_) {}
+    }
+
+    final level = _optimizationLevel;
+    if (level == BackgroundOptimizationLevel.disabled) return;
+
+    _cancelEscalationTimer();
+    _restoreGlobalStateTimerFrequency();
+    _resumeAllUpdates();
+    _stopBackgroundMaintenance();
 
     _transitionToMode(LowMemoryMode.normal);
     _scheduleUiRefresh();
