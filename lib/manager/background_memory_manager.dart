@@ -83,6 +83,8 @@ class BackgroundMemoryManager {
   Timer? _escalationTimer;
   int _backgroundDuration = 0;
   final _PerformanceStats _perfStats = _PerformanceStats();
+  final List<VoidCallback> _onEnterBackgroundCallbacks = [];
+  final List<VoidCallback> _onExitBackgroundCallbacks = [];
 
   /// 后台持续时间阈值：动态调整维护间隔
   static const int _mediumBgThreshold = 300; // 5 分钟后进入中期
@@ -126,11 +128,45 @@ class BackgroundMemoryManager {
     });
   }
 
+  /// 注册后台进入回调，在应用进入后台时调用。
+  /// 用于暂停非必要的定时器、订阅等资源。
+  void onEnterBackground(VoidCallback callback) {
+    _onEnterBackgroundCallbacks.add(callback);
+  }
+
+  /// 注册后台退出回调，在应用回到前台时调用。
+  /// 用于恢复被暂停的定时器、订阅等资源。
+  void onExitBackground(VoidCallback callback) {
+    _onExitBackgroundCallbacks.add(callback);
+  }
+
+  /// 移除后台进入回调。
+  void removeOnEnterBackground(VoidCallback callback) {
+    _onEnterBackgroundCallbacks.remove(callback);
+  }
+
+  /// 移除后台退出回调。
+  void removeOnExitBackground(VoidCallback callback) {
+    _onExitBackgroundCallbacks.remove(callback);
+  }
+
   void _enterBackground() {
     if (_isInBackground) return;
     _isInBackground = true;
     _backgroundDuration = 0;
     _perfStats.recordBackgroundStart();
+
+    // 通知所有注册的回调暂停非必要资源（定时器、订阅等）
+    for (final callback in _onEnterBackgroundCallbacks) {
+      try {
+        callback();
+      } catch (_) {}
+    }
+
+    // 标记 HTTP 客户端进入后台模式，缩短空闲超时加速连接释放
+    FlClashHttpOverrides.enterBackground();
+    // 节流 ClashMessage 非关键消息处理，减少后台 CPU 占用
+    clashMessage.enterBackground();
 
     final level = _optimizationLevel;
     if (level == BackgroundOptimizationLevel.disabled) return;
@@ -166,6 +202,18 @@ class BackgroundMemoryManager {
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
     _stopBackgroundMaintenance();
+
+    // 在模式转换前通知回调恢复资源，确保定时器在 normal 模式前恢复
+    for (final callback in _onExitBackgroundCallbacks) {
+      try {
+        callback();
+      } catch (_) {}
+    }
+
+    // 标记 HTTP 客户端回到前台模式，恢复正常空闲超时
+    FlClashHttpOverrides.exitBackground();
+    // 恢复 ClashMessage 全部消息处理
+    clashMessage.exitBackground();
 
     if (_optimizationLevel != BackgroundOptimizationLevel.disabled) {
       _transitionToMode(LowMemoryMode.normal);
@@ -243,6 +291,8 @@ class BackgroundMemoryManager {
     resourceController.pauseAllNonCriticalTimers();
     resourceController.pauseAllNonCriticalSubscriptions();
     resourceController.forceClearImageCache();
+    // 关闭空闲 HTTP 连接，释放网络资源（保留活跃连接）
+    FlClashHttpOverrides.closeIdleConnections();
     _perfStats.recordCacheClear();
   }
 
@@ -320,6 +370,8 @@ class BackgroundMemoryManager {
 
   void _performAggressiveCleanup() {
     resourceController.forceClearAllCaches();
+    // 强制关闭所有 HTTP 连接，最大化资源释放
+    FlClashHttpOverrides.forceCloseAllConnections();
     _perfStats.recordCacheClear();
     _trimAppStateData();
     _trimFlowingStateData();
@@ -355,6 +407,8 @@ class BackgroundMemoryManager {
   void dispose() {
     _cancelEscalationTimer();
     _stopBackgroundMaintenance();
+    _onEnterBackgroundCallbacks.clear();
+    _onExitBackgroundCallbacks.clear();
     resourceController.dispose();
     _isInitialized = false;
   }
