@@ -350,6 +350,6 @@
   "speedTestUrl": "Speed test url",
   "speedTest": "Speed test",
   "latencyTest": "Latency test",
-  "testConcurrency": "Test concurrency",
+  "testConcurrency": "Speed test concurrency",
   "speed": "Speed"
 }

@@ -54,16 +54,20 @@ proxyDelayTest(Proxy proxy) async {
 
 delayTest(List<Proxy> proxies) async {
   final appController = globalState.appController;
-  final proxyNames = proxies
-      .map((proxy) => appController.appState.getRealProxyName(proxy.name))
-      .toSet()
-      .toList();
-
-  final concurrency = appController.config.appSetting.testConcurrency;
-  await _runWithConcurrency(proxyNames, concurrency, (proxyName) async {
-    appController.setDelay(Delay(name: proxyName, value: 0));
-    appController.setDelay(await clashCore.getDelay(proxyName));
-  });
+  for (final proxy in proxies) {
+    final proxyName =
+        appController.appState.getRealProxyName(proxy.name);
+    globalState.appController.setDelay(
+      Delay(
+        name: proxyName,
+        value: 0,
+      ),
+    );
+    clashCore.getDelay(proxyName).then((delay) {
+      globalState.appController.setDelay(delay);
+    });
+  }
+  await Future.delayed(httpTimeoutDuration + moreDuration);
   appController.appState.sortNum++;
 }
 

@@ -2761,7 +2761,7 @@ class AppLocalizations {
 
   String get testConcurrency {
     return Intl.message(
-      'Test concurrency',
+      'Speed test concurrency',
       name: 'testConcurrency',
       desc: '',
       args: [],
