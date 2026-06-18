@@ -73,7 +73,7 @@ class Vpn {
   onStarted(int fd) {
     if (receiver != null) {
       receiver!.close();
-      receiver == null;
+      receiver = null;
     }
     receiver = ReceivePort();
     receiver!.listen((message) {

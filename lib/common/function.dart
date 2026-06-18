@@ -10,6 +10,11 @@ class Debouncer {
     _timer?.cancel();
     _timer = Timer(delay, () => Function.apply(action, positionalArguments, namedArguments));
   }
+
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+  }
 }
 
 Function debounce<F extends Function>(F func,{int milliseconds = 600}) {

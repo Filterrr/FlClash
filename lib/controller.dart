@@ -132,10 +132,10 @@ class AppController {
     if (config.currentProfileId == id) {
       if (config.profiles.isNotEmpty) {
         final updateId = config.profiles.first.id;
-        changeProfile(updateId);
+        await changeProfile(updateId);
       } else {
-        changeProfile(null);
-        updateStatus(false);
+        await changeProfile(null);
+        await updateStatus(false);
       }
     }
   }
@@ -267,7 +267,9 @@ class AppController {
       await clashService?.destroy();
       await proxy?.stopProxy();
       await savePreferences();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("[APP] handleExit error: $e");
+    }
     system.exit();
   }
 
@@ -323,7 +325,8 @@ class AppController {
   init() async {
     final isDisclaimerAccepted = await handlerDisclaimer();
     if (!isDisclaimerAccepted) {
-      handleExit();
+      await handleExit();
+      return;
     }
     if (!config.appSetting.silentLaunch) {
       window?.show();
@@ -334,8 +337,12 @@ class AppController {
       config: config,
     );
     await _initStatus();
-    autoUpdateProfiles();
-    autoCheckUpdate();
+    unawaited(autoUpdateProfiles().catchError((e) {
+      debugPrint("[APP] autoUpdateProfiles error: $e");
+    }));
+    unawaited(autoCheckUpdate().catchError((e) {
+      debugPrint("[APP] autoCheckUpdate error: $e");
+    }));
   }
 
   _initStatus() async {
@@ -601,7 +608,7 @@ class AppController {
   }
 
   updateStart() {
-    updateStatus(!appFlowingState.isStart);
+    unawaited(updateStatus(!appFlowingState.isStart));
   }
 
   changeMode(Mode mode) {
@@ -623,7 +630,7 @@ class AppController {
     if (visible != null && !visible) {
       window?.show();
       backgroundMemoryManager.onWindowShown();
-    } else {
+    } else if (visible != null && visible) {
       window?.hide();
       backgroundMemoryManager.onWindowHidden();
     }
