@@ -9,7 +9,7 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/cupertino.dart';
 
 class Request {
-  Dio _dio = Dio();
+  late Dio _dio;
   String? userAgent;
 
   Request() {
