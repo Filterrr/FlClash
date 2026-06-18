@@ -8,6 +8,8 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+const _delayTestConcurrency = 50;
+
 Widget currentSelectedProxyNameBuilder({
   required String groupName,
   required Widget Function(String currentGroupName) builder,
@@ -54,20 +56,15 @@ proxyDelayTest(Proxy proxy) async {
 
 delayTest(List<Proxy> proxies) async {
   final appController = globalState.appController;
-  for (final proxy in proxies) {
-    final proxyName =
-        appController.appState.getRealProxyName(proxy.name);
-    globalState.appController.setDelay(
-      Delay(
-        name: proxyName,
-        value: 0,
-      ),
-    );
-    clashCore.getDelay(proxyName).then((delay) {
-      globalState.appController.setDelay(delay);
-    });
-  }
-  await Future.delayed(httpTimeoutDuration + moreDuration);
+  final proxyNames = proxies
+      .map((proxy) => appController.appState.getRealProxyName(proxy.name))
+      .toSet()
+      .toList();
+
+  await _runWithConcurrency(proxyNames, _delayTestConcurrency, (proxyName) async {
+    appController.setDelay(Delay(name: proxyName, value: 0));
+    appController.setDelay(await clashCore.getDelay(proxyName));
+  });
   appController.appState.sortNum++;
 }
 
