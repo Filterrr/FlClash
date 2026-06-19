@@ -160,6 +160,7 @@
   "checking": "Checking...",
   "country": "Country",
   "checkError": "Check error",
+  "checkIpTimeout": "IP check timed out, please try again later",
   "search": "Search",
   "allowBypass": "Allow applications to bypass VPN",
   "allowBypassDesc": "Some apps can bypass VPN when turned on",
