@@ -16,6 +16,8 @@ final unixSocketPath = "/tmp/FlClashSocket_${Random().nextInt(10000)}.sock";
 const helperPort = 47890;
 const helperTag = "2024125";
 const httpTimeoutDuration = Duration(milliseconds: 5000);
+// IP检查整体超时时间：当所有IP源尝试超过此时间后自动终止请求
+const ipCheckTimeout = Duration(seconds: 8);
 const moreDuration = Duration(milliseconds: 100);
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);

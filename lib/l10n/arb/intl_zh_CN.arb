@@ -160,6 +160,7 @@
   "checking": "检测中...",
   "country": "区域",
   "checkError": "检测失败",
+  "checkIpTimeout": "IP检查超时，请稍后重试",
   "search": "搜索",
   "allowBypass": "允许应用绕过VPN",
   "allowBypassDesc": "开启后部分应用可绕过VPN",

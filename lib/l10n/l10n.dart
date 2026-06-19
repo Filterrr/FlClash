@@ -1254,6 +1254,16 @@ class AppLocalizations {
     return Intl.message('Check error', name: 'checkError', desc: '', args: []);
   }
 
+  /// `IP check timed out, please try again later`
+  String get checkIpTimeout {
+    return Intl.message(
+      'IP check timed out, please try again later',
+      name: 'checkIpTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Search`
   String get search {
     return Intl.message('Search', name: 'search', desc: '', args: []);

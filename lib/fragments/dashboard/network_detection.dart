@@ -27,6 +27,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
   bool? _preIsStart;
   Function? _checkIpDebounce;
   Timer? _setTimeoutTimer;
+  Timer? _ipCheckTimeoutTimer;
   CancelToken? cancelToken;
 
   _checkIp() async {
@@ -42,6 +43,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
     final isStart = appFlowingState.isStart;
     if (_preIsStart == false && _preIsStart == isStart) return;
     _clearSetTimeoutTimer();
+    _clearIpCheckTimeoutTimer();
     networkDetectionState.value = networkDetectionState.value.copyWith(
       isTesting: true,
       ipInfo: null,
@@ -52,8 +54,23 @@ class _NetworkDetectionState extends State<NetworkDetection> {
       cancelToken = null;
     }
     cancelToken = CancelToken();
+
+    // 启动IP检查整体超时计时器，超时后自动取消请求并显示超时提示
+    _ipCheckTimeoutTimer = Timer(ipCheckTimeout, () {
+      if (cancelToken != null) {
+        cancelToken!.cancel();
+        cancelToken = null;
+      }
+      networkDetectionState.value = networkDetectionState.value.copyWith(
+        isTesting: false,
+        ipInfo: null,
+      );
+    });
+
     try {
       final ipInfo = await request.checkIp(cancelToken: cancelToken);
+      // 请求完成，清除超时计时器
+      _clearIpCheckTimeoutTimer();
       if (ipInfo != null) {
         networkDetectionState.value = networkDetectionState.value.copyWith(
           isTesting: false,
@@ -69,11 +86,17 @@ class _NetworkDetectionState extends State<NetworkDetection> {
         );
       });
     } catch (e) {
+      // 请求异常，清除超时计时器
+      _clearIpCheckTimeoutTimer();
       if (e.toString() == "cancelled") {
-        networkDetectionState.value = networkDetectionState.value.copyWith(
-          isTesting: true,
-          ipInfo: null,
-        );
+        // 超时取消或手动取消时，保持当前状态（超时计时器已设置isTesting=false）
+        // 仅在尚未被超时处理覆盖时更新状态
+        if (networkDetectionState.value.isTesting) {
+          networkDetectionState.value = networkDetectionState.value.copyWith(
+            isTesting: true,
+            ipInfo: null,
+          );
+        }
       }
     }
   }
@@ -82,6 +105,14 @@ class _NetworkDetectionState extends State<NetworkDetection> {
     if (_setTimeoutTimer != null) {
       _setTimeoutTimer?.cancel();
       _setTimeoutTimer = null;
+    }
+  }
+
+  /// 清除IP检查超时计时器
+  _clearIpCheckTimeoutTimer() {
+    if (_ipCheckTimeoutTimer != null) {
+      _ipCheckTimeoutTimer?.cancel();
+      _ipCheckTimeoutTimer = null;
     }
   }
 
@@ -102,6 +133,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
 
   @override
   dispose() {
+    _clearIpCheckTimeoutTimer();
     super.dispose();
   }
 
@@ -210,7 +242,7 @@ class _NetworkDetectionState extends State<NetworkDetection> {
                         : FadeBox(
                             child: isTesting == false && ipInfo == null
                                 ? Text(
-                                    "timeout",
+                                    appLocalizations.checkIpTimeout,
                                     style: context.textTheme.titleLarge
                                         ?.copyWith(color: Colors.red)
                                         .toSoftBold

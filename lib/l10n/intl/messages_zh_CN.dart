@@ -110,6 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancelFilterSystemApp": MessageLookupByLibrary.simpleMessage("取消过滤系统应用"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
     "checkError": MessageLookupByLibrary.simpleMessage("检测失败"),
+    "checkIpTimeout": MessageLookupByLibrary.simpleMessage("IP检查超时，请稍后重试"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage("当前应用已经是最新版了"),
     "checking": MessageLookupByLibrary.simpleMessage("检测中..."),
