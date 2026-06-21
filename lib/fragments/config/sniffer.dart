@@ -252,6 +252,35 @@ class SniffTlsPortsItem extends StatelessWidget {
   }
 }
 
+class SniffTlsOverrideDestinationItem extends StatelessWidget {
+  const SniffTlsOverrideDestinationItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, bool?>(
+      selector: (_, clashConfig) =>
+          clashConfig.sniffer.sniff["TLS"]?.overrideDestination,
+      builder: (_, overrideDest, __) {
+        return ListItem.switchItem(
+          title: Text("${appLocalizations.overrideDestination} (TLS)"),
+          delegate: SwitchDelegate(
+            value: overrideDest ?? false,
+            onChanged: (bool value) async {
+              final clashConfig = globalState.appController.clashConfig;
+              final sniff = Map<String, SniffProtocol>.from(
+                  clashConfig.sniffer.sniff);
+              sniff["TLS"] = (sniff["TLS"] ?? const SniffProtocol())
+                  .copyWith(overrideDestination: value);
+              clashConfig.sniffer =
+                  clashConfig.sniffer.copyWith(sniff: sniff);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class SniffQuicPortsItem extends StatelessWidget {
   const SniffQuicPortsItem({super.key});
 
@@ -290,6 +319,35 @@ class SniffQuicPortsItem extends StatelessWidget {
               },
             ),
             extendPageWidth: 360,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class SniffQuicOverrideDestinationItem extends StatelessWidget {
+  const SniffQuicOverrideDestinationItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, bool?>(
+      selector: (_, clashConfig) =>
+          clashConfig.sniffer.sniff["QUIC"]?.overrideDestination,
+      builder: (_, overrideDest, __) {
+        return ListItem.switchItem(
+          title: Text("${appLocalizations.overrideDestination} (QUIC)"),
+          delegate: SwitchDelegate(
+            value: overrideDest ?? false,
+            onChanged: (bool value) async {
+              final clashConfig = globalState.appController.clashConfig;
+              final sniff = Map<String, SniffProtocol>.from(
+                  clashConfig.sniffer.sniff);
+              sniff["QUIC"] = (sniff["QUIC"] ?? const SniffProtocol())
+                  .copyWith(overrideDestination: value);
+              clashConfig.sniffer =
+                  clashConfig.sniffer.copyWith(sniff: sniff);
+            },
           ),
         );
       },
@@ -464,7 +522,9 @@ class SniffProtocolsOptions extends StatelessWidget {
           const SniffHttpPortsItem(),
           const SniffHttpOverrideDestinationItem(),
           const SniffTlsPortsItem(),
+          const SniffTlsOverrideDestinationItem(),
           const SniffQuicPortsItem(),
+          const SniffQuicOverrideDestinationItem(),
         ],
       ),
     );
