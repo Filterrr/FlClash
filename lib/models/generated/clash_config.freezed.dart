@@ -25,6 +25,12 @@ mixin _$Tun {
   TunStack get stack => throw _privateConstructorUsedError;
   @JsonKey(name: "dns-hijack")
   List<String> get dnsHijack => throw _privateConstructorUsedError;
+  @JsonKey(name: "auto-route")
+  bool get autoRoute => throw _privateConstructorUsedError;
+  @JsonKey(name: "strict-route")
+  bool get strictRoute => throw _privateConstructorUsedError;
+  @JsonKey(name: "auto-detect-interface")
+  bool get autoDetectInterface => throw _privateConstructorUsedError;
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding => throw _privateConstructorUsedError;
 
@@ -43,6 +49,9 @@ abstract class $TunCopyWith<$Res> {
       String device,
       TunStack stack,
       @JsonKey(name: "dns-hijack") List<String> dnsHijack,
+      @JsonKey(name: "auto-route") bool autoRoute,
+      @JsonKey(name: "strict-route") bool strictRoute,
+      @JsonKey(name: "auto-detect-interface") bool autoDetectInterface,
       @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding});
 }
 
@@ -62,6 +71,9 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
     Object? device = null,
     Object? stack = null,
     Object? dnsHijack = null,
+    Object? autoRoute = null,
+    Object? strictRoute = null,
+    Object? autoDetectInterface = null,
     Object? disableIcmpForwarding = null,
   }) {
     return _then(_value.copyWith(
@@ -81,6 +93,18 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
           ? _value.dnsHijack
           : dnsHijack // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      autoRoute: null == autoRoute
+          ? _value.autoRoute
+          : autoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      strictRoute: null == strictRoute
+          ? _value.strictRoute
+          : strictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      autoDetectInterface: null == autoDetectInterface
+          ? _value.autoDetectInterface
+          : autoDetectInterface // ignore: cast_nullable_to_non_nullable
+              as bool,
       disableIcmpForwarding: null == disableIcmpForwarding
           ? _value.disableIcmpForwarding
           : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
@@ -100,6 +124,9 @@ abstract class _$$TunImplCopyWith<$Res> implements $TunCopyWith<$Res> {
       String device,
       TunStack stack,
       @JsonKey(name: "dns-hijack") List<String> dnsHijack,
+      @JsonKey(name: "auto-route") bool autoRoute,
+      @JsonKey(name: "strict-route") bool strictRoute,
+      @JsonKey(name: "auto-detect-interface") bool autoDetectInterface,
       @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding});
 }
 
@@ -116,6 +143,9 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
     Object? device = null,
     Object? stack = null,
     Object? dnsHijack = null,
+    Object? autoRoute = null,
+    Object? strictRoute = null,
+    Object? autoDetectInterface = null,
     Object? disableIcmpForwarding = null,
   }) {
     return _then(_$TunImpl(
@@ -135,6 +165,18 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
           ? _value._dnsHijack
           : dnsHijack // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      autoRoute: null == autoRoute
+          ? _value.autoRoute
+          : autoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      strictRoute: null == strictRoute
+          ? _value.strictRoute
+          : strictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      autoDetectInterface: null == autoDetectInterface
+          ? _value.autoDetectInterface
+          : autoDetectInterface // ignore: cast_nullable_to_non_nullable
+              as bool,
       disableIcmpForwarding: null == disableIcmpForwarding
           ? _value.disableIcmpForwarding
           : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
@@ -152,6 +194,9 @@ class _$TunImpl implements _Tun {
       this.stack = TunStack.gvisor,
       @JsonKey(name: "dns-hijack")
       final List<String> dnsHijack = const ["any:53", "tcp://any:53"],
+      @JsonKey(name: "auto-route") this.autoRoute = false,
+      @JsonKey(name: "strict-route") this.strictRoute = false,
+      @JsonKey(name: "auto-detect-interface") this.autoDetectInterface = false,
       @JsonKey(name: "disable-icmp-forwarding")
       this.disableIcmpForwarding = false})
       : _dnsHijack = dnsHijack;
@@ -178,12 +223,21 @@ class _$TunImpl implements _Tun {
   }
 
   @override
+  @JsonKey(name: "auto-route")
+  final bool autoRoute;
+  @override
+  @JsonKey(name: "strict-route")
+  final bool strictRoute;
+  @override
+  @JsonKey(name: "auto-detect-interface")
+  final bool autoDetectInterface;
+  @override
   @JsonKey(name: "disable-icmp-forwarding")
   final bool disableIcmpForwarding;
 
   @override
   String toString() {
-    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, disableIcmpForwarding: $disableIcmpForwarding)';
+    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, autoRoute: $autoRoute, strictRoute: $strictRoute, autoDetectInterface: $autoDetectInterface, disableIcmpForwarding: $disableIcmpForwarding)';
   }
 
   @override
@@ -196,14 +250,28 @@ class _$TunImpl implements _Tun {
             (identical(other.stack, stack) || other.stack == stack) &&
             const DeepCollectionEquality()
                 .equals(other._dnsHijack, _dnsHijack) &&
+            (identical(other.autoRoute, autoRoute) ||
+                other.autoRoute == autoRoute) &&
+            (identical(other.strictRoute, strictRoute) ||
+                other.strictRoute == strictRoute) &&
+            (identical(other.autoDetectInterface, autoDetectInterface) ||
+                other.autoDetectInterface == autoDetectInterface) &&
             (identical(other.disableIcmpForwarding, disableIcmpForwarding) ||
                 other.disableIcmpForwarding == disableIcmpForwarding));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, enable, device, stack,
-      const DeepCollectionEquality().hash(_dnsHijack), disableIcmpForwarding);
+  int get hashCode => Object.hash(
+      runtimeType,
+      enable,
+      device,
+      stack,
+      const DeepCollectionEquality().hash(_dnsHijack),
+      autoRoute,
+      strictRoute,
+      autoDetectInterface,
+      disableIcmpForwarding);
 
   @JsonKey(ignore: true)
   @override
@@ -225,6 +293,9 @@ abstract class _Tun implements Tun {
       final String device,
       final TunStack stack,
       @JsonKey(name: "dns-hijack") final List<String> dnsHijack,
+      @JsonKey(name: "auto-route") final bool autoRoute,
+      @JsonKey(name: "strict-route") final bool strictRoute,
+      @JsonKey(name: "auto-detect-interface") final bool autoDetectInterface,
       @JsonKey(name: "disable-icmp-forwarding")
       final bool disableIcmpForwarding}) = _$TunImpl;
 
@@ -239,6 +310,15 @@ abstract class _Tun implements Tun {
   @override
   @JsonKey(name: "dns-hijack")
   List<String> get dnsHijack;
+  @override
+  @JsonKey(name: "auto-route")
+  bool get autoRoute;
+  @override
+  @JsonKey(name: "strict-route")
+  bool get strictRoute;
+  @override
+  @JsonKey(name: "auto-detect-interface")
+  bool get autoDetectInterface;
   @override
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding;

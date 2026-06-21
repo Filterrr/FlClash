@@ -109,6 +109,9 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
               ?.map((e) => e as String)
               .toList() ??
           const ["any:53", "tcp://any:53"],
+      autoRoute: json['auto-route'] as bool? ?? false,
+      strictRoute: json['strict-route'] as bool? ?? false,
+      autoDetectInterface: json['auto-detect-interface'] as bool? ?? false,
       disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
     );
 
@@ -117,6 +120,9 @@ Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
       'device': instance.device,
       'stack': _$TunStackEnumMap[instance.stack]!,
       'dns-hijack': instance.dnsHijack,
+      'auto-route': instance.autoRoute,
+      'strict-route': instance.strictRoute,
+      'auto-detect-interface': instance.autoDetectInterface,
       'disable-icmp-forwarding': instance.disableIcmpForwarding,
     };
 

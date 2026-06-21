@@ -200,6 +200,87 @@ class DisableICMPForwardingItem extends StatelessWidget {
   }
 }
 
+class AutoRouteItem extends StatelessWidget {
+  const AutoRouteItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.overrideAutoRoute,
+      builder: (_, overrideAutoRoute, __) {
+        return ListItem.switchItem(
+          title: Text(appLocalizations.autoRoute),
+          subtitle: Text(appLocalizations.autoRouteDesc),
+          delegate: SwitchDelegate(
+            value: overrideAutoRoute,
+            onChanged: (bool value) async {
+              final config = globalState.appController.config;
+              config.overrideAutoRoute = value;
+              if (!value) {
+                config.overrideStrictRoute = false;
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class StrictRouteItem extends StatelessWidget {
+  const StrictRouteItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.overrideAutoRoute,
+      builder: (_, overrideAutoRoute, __) {
+        if (!overrideAutoRoute) return Container();
+        return Selector<Config, bool>(
+          selector: (_, config) => config.overrideStrictRoute,
+          builder: (_, overrideStrictRoute, __) {
+            return ListItem.switchItem(
+              title: Text(appLocalizations.strictRoute),
+              subtitle: Text(appLocalizations.strictRouteDesc),
+              delegate: SwitchDelegate(
+                value: overrideStrictRoute,
+                onChanged: (bool value) async {
+                  final config = globalState.appController.config;
+                  config.overrideStrictRoute = value;
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class AutoDetectInterfaceItem extends StatelessWidget {
+  const AutoDetectInterfaceItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.overrideAutoDetectInterface,
+      builder: (_, overrideAutoDetectInterface, __) {
+        return ListItem.switchItem(
+          title: Text(appLocalizations.autoDetectInterface),
+          subtitle: Text(appLocalizations.autoDetectInterfaceDesc),
+          delegate: SwitchDelegate(
+            value: overrideAutoDetectInterface,
+            onChanged: (bool value) async {
+              final config = globalState.appController.config;
+              config.overrideAutoDetectInterface = value;
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class BypassDomainItem extends StatelessWidget {
   const BypassDomainItem({super.key});
 
@@ -365,6 +446,9 @@ final networkItems = [
     items: [
       if (system.isDesktop) const TUNItem(),
       const TunStackItem(),
+      const AutoRouteItem(),
+      const StrictRouteItem(),
+      const AutoDetectInterfaceItem(),
       const DisableICMPForwardingItem(),
       const RouteModeItem(),
       const RouteAddressItem(),

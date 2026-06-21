@@ -3467,6 +3467,9 @@ mixin _$ClashConfigState {
   bool get allowLan => throw _privateConstructorUsedError;
   bool get ipv6 => throw _privateConstructorUsedError;
   bool get overrideDns => throw _privateConstructorUsedError;
+  bool get overrideAutoRoute => throw _privateConstructorUsedError;
+  bool get overrideStrictRoute => throw _privateConstructorUsedError;
+  bool get overrideAutoDetectInterface => throw _privateConstructorUsedError;
   String get geodataLoader => throw _privateConstructorUsedError;
   LogLevel get logLevel => throw _privateConstructorUsedError;
   String get externalController => throw _privateConstructorUsedError;
@@ -3498,6 +3501,9 @@ abstract class $ClashConfigStateCopyWith<$Res> {
       bool allowLan,
       bool ipv6,
       bool overrideDns,
+      bool overrideAutoRoute,
+      bool overrideStrictRoute,
+      bool overrideAutoDetectInterface,
       String geodataLoader,
       LogLevel logLevel,
       String externalController,
@@ -3534,6 +3540,9 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
     Object? allowLan = null,
     Object? ipv6 = null,
     Object? overrideDns = null,
+    Object? overrideAutoRoute = null,
+    Object? overrideStrictRoute = null,
+    Object? overrideAutoDetectInterface = null,
     Object? geodataLoader = null,
     Object? logLevel = null,
     Object? externalController = null,
@@ -3565,6 +3574,18 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoRoute: null == overrideAutoRoute
+          ? _value.overrideAutoRoute
+          : overrideAutoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideStrictRoute: null == overrideStrictRoute
+          ? _value.overrideStrictRoute
+          : overrideStrictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoDetectInterface: null == overrideAutoDetectInterface
+          ? _value.overrideAutoDetectInterface
+          : overrideAutoDetectInterface // ignore: cast_nullable_to_non_nullable
               as bool,
       geodataLoader: null == geodataLoader
           ? _value.geodataLoader
@@ -3655,6 +3676,9 @@ abstract class _$$ClashConfigStateImplCopyWith<$Res>
       bool allowLan,
       bool ipv6,
       bool overrideDns,
+      bool overrideAutoRoute,
+      bool overrideStrictRoute,
+      bool overrideAutoDetectInterface,
       String geodataLoader,
       LogLevel logLevel,
       String externalController,
@@ -3691,6 +3715,9 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
     Object? allowLan = null,
     Object? ipv6 = null,
     Object? overrideDns = null,
+    Object? overrideAutoRoute = null,
+    Object? overrideStrictRoute = null,
+    Object? overrideAutoDetectInterface = null,
     Object? geodataLoader = null,
     Object? logLevel = null,
     Object? externalController = null,
@@ -3722,6 +3749,18 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoRoute: null == overrideAutoRoute
+          ? _value.overrideAutoRoute
+          : overrideAutoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideStrictRoute: null == overrideStrictRoute
+          ? _value.overrideStrictRoute
+          : overrideStrictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoDetectInterface: null == overrideAutoDetectInterface
+          ? _value.overrideAutoDetectInterface
+          : overrideAutoDetectInterface // ignore: cast_nullable_to_non_nullable
               as bool,
       geodataLoader: null == geodataLoader
           ? _value.geodataLoader
@@ -3791,6 +3830,9 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
       required this.allowLan,
       required this.ipv6,
       required this.overrideDns,
+      required this.overrideAutoRoute,
+      required this.overrideStrictRoute,
+      required this.overrideAutoDetectInterface,
       required this.geodataLoader,
       required this.logLevel,
       required this.externalController,
@@ -3817,6 +3859,12 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
   final bool ipv6;
   @override
   final bool overrideDns;
+  @override
+  final bool overrideAutoRoute;
+  @override
+  final bool overrideStrictRoute;
+  @override
+  final bool overrideAutoDetectInterface;
   @override
   final String geodataLoader;
   @override
@@ -3866,7 +3914,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
 
   @override
   String toString() {
-    return 'ClashConfigState(mixedPort: $mixedPort, allowLan: $allowLan, ipv6: $ipv6, overrideDns: $overrideDns, geodataLoader: $geodataLoader, logLevel: $logLevel, externalController: $externalController, mode: $mode, findProcessMode: $findProcessMode, keepAliveInterval: $keepAliveInterval, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, hosts: $hosts, tun: $tun, dns: $dns, geoXUrl: $geoXUrl, rules: $rules, globalRealUa: $globalRealUa)';
+    return 'ClashConfigState(mixedPort: $mixedPort, allowLan: $allowLan, ipv6: $ipv6, overrideDns: $overrideDns, overrideAutoRoute: $overrideAutoRoute, overrideStrictRoute: $overrideStrictRoute, overrideAutoDetectInterface: $overrideAutoDetectInterface, geodataLoader: $geodataLoader, logLevel: $logLevel, externalController: $externalController, mode: $mode, findProcessMode: $findProcessMode, keepAliveInterval: $keepAliveInterval, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, hosts: $hosts, tun: $tun, dns: $dns, geoXUrl: $geoXUrl, rules: $rules, globalRealUa: $globalRealUa)';
   }
 
   @override
@@ -3881,6 +3929,14 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
             (identical(other.ipv6, ipv6) || other.ipv6 == ipv6) &&
             (identical(other.overrideDns, overrideDns) ||
                 other.overrideDns == overrideDns) &&
+            (identical(other.overrideAutoRoute, overrideAutoRoute) ||
+                other.overrideAutoRoute == overrideAutoRoute) &&
+            (identical(other.overrideStrictRoute, overrideStrictRoute) ||
+                other.overrideStrictRoute == overrideStrictRoute) &&
+            (identical(other.overrideAutoDetectInterface,
+                    overrideAutoDetectInterface) ||
+                other.overrideAutoDetectInterface ==
+                    overrideAutoDetectInterface) &&
             (identical(other.geodataLoader, geodataLoader) ||
                 other.geodataLoader == geodataLoader) &&
             (identical(other.logLevel, logLevel) ||
@@ -3906,26 +3962,30 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      mixedPort,
-      allowLan,
-      ipv6,
-      overrideDns,
-      geodataLoader,
-      logLevel,
-      externalController,
-      mode,
-      findProcessMode,
-      keepAliveInterval,
-      unifiedDelay,
-      tcpConcurrent,
-      const DeepCollectionEquality().hash(_hosts),
-      tun,
-      dns,
-      const DeepCollectionEquality().hash(_geoXUrl),
-      const DeepCollectionEquality().hash(_rules),
-      globalRealUa);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        mixedPort,
+        allowLan,
+        ipv6,
+        overrideDns,
+        overrideAutoRoute,
+        overrideStrictRoute,
+        overrideAutoDetectInterface,
+        geodataLoader,
+        logLevel,
+        externalController,
+        mode,
+        findProcessMode,
+        keepAliveInterval,
+        unifiedDelay,
+        tcpConcurrent,
+        const DeepCollectionEquality().hash(_hosts),
+        tun,
+        dns,
+        const DeepCollectionEquality().hash(_geoXUrl),
+        const DeepCollectionEquality().hash(_rules),
+        globalRealUa
+      ]);
 
   @JsonKey(ignore: true)
   @override
@@ -3941,6 +4001,9 @@ abstract class _ClashConfigState implements ClashConfigState {
       required final bool allowLan,
       required final bool ipv6,
       required final bool overrideDns,
+      required final bool overrideAutoRoute,
+      required final bool overrideStrictRoute,
+      required final bool overrideAutoDetectInterface,
       required final String geodataLoader,
       required final LogLevel logLevel,
       required final String externalController,
@@ -3964,6 +4027,12 @@ abstract class _ClashConfigState implements ClashConfigState {
   bool get ipv6;
   @override
   bool get overrideDns;
+  @override
+  bool get overrideAutoRoute;
+  @override
+  bool get overrideStrictRoute;
+  @override
+  bool get overrideAutoDetectInterface;
   @override
   String get geodataLoader;
   @override
