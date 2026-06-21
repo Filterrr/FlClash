@@ -275,6 +275,9 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 			targetConfig.DNS.Enable = true
 		}
 	}
+	if configParams.OverrideSniffer {
+		targetConfig.Sniffer = patchConfig.Sniffer
+	}
 	overrideRules(&targetConfig.Rule)
 }
 
