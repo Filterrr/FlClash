@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
@@ -185,8 +184,8 @@ class SniffHttpOverrideDestinationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Selector<ClashConfig, bool?>(
-      selector: (_) =>
-          _.sniffer.sniff["HTTP"]?.overrideDestination,
+      selector: (_, clashConfig) =>
+          clashConfig.sniffer.sniff["HTTP"]?.overrideDestination,
       builder: (_, overrideDest, __) {
         return ListItem.switchItem(
           title: Text("${appLocalizations.overrideDestination} (HTTP)"),
