@@ -85,6 +85,7 @@ _$ConfigExtendedParamsImpl _$$ConfigExtendedParamsImplFromJson(
       isCompatible: json['is-compatible'] as bool,
       selectedMap: Map<String, String>.from(json['selected-map'] as Map),
       overrideDns: json['override-dns'] as bool,
+      overrideSniffer: json['override-sniffer'] as bool,
       overrideAutoRoute: json['override-auto-route'] as bool,
       overrideStrictRoute: json['override-strict-route'] as bool,
       overrideAutoDetectInterface:
@@ -100,6 +101,7 @@ Map<String, dynamic> _$$ConfigExtendedParamsImplToJson(
       'is-compatible': instance.isCompatible,
       'selected-map': instance.selectedMap,
       'override-dns': instance.overrideDns,
+      'override-sniffer': instance.overrideSniffer,
       'override-auto-route': instance.overrideAutoRoute,
       'override-strict-route': instance.overrideStrictRoute,
       'override-auto-detect-interface': instance.overrideAutoDetectInterface,

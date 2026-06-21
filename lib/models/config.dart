@@ -192,6 +192,7 @@ class Config extends ChangeNotifier {
   VpnProps _vpnProps;
   NetworkProps _networkProps;
   bool _overrideDns;
+  bool _overrideSniffer;
   bool _overrideAutoRoute;
   bool _overrideStrictRoute;
   bool _overrideAutoDetectInterface;
@@ -206,6 +207,7 @@ class Config extends ChangeNotifier {
         _vpnProps = defaultVpnProps,
         _networkProps = const NetworkProps(),
         _overrideDns = false,
+        _overrideSniffer = false,
         _overrideAutoRoute = false,
         _overrideStrictRoute = false,
         _overrideAutoDetectInterface = false,
@@ -412,6 +414,16 @@ class Config extends ChangeNotifier {
   }
 
   @JsonKey(defaultValue: false)
+  bool get overrideSniffer => _overrideSniffer;
+
+  set overrideSniffer(bool value) {
+    if (_overrideSniffer != value) {
+      _overrideSniffer = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
   bool get overrideAutoRoute => _overrideAutoRoute;
 
   set overrideAutoRoute(bool value) {
@@ -509,6 +521,7 @@ class Config extends ChangeNotifier {
       _proxiesStyle = config._proxiesStyle;
       _vpnProps = config._vpnProps;
       _overrideDns = config._overrideDns;
+      _overrideSniffer = config._overrideSniffer;
       _overrideAutoRoute = config._overrideAutoRoute;
       _overrideStrictRoute = config._overrideStrictRoute;
       _overrideAutoDetectInterface = config._overrideAutoDetectInterface;

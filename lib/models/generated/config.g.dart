@@ -26,6 +26,7 @@ Config _$ConfigFromJson(Map<String, dynamic> json) => Config()
   ..networkProps =
       NetworkProps.fromJson(json['networkProps'] as Map<String, dynamic>?)
   ..overrideDns = json['overrideDns'] as bool? ?? false
+  ..overrideSniffer = json['overrideSniffer'] as bool? ?? false
   ..overrideAutoRoute = json['overrideAutoRoute'] as bool? ?? false
   ..overrideStrictRoute = json['overrideStrictRoute'] as bool? ?? false
   ..overrideAutoDetectInterface =
@@ -50,6 +51,7 @@ Map<String, dynamic> _$ConfigToJson(Config instance) => <String, dynamic>{
       'vpnProps': instance.vpnProps,
       'networkProps': instance.networkProps,
       'overrideDns': instance.overrideDns,
+      'overrideSniffer': instance.overrideSniffer,
       'overrideAutoRoute': instance.overrideAutoRoute,
       'overrideStrictRoute': instance.overrideStrictRoute,
       'overrideAutoDetectInterface': instance.overrideAutoDetectInterface,

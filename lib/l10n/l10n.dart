@@ -2846,6 +2846,206 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Sniffer`
+  String get sniffer {
+    return Intl.message('Sniffer', name: 'sniffer', desc: '', args: []);
+  }
+
+  /// `Update domain sniffing related settings`
+  String get snifferDesc {
+    return Intl.message(
+      'Update domain sniffing related settings',
+      name: 'snifferDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override Sniffer`
+  String get overrideSniffer {
+    return Intl.message(
+      'Override Sniffer',
+      name: 'overrideSniffer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turning it on will override the Sniffer options in the profile`
+  String get overrideSnifferDesc {
+    return Intl.message(
+      'Turning it on will override the Sniffer options in the profile',
+      name: 'overrideSnifferDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable domain sniffing for protocol detection`
+  String get snifferEnableDesc {
+    return Intl.message(
+      'Enable domain sniffing for protocol detection',
+      name: 'snifferEnableDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force DNS mapping`
+  String get forceDnsMapping {
+    return Intl.message(
+      'Force DNS mapping',
+      name: 'forceDnsMapping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force sniffing for redir-host type traffic`
+  String get forceDnsMappingDesc {
+    return Intl.message(
+      'Force sniffing for redir-host type traffic',
+      name: 'forceDnsMappingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Parse pure IP`
+  String get parsePureIp {
+    return Intl.message(
+      'Parse pure IP',
+      name: 'parsePureIp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force sniffing for all traffic without domain`
+  String get parsePureIpDesc {
+    return Intl.message(
+      'Force sniffing for all traffic without domain',
+      name: 'parsePureIpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override destination`
+  String get overrideDestination {
+    return Intl.message(
+      'Override destination',
+      name: 'overrideDestination',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use sniffing result as actual destination`
+  String get overrideDestinationDesc {
+    return Intl.message(
+      'Use sniffing result as actual destination',
+      name: 'overrideDestinationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sniff protocol`
+  String get sniffProtocol {
+    return Intl.message(
+      'Sniff protocol',
+      name: 'sniffProtocol',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force domain`
+  String get forceDomain {
+    return Intl.message(
+      'Force domain',
+      name: 'forceDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force sniffing for these domains`
+  String get forceDomainDesc {
+    return Intl.message(
+      'Force sniffing for these domains',
+      name: 'forceDomainDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip domain`
+  String get skipDomain {
+    return Intl.message(
+      'Skip domain',
+      name: 'skipDomain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip sniffing for these domains`
+  String get skipDomainDesc {
+    return Intl.message(
+      'Skip sniffing for these domains',
+      name: 'skipDomainDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip source address`
+  String get skipSrcAddress {
+    return Intl.message(
+      'Skip source address',
+      name: 'skipSrcAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip sniffing for these source IP ranges`
+  String get skipSrcAddressDesc {
+    return Intl.message(
+      'Skip sniffing for these source IP ranges',
+      name: 'skipSrcAddressDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip destination address`
+  String get skipDstAddress {
+    return Intl.message(
+      'Skip destination address',
+      name: 'skipDstAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip sniffing for these destination IP ranges`
+  String get skipDstAddressDesc {
+    return Intl.message(
+      'Skip sniffing for these destination IP ranges',
+      name: 'skipDstAddressDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Filter`
+  String get filter {
+    return Intl.message('Filter', name: 'filter', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -3467,6 +3467,7 @@ mixin _$ClashConfigState {
   bool get allowLan => throw _privateConstructorUsedError;
   bool get ipv6 => throw _privateConstructorUsedError;
   bool get overrideDns => throw _privateConstructorUsedError;
+  bool get overrideSniffer => throw _privateConstructorUsedError;
   bool get overrideAutoRoute => throw _privateConstructorUsedError;
   bool get overrideStrictRoute => throw _privateConstructorUsedError;
   bool get overrideAutoDetectInterface => throw _privateConstructorUsedError;
@@ -3481,6 +3482,7 @@ mixin _$ClashConfigState {
   Map<String, String> get hosts => throw _privateConstructorUsedError;
   Tun get tun => throw _privateConstructorUsedError;
   Dns get dns => throw _privateConstructorUsedError;
+  Sniffer get sniffer => throw _privateConstructorUsedError;
   Map<String, String> get geoXUrl => throw _privateConstructorUsedError;
   List<String> get rules => throw _privateConstructorUsedError;
   String? get globalRealUa => throw _privateConstructorUsedError;
@@ -3501,6 +3503,7 @@ abstract class $ClashConfigStateCopyWith<$Res> {
       bool allowLan,
       bool ipv6,
       bool overrideDns,
+      bool overrideSniffer,
       bool overrideAutoRoute,
       bool overrideStrictRoute,
       bool overrideAutoDetectInterface,
@@ -3515,12 +3518,14 @@ abstract class $ClashConfigStateCopyWith<$Res> {
       Map<String, String> hosts,
       Tun tun,
       Dns dns,
+      Sniffer sniffer,
       Map<String, String> geoXUrl,
       List<String> rules,
       String? globalRealUa});
 
   $TunCopyWith<$Res> get tun;
   $DnsCopyWith<$Res> get dns;
+  $SnifferCopyWith<$Res> get sniffer;
 }
 
 /// @nodoc
@@ -3540,6 +3545,7 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
     Object? allowLan = null,
     Object? ipv6 = null,
     Object? overrideDns = null,
+    Object? overrideSniffer = null,
     Object? overrideAutoRoute = null,
     Object? overrideStrictRoute = null,
     Object? overrideAutoDetectInterface = null,
@@ -3554,6 +3560,7 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
     Object? hosts = null,
     Object? tun = null,
     Object? dns = null,
+    Object? sniffer = null,
     Object? geoXUrl = null,
     Object? rules = null,
     Object? globalRealUa = freezed,
@@ -3574,6 +3581,10 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideSniffer: null == overrideSniffer
+          ? _value.overrideSniffer
+          : overrideSniffer // ignore: cast_nullable_to_non_nullable
               as bool,
       overrideAutoRoute: null == overrideAutoRoute
           ? _value.overrideAutoRoute
@@ -3631,6 +3642,10 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
           ? _value.dns
           : dns // ignore: cast_nullable_to_non_nullable
               as Dns,
+      sniffer: null == sniffer
+          ? _value.sniffer
+          : sniffer // ignore: cast_nullable_to_non_nullable
+              as Sniffer,
       geoXUrl: null == geoXUrl
           ? _value.geoXUrl
           : geoXUrl // ignore: cast_nullable_to_non_nullable
@@ -3661,6 +3676,14 @@ class _$ClashConfigStateCopyWithImpl<$Res, $Val extends ClashConfigState>
       return _then(_value.copyWith(dns: value) as $Val);
     });
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $SnifferCopyWith<$Res> get sniffer {
+    return $SnifferCopyWith<$Res>(_value.sniffer, (value) {
+      return _then(_value.copyWith(sniffer: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -3676,6 +3699,7 @@ abstract class _$$ClashConfigStateImplCopyWith<$Res>
       bool allowLan,
       bool ipv6,
       bool overrideDns,
+      bool overrideSniffer,
       bool overrideAutoRoute,
       bool overrideStrictRoute,
       bool overrideAutoDetectInterface,
@@ -3690,6 +3714,7 @@ abstract class _$$ClashConfigStateImplCopyWith<$Res>
       Map<String, String> hosts,
       Tun tun,
       Dns dns,
+      Sniffer sniffer,
       Map<String, String> geoXUrl,
       List<String> rules,
       String? globalRealUa});
@@ -3698,6 +3723,8 @@ abstract class _$$ClashConfigStateImplCopyWith<$Res>
   $TunCopyWith<$Res> get tun;
   @override
   $DnsCopyWith<$Res> get dns;
+  @override
+  $SnifferCopyWith<$Res> get sniffer;
 }
 
 /// @nodoc
@@ -3715,6 +3742,7 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
     Object? allowLan = null,
     Object? ipv6 = null,
     Object? overrideDns = null,
+    Object? overrideSniffer = null,
     Object? overrideAutoRoute = null,
     Object? overrideStrictRoute = null,
     Object? overrideAutoDetectInterface = null,
@@ -3729,6 +3757,7 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
     Object? hosts = null,
     Object? tun = null,
     Object? dns = null,
+    Object? sniffer = null,
     Object? geoXUrl = null,
     Object? rules = null,
     Object? globalRealUa = freezed,
@@ -3749,6 +3778,10 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideSniffer: null == overrideSniffer
+          ? _value.overrideSniffer
+          : overrideSniffer // ignore: cast_nullable_to_non_nullable
               as bool,
       overrideAutoRoute: null == overrideAutoRoute
           ? _value.overrideAutoRoute
@@ -3806,6 +3839,10 @@ class __$$ClashConfigStateImplCopyWithImpl<$Res>
           ? _value.dns
           : dns // ignore: cast_nullable_to_non_nullable
               as Dns,
+      sniffer: null == sniffer
+          ? _value.sniffer
+          : sniffer // ignore: cast_nullable_to_non_nullable
+              as Sniffer,
       geoXUrl: null == geoXUrl
           ? _value._geoXUrl
           : geoXUrl // ignore: cast_nullable_to_non_nullable
@@ -3830,6 +3867,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
       required this.allowLan,
       required this.ipv6,
       required this.overrideDns,
+      required this.overrideSniffer,
       required this.overrideAutoRoute,
       required this.overrideStrictRoute,
       required this.overrideAutoDetectInterface,
@@ -3844,6 +3882,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
       required final Map<String, String> hosts,
       required this.tun,
       required this.dns,
+      required this.sniffer,
       required final Map<String, String> geoXUrl,
       required final List<String> rules,
       required this.globalRealUa})
@@ -3859,6 +3898,8 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
   final bool ipv6;
   @override
   final bool overrideDns;
+  @override
+  final bool overrideSniffer;
   @override
   final bool overrideAutoRoute;
   @override
@@ -3893,6 +3934,8 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
   final Tun tun;
   @override
   final Dns dns;
+  @override
+  final Sniffer sniffer;
   final Map<String, String> _geoXUrl;
   @override
   Map<String, String> get geoXUrl {
@@ -3914,7 +3957,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
 
   @override
   String toString() {
-    return 'ClashConfigState(mixedPort: $mixedPort, allowLan: $allowLan, ipv6: $ipv6, overrideDns: $overrideDns, overrideAutoRoute: $overrideAutoRoute, overrideStrictRoute: $overrideStrictRoute, overrideAutoDetectInterface: $overrideAutoDetectInterface, geodataLoader: $geodataLoader, logLevel: $logLevel, externalController: $externalController, mode: $mode, findProcessMode: $findProcessMode, keepAliveInterval: $keepAliveInterval, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, hosts: $hosts, tun: $tun, dns: $dns, geoXUrl: $geoXUrl, rules: $rules, globalRealUa: $globalRealUa)';
+    return 'ClashConfigState(mixedPort: $mixedPort, allowLan: $allowLan, ipv6: $ipv6, overrideDns: $overrideDns, overrideSniffer: $overrideSniffer, overrideAutoRoute: $overrideAutoRoute, overrideStrictRoute: $overrideStrictRoute, overrideAutoDetectInterface: $overrideAutoDetectInterface, geodataLoader: $geodataLoader, logLevel: $logLevel, externalController: $externalController, mode: $mode, findProcessMode: $findProcessMode, keepAliveInterval: $keepAliveInterval, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, hosts: $hosts, tun: $tun, dns: $dns, sniffer: $sniffer, geoXUrl: $geoXUrl, rules: $rules, globalRealUa: $globalRealUa)';
   }
 
   @override
@@ -3929,6 +3972,8 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
             (identical(other.ipv6, ipv6) || other.ipv6 == ipv6) &&
             (identical(other.overrideDns, overrideDns) ||
                 other.overrideDns == overrideDns) &&
+            (identical(other.overrideSniffer, overrideSniffer) ||
+                other.overrideSniffer == overrideSniffer) &&
             (identical(other.overrideAutoRoute, overrideAutoRoute) ||
                 other.overrideAutoRoute == overrideAutoRoute) &&
             (identical(other.overrideStrictRoute, overrideStrictRoute) ||
@@ -3955,6 +4000,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
             const DeepCollectionEquality().equals(other._hosts, _hosts) &&
             (identical(other.tun, tun) || other.tun == tun) &&
             (identical(other.dns, dns) || other.dns == dns) &&
+            (identical(other.sniffer, sniffer) || other.sniffer == sniffer) &&
             const DeepCollectionEquality().equals(other._geoXUrl, _geoXUrl) &&
             const DeepCollectionEquality().equals(other._rules, _rules) &&
             (identical(other.globalRealUa, globalRealUa) ||
@@ -3968,6 +4014,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
         allowLan,
         ipv6,
         overrideDns,
+        overrideSniffer,
         overrideAutoRoute,
         overrideStrictRoute,
         overrideAutoDetectInterface,
@@ -3982,6 +4029,7 @@ class _$ClashConfigStateImpl implements _ClashConfigState {
         const DeepCollectionEquality().hash(_hosts),
         tun,
         dns,
+        sniffer,
         const DeepCollectionEquality().hash(_geoXUrl),
         const DeepCollectionEquality().hash(_rules),
         globalRealUa
@@ -4001,6 +4049,7 @@ abstract class _ClashConfigState implements ClashConfigState {
       required final bool allowLan,
       required final bool ipv6,
       required final bool overrideDns,
+      required final bool overrideSniffer,
       required final bool overrideAutoRoute,
       required final bool overrideStrictRoute,
       required final bool overrideAutoDetectInterface,
@@ -4015,6 +4064,7 @@ abstract class _ClashConfigState implements ClashConfigState {
       required final Map<String, String> hosts,
       required final Tun tun,
       required final Dns dns,
+      required final Sniffer sniffer,
       required final Map<String, String> geoXUrl,
       required final List<String> rules,
       required final String? globalRealUa}) = _$ClashConfigStateImpl;
@@ -4027,6 +4077,8 @@ abstract class _ClashConfigState implements ClashConfigState {
   bool get ipv6;
   @override
   bool get overrideDns;
+  @override
+  bool get overrideSniffer;
   @override
   bool get overrideAutoRoute;
   @override
@@ -4055,6 +4107,8 @@ abstract class _ClashConfigState implements ClashConfigState {
   Tun get tun;
   @override
   Dns get dns;
+  @override
+  Sniffer get sniffer;
   @override
   Map<String, String> get geoXUrl;
   @override
