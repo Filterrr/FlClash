@@ -352,5 +352,11 @@
   "speedTest": "Speed test",
   "latencyTest": "Latency test",
   "testConcurrency": "Speed test concurrency",
-  "speed": "Speed"
+  "speed": "Speed",
+  "autoRoute": "Auto Route",
+  "autoRouteDesc": "Override the auto-route option in the profile when enabled",
+  "strictRoute": "Strict Route",
+  "strictRouteDesc": "Override the strict-route option in the profile when enabled, available when auto-route is on",
+  "autoDetectInterface": "Auto Detect Interface",
+  "autoDetectInterfaceDesc": "Override the auto-detect-interface option in the profile when enabled"
 }

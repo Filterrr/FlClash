@@ -352,5 +352,11 @@
   "speedTest": "测速",
   "latencyTest": "测延迟",
   "testConcurrency": "测速并发数",
-  "speed": "速度"
+  "speed": "速度",
+  "autoRoute": "自动路由",
+  "autoRouteDesc": "开启后将覆盖配置中的auto-route选项",
+  "strictRoute": "严格路由",
+  "strictRouteDesc": "开启后将覆盖配置中的strict-route选项，启用自动路由后可用",
+  "autoDetectInterface": "自动检测接口",
+  "autoDetectInterfaceDesc": "开启后将覆盖配置中的auto-detect-interface选项"
 }

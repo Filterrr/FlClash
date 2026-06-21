@@ -192,6 +192,9 @@ class Config extends ChangeNotifier {
   VpnProps _vpnProps;
   NetworkProps _networkProps;
   bool _overrideDns;
+  bool _overrideAutoRoute;
+  bool _overrideStrictRoute;
+  bool _overrideAutoDetectInterface;
   List<HotKeyAction> _hotKeyActions;
   ProxiesStyle _proxiesStyle;
 
@@ -203,6 +206,9 @@ class Config extends ChangeNotifier {
         _vpnProps = defaultVpnProps,
         _networkProps = const NetworkProps(),
         _overrideDns = false,
+        _overrideAutoRoute = false,
+        _overrideStrictRoute = false,
+        _overrideAutoDetectInterface = false,
         _appSetting = defaultAppSetting,
         _hotKeyActions = [],
         _proxiesStyle = defaultProxiesStyle,
@@ -405,6 +411,36 @@ class Config extends ChangeNotifier {
     }
   }
 
+  @JsonKey(defaultValue: false)
+  bool get overrideAutoRoute => _overrideAutoRoute;
+
+  set overrideAutoRoute(bool value) {
+    if (_overrideAutoRoute != value) {
+      _overrideAutoRoute = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
+  bool get overrideStrictRoute => _overrideStrictRoute;
+
+  set overrideStrictRoute(bool value) {
+    if (_overrideStrictRoute != value) {
+      _overrideStrictRoute = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
+  bool get overrideAutoDetectInterface => _overrideAutoDetectInterface;
+
+  set overrideAutoDetectInterface(bool value) {
+    if (_overrideAutoDetectInterface != value) {
+      _overrideAutoDetectInterface = value;
+      notifyListeners();
+    }
+  }
+
   @JsonKey(defaultValue: [])
   List<HotKeyAction> get hotKeyActions => _hotKeyActions;
 
@@ -473,6 +509,9 @@ class Config extends ChangeNotifier {
       _proxiesStyle = config._proxiesStyle;
       _vpnProps = config._vpnProps;
       _overrideDns = config._overrideDns;
+      _overrideAutoRoute = config._overrideAutoRoute;
+      _overrideStrictRoute = config._overrideStrictRoute;
+      _overrideAutoDetectInterface = config._overrideAutoDetectInterface;
       _networkProps = config._networkProps;
       _hotKeyActions = config._hotKeyActions;
     }

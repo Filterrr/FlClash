@@ -773,6 +773,12 @@ mixin _$ConfigExtendedParams {
   Map<String, String> get selectedMap => throw _privateConstructorUsedError;
   @JsonKey(name: "override-dns")
   bool get overrideDns => throw _privateConstructorUsedError;
+  @JsonKey(name: "override-auto-route")
+  bool get overrideAutoRoute => throw _privateConstructorUsedError;
+  @JsonKey(name: "override-strict-route")
+  bool get overrideStrictRoute => throw _privateConstructorUsedError;
+  @JsonKey(name: "override-auto-detect-interface")
+  bool get overrideAutoDetectInterface => throw _privateConstructorUsedError;
   @JsonKey(name: "test-url")
   String get testUrl => throw _privateConstructorUsedError;
   @JsonKey(name: "udp")
@@ -795,6 +801,10 @@ abstract class $ConfigExtendedParamsCopyWith<$Res> {
       @JsonKey(name: "is-compatible") bool isCompatible,
       @JsonKey(name: "selected-map") Map<String, String> selectedMap,
       @JsonKey(name: "override-dns") bool overrideDns,
+      @JsonKey(name: "override-auto-route") bool overrideAutoRoute,
+      @JsonKey(name: "override-strict-route") bool overrideStrictRoute,
+      @JsonKey(name: "override-auto-detect-interface")
+      bool overrideAutoDetectInterface,
       @JsonKey(name: "test-url") String testUrl,
       @JsonKey(name: "udp") bool udp});
 }
@@ -817,6 +827,9 @@ class _$ConfigExtendedParamsCopyWithImpl<$Res,
     Object? isCompatible = null,
     Object? selectedMap = null,
     Object? overrideDns = null,
+    Object? overrideAutoRoute = null,
+    Object? overrideStrictRoute = null,
+    Object? overrideAutoDetectInterface = null,
     Object? testUrl = null,
     Object? udp = null,
   }) {
@@ -836,6 +849,18 @@ class _$ConfigExtendedParamsCopyWithImpl<$Res,
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoRoute: null == overrideAutoRoute
+          ? _value.overrideAutoRoute
+          : overrideAutoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideStrictRoute: null == overrideStrictRoute
+          ? _value.overrideStrictRoute
+          : overrideStrictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoDetectInterface: null == overrideAutoDetectInterface
+          ? _value.overrideAutoDetectInterface
+          : overrideAutoDetectInterface // ignore: cast_nullable_to_non_nullable
               as bool,
       testUrl: null == testUrl
           ? _value.testUrl
@@ -862,6 +887,10 @@ abstract class _$$ConfigExtendedParamsImplCopyWith<$Res>
       @JsonKey(name: "is-compatible") bool isCompatible,
       @JsonKey(name: "selected-map") Map<String, String> selectedMap,
       @JsonKey(name: "override-dns") bool overrideDns,
+      @JsonKey(name: "override-auto-route") bool overrideAutoRoute,
+      @JsonKey(name: "override-strict-route") bool overrideStrictRoute,
+      @JsonKey(name: "override-auto-detect-interface")
+      bool overrideAutoDetectInterface,
       @JsonKey(name: "test-url") String testUrl,
       @JsonKey(name: "udp") bool udp});
 }
@@ -881,6 +910,9 @@ class __$$ConfigExtendedParamsImplCopyWithImpl<$Res>
     Object? isCompatible = null,
     Object? selectedMap = null,
     Object? overrideDns = null,
+    Object? overrideAutoRoute = null,
+    Object? overrideStrictRoute = null,
+    Object? overrideAutoDetectInterface = null,
     Object? testUrl = null,
     Object? udp = null,
   }) {
@@ -900,6 +932,18 @@ class __$$ConfigExtendedParamsImplCopyWithImpl<$Res>
       overrideDns: null == overrideDns
           ? _value.overrideDns
           : overrideDns // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoRoute: null == overrideAutoRoute
+          ? _value.overrideAutoRoute
+          : overrideAutoRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideStrictRoute: null == overrideStrictRoute
+          ? _value.overrideStrictRoute
+          : overrideStrictRoute // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideAutoDetectInterface: null == overrideAutoDetectInterface
+          ? _value.overrideAutoDetectInterface
+          : overrideAutoDetectInterface // ignore: cast_nullable_to_non_nullable
               as bool,
       testUrl: null == testUrl
           ? _value.testUrl
@@ -922,6 +966,10 @@ class _$ConfigExtendedParamsImpl implements _ConfigExtendedParams {
       @JsonKey(name: "selected-map")
       required final Map<String, String> selectedMap,
       @JsonKey(name: "override-dns") required this.overrideDns,
+      @JsonKey(name: "override-auto-route") required this.overrideAutoRoute,
+      @JsonKey(name: "override-strict-route") required this.overrideStrictRoute,
+      @JsonKey(name: "override-auto-detect-interface")
+      required this.overrideAutoDetectInterface,
       @JsonKey(name: "test-url") required this.testUrl,
       @JsonKey(name: "udp") required this.udp})
       : _selectedMap = selectedMap;
@@ -948,6 +996,15 @@ class _$ConfigExtendedParamsImpl implements _ConfigExtendedParams {
   @JsonKey(name: "override-dns")
   final bool overrideDns;
   @override
+  @JsonKey(name: "override-auto-route")
+  final bool overrideAutoRoute;
+  @override
+  @JsonKey(name: "override-strict-route")
+  final bool overrideStrictRoute;
+  @override
+  @JsonKey(name: "override-auto-detect-interface")
+  final bool overrideAutoDetectInterface;
+  @override
   @JsonKey(name: "test-url")
   final String testUrl;
   @override
@@ -956,7 +1013,7 @@ class _$ConfigExtendedParamsImpl implements _ConfigExtendedParams {
 
   @override
   String toString() {
-    return 'ConfigExtendedParams(isPatch: $isPatch, isCompatible: $isCompatible, selectedMap: $selectedMap, overrideDns: $overrideDns, testUrl: $testUrl, udp: $udp)';
+    return 'ConfigExtendedParams(isPatch: $isPatch, isCompatible: $isCompatible, selectedMap: $selectedMap, overrideDns: $overrideDns, overrideAutoRoute: $overrideAutoRoute, overrideStrictRoute: $overrideStrictRoute, overrideAutoDetectInterface: $overrideAutoDetectInterface, testUrl: $testUrl, udp: $udp)';
   }
 
   @override
@@ -971,6 +1028,14 @@ class _$ConfigExtendedParamsImpl implements _ConfigExtendedParams {
                 .equals(other._selectedMap, _selectedMap) &&
             (identical(other.overrideDns, overrideDns) ||
                 other.overrideDns == overrideDns) &&
+            (identical(other.overrideAutoRoute, overrideAutoRoute) ||
+                other.overrideAutoRoute == overrideAutoRoute) &&
+            (identical(other.overrideStrictRoute, overrideStrictRoute) ||
+                other.overrideStrictRoute == overrideStrictRoute) &&
+            (identical(other.overrideAutoDetectInterface,
+                    overrideAutoDetectInterface) ||
+                other.overrideAutoDetectInterface ==
+                    overrideAutoDetectInterface) &&
             (identical(other.testUrl, testUrl) || other.testUrl == testUrl) &&
             (identical(other.udp, udp) || other.udp == udp));
   }
@@ -983,6 +1048,9 @@ class _$ConfigExtendedParamsImpl implements _ConfigExtendedParams {
       isCompatible,
       const DeepCollectionEquality().hash(_selectedMap),
       overrideDns,
+      overrideAutoRoute,
+      overrideStrictRoute,
+      overrideAutoDetectInterface,
       testUrl,
       udp);
 
@@ -1009,6 +1077,12 @@ abstract class _ConfigExtendedParams implements ConfigExtendedParams {
           @JsonKey(name: "selected-map")
           required final Map<String, String> selectedMap,
           @JsonKey(name: "override-dns") required final bool overrideDns,
+          @JsonKey(name: "override-auto-route")
+          required final bool overrideAutoRoute,
+          @JsonKey(name: "override-strict-route")
+          required final bool overrideStrictRoute,
+          @JsonKey(name: "override-auto-detect-interface")
+          required final bool overrideAutoDetectInterface,
           @JsonKey(name: "test-url") required final String testUrl,
           @JsonKey(name: "udp") required final bool udp}) =
       _$ConfigExtendedParamsImpl;
@@ -1028,6 +1102,15 @@ abstract class _ConfigExtendedParams implements ConfigExtendedParams {
   @override
   @JsonKey(name: "override-dns")
   bool get overrideDns;
+  @override
+  @JsonKey(name: "override-auto-route")
+  bool get overrideAutoRoute;
+  @override
+  @JsonKey(name: "override-strict-route")
+  bool get overrideStrictRoute;
+  @override
+  @JsonKey(name: "override-auto-detect-interface")
+  bool get overrideAutoDetectInterface;
   @override
   @JsonKey(name: "test-url")
   String get testUrl;

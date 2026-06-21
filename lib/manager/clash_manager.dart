@@ -28,6 +28,9 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
     return Selector2<Config, ClashConfig, ClashConfigState>(
       selector: (_, config, clashConfig) => ClashConfigState(
         overrideDns: config.overrideDns,
+        overrideAutoRoute: config.overrideAutoRoute,
+        overrideStrictRoute: config.overrideStrictRoute,
+        overrideAutoDetectInterface: config.overrideAutoDetectInterface,
         mixedPort: clashConfig.mixedPort,
         allowLan: clashConfig.allowLan,
         ipv6: clashConfig.ipv6,

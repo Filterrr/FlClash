@@ -231,6 +231,15 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.Tun.DNSHijack = patchConfig.Tun.DNSHijack
 	targetConfig.Tun.Stack = patchConfig.Tun.Stack
 	targetConfig.Tun.DisableICMPForwarding = patchConfig.Tun.DisableICMPForwarding
+	if configParams.OverrideAutoRoute {
+		targetConfig.Tun.AutoRoute = true
+	}
+	if configParams.OverrideStrictRoute {
+		targetConfig.Tun.StrictRoute = true
+	}
+	if configParams.OverrideAutoDetectInterface {
+		targetConfig.Tun.AutoDetectInterface = true
+	}
 	targetConfig.GeodataLoader = patchConfig.GeodataLoader
 	targetConfig.Profile.StoreSelected = false
 	targetConfig.GeoXUrl = patchConfig.GeoXUrl

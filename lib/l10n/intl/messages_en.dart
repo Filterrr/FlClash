@@ -424,6 +424,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
       "Turning it on will override the DNS options in the profile",
     ),
+    "autoRoute": MessageLookupByLibrary.simpleMessage("Auto Route"),
+    "autoRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Override the auto-route option in the profile when enabled",
+    ),
+    "strictRoute": MessageLookupByLibrary.simpleMessage("Strict Route"),
+    "strictRouteDesc": MessageLookupByLibrary.simpleMessage(
+      "Override the strict-route option in the profile when enabled, available when auto-route is on",
+    ),
+    "autoDetectInterface": MessageLookupByLibrary.simpleMessage("Auto Detect Interface"),
+    "autoDetectInterfaceDesc": MessageLookupByLibrary.simpleMessage(
+      "Override the auto-detect-interface option in the profile when enabled",
+    ),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "passwordTip": MessageLookupByLibrary.simpleMessage(
       "Password cannot be empty",

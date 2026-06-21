@@ -2079,6 +2079,66 @@ class AppLocalizations {
     );
   }
 
+  /// `Auto Route`
+  String get autoRoute {
+    return Intl.message(
+      'Auto Route',
+      name: 'autoRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override the auto-route option in the profile when enabled`
+  String get autoRouteDesc {
+    return Intl.message(
+      'Override the auto-route option in the profile when enabled',
+      name: 'autoRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strict Route`
+  String get strictRoute {
+    return Intl.message(
+      'Strict Route',
+      name: 'strictRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override the strict-route option in the profile when enabled, available when auto-route is on`
+  String get strictRouteDesc {
+    return Intl.message(
+      'Override the strict-route option in the profile when enabled, available when auto-route is on',
+      name: 'strictRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto Detect Interface`
+  String get autoDetectInterface {
+    return Intl.message(
+      'Auto Detect Interface',
+      name: 'autoDetectInterface',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override the auto-detect-interface option in the profile when enabled`
+  String get autoDetectInterfaceDesc {
+    return Intl.message(
+      'Override the auto-detect-interface option in the profile when enabled',
+      name: 'autoDetectInterfaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Status`
   String get status {
     return Intl.message('Status', name: 'status', desc: '', args: []);

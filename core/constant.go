@@ -8,12 +8,15 @@ import (
 )
 
 type ConfigExtendedParams struct {
-	IsPatch      bool              `json:"is-patch"`
-	IsCompatible bool              `json:"is-compatible"`
-	SelectedMap  map[string]string `json:"selected-map"`
-	TestURL      *string           `json:"test-url"`
-	OverrideDns  bool              `json:"override-dns"`
-	Udp          bool              `json:"udp"`
+	IsPatch                   bool              `json:"is-patch"`
+	IsCompatible              bool              `json:"is-compatible"`
+	SelectedMap               map[string]string `json:"selected-map"`
+	TestURL                   *string           `json:"test-url"`
+	OverrideDns               bool              `json:"override-dns"`
+	OverrideAutoRoute         bool              `json:"override-auto-route"`
+	OverrideStrictRoute       bool              `json:"override-strict-route"`
+	OverrideAutoDetectInterface bool            `json:"override-auto-detect-interface"`
+	Udp                       bool              `json:"udp"`
 }
 
 type GenerateConfigParams struct {
