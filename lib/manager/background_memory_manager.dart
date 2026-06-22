@@ -220,6 +220,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
       _transitionToMode(LowMemoryMode.reduced);
     }
     _requestGc();
+    _requestDartGc();
     resourceController.forceClearImageCache();
     _perfStats.recordCacheClear();
   }
@@ -227,6 +228,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
   void onMemoryPressureMedium() {
     _transitionToMode(LowMemoryMode.low);
     _requestGc();
+    _requestDartGc();
     resourceController.forceClearAllCaches();
     _perfStats.recordCacheClear();
     _trimAppStateData();
@@ -235,6 +237,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
   void onMemoryPressureCritical() {
     _transitionToMode(LowMemoryMode.low);
     _requestGc();
+    _requestDartGc();
     resourceController.forceClearAllCaches();
     _perfStats.recordCacheClear();
     _trimAppStateData();
@@ -304,16 +307,19 @@ class BackgroundMemoryManager extends ChangeNotifier {
       if (_backgroundDuration >= _mediumBgThreshold) {
         _requestGc();
         _requestDartGc();
+        _emptyWorkingSet();
       }
 
       // 仅在深度后台时才清理缓存
       if (_backgroundDuration >= _longBgThreshold) {
         resourceController.forceClearImageCache();
         _perfStats.recordCacheClear();
+        _emptyWorkingSet();
       }
 
       if (_backgroundDuration >= _aggressiveGcThreshold) {
         _performAggressiveCleanup();
+        _emptyWorkingSet();
       }
 
       // 检查是否需要调整间隔（升级后重启定时器）

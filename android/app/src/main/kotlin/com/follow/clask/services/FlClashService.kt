@@ -38,6 +38,19 @@ class FlClashService : Service(), BaseServiceInterface {
         return super.onUnbind(intent)
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= TRIM_MEMORY_COMPLETE) {
+            GlobalState.getCurrentVPNPlugin()?.requestGc()
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
+        } else if (level >= TRIM_MEMORY_MODERATE) {
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
+        } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            GlobalState.getCurrentVPNPlugin()?.requestGc()
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
+        }
+    }
+
     private val CHANNEL = "FlClash"
 
     private val notificationId: Int = 1

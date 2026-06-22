@@ -6,6 +6,7 @@ import 'dart:isolate';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/services.dart';
 
@@ -25,6 +26,8 @@ class Vpn {
           break;
         case "gc":
           clashCore.requestGc();
+        case "trimMemory":
+          _handleTrimMemory(call.arguments as int);
         case "dnsChanged":
           final dns = call.arguments as String;
           clashLib?.updateDns(dns);
@@ -97,6 +100,22 @@ class Vpn {
         _serviceMessageHandler?.onStarted(m.data);
       case ServiceMessageType.loaded:
         _serviceMessageHandler?.onLoaded(m.data);
+    }
+  }
+
+  /// Android onTrimMemory level 常量
+  static const int _trimMemoryRunningLow = 10;
+  static const int _trimMemoryModerate = 60;
+  static const int _trimMemoryComplete = 80;
+
+  void _handleTrimMemory(int level) {
+    final manager = backgroundMemoryManager;
+    if (level >= _trimMemoryComplete) {
+      manager.onMemoryPressureCritical();
+    } else if (level >= _trimMemoryModerate) {
+      manager.onMemoryPressureMedium();
+    } else if (level >= _trimMemoryRunningLow) {
+      manager.onMemoryPressureLow();
     }
   }
 }
