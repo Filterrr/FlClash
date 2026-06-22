@@ -24,6 +24,7 @@ ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => ClashConfig()
   ..udp = json['udp'] as bool? ?? false
   ..tun = Tun.fromJson(json['tun'] as Map<String, dynamic>)
   ..dns = Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>)
+  ..sniffer = Sniffer.safeFromJson(json['sniffer'] as Map<String, Object?>?)
   ..rules = (json['rules'] as List<dynamic>).map((e) => e as String).toList()
   ..globalRealUa = json['global-real-ua'] as String?
   ..geoXUrl = (json['geox-url'] as Map<String, dynamic>?)?.map(
@@ -66,6 +67,7 @@ Map<String, dynamic> _$ClashConfigToJson(ClashConfig instance) =>
       'udp': instance.udp,
       'tun': instance.tun,
       'dns': instance.dns,
+      'sniffer': instance.sniffer,
       'rules': instance.rules,
       'global-ua': instance.globalUa,
       'global-real-ua': instance.globalRealUa,
@@ -233,3 +235,64 @@ const _$DnsModeEnumMap = {
   DnsMode.redirHost: 'redir-host',
   DnsMode.hosts: 'hosts',
 };
+
+_$SniffProtocolImpl _$$SniffProtocolImplFromJson(Map<String, dynamic> json) =>
+    _$SniffProtocolImpl(
+      ports: json['ports'] == null
+          ? const []
+          : _portsFromJson(json['ports'] as List?),
+      overrideDestination: json['override-destination'] as bool?,
+    );
+
+Map<String, dynamic> _$$SniffProtocolImplToJson(_$SniffProtocolImpl instance) =>
+    <String, dynamic>{
+      'ports': instance.ports,
+      'override-destination': instance.overrideDestination,
+    };
+
+_$SnifferImpl _$$SnifferImplFromJson(Map<String, dynamic> json) =>
+    _$SnifferImpl(
+      enable: json['enable'] as bool? ?? false,
+      forceDnsMapping: json['force-dns-mapping'] as bool? ?? true,
+      parsePureIp: json['parse-pure-ip'] as bool? ?? true,
+      overrideDestination: json['override-destination'] as bool? ?? true,
+      sniff: (json['sniff'] as Map<String, dynamic>?)?.map(
+            (k, e) =>
+                MapEntry(k, SniffProtocol.fromJson(e as Map<String, dynamic>)),
+          ) ??
+          const {
+            "HTTP": SniffProtocol(
+                ports: ["80", "8080-8880"], overrideDestination: true),
+            "TLS": SniffProtocol(ports: ["443", "8443"]),
+            "QUIC": SniffProtocol(ports: ["443", "8443"])
+          },
+      forceDomain: (json['force-domain'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      skipDomain: (json['skip-domain'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      skipSrcAddress: (json['skip-src-address'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      skipDstAddress: (json['skip-dst-address'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$$SnifferImplToJson(_$SnifferImpl instance) =>
+    <String, dynamic>{
+      'enable': instance.enable,
+      'force-dns-mapping': instance.forceDnsMapping,
+      'parse-pure-ip': instance.parsePureIp,
+      'override-destination': instance.overrideDestination,
+      'sniff': instance.sniff,
+      'force-domain': instance.forceDomain,
+      'skip-domain': instance.skipDomain,
+      'skip-src-address': instance.skipSrcAddress,
+      'skip-dst-address': instance.skipDstAddress,
+    };

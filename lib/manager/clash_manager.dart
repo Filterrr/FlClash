@@ -28,6 +28,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
     return Selector2<Config, ClashConfig, ClashConfigState>(
       selector: (_, config, clashConfig) => ClashConfigState(
         overrideDns: config.overrideDns,
+        overrideSniffer: config.overrideSniffer,
         overrideAutoRoute: config.overrideAutoRoute,
         overrideStrictRoute: config.overrideStrictRoute,
         overrideAutoDetectInterface: config.overrideAutoDetectInterface,
@@ -44,6 +45,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
         tcpConcurrent: clashConfig.tcpConcurrent,
         tun: clashConfig.tun,
         dns: clashConfig.dns,
+        sniffer: clashConfig.sniffer,
         hosts: clashConfig.hosts,
         geoXUrl: clashConfig.geoXUrl,
         rules: clashConfig.rules,

@@ -436,6 +436,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "autoDetectInterfaceDesc": MessageLookupByLibrary.simpleMessage(
       "Override the auto-detect-interface option in the profile when enabled",
     ),
+    "sniffer": MessageLookupByLibrary.simpleMessage("Sniffer"),
+    "snifferDesc": MessageLookupByLibrary.simpleMessage(
+      "Update domain sniffing related settings",
+    ),
+    "overrideSniffer": MessageLookupByLibrary.simpleMessage("Override Sniffer"),
+    "overrideSnifferDesc": MessageLookupByLibrary.simpleMessage(
+      "Turning it on will override the Sniffer options in the profile",
+    ),
+    "snifferEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "Enable domain sniffing for protocol detection",
+    ),
+    "forceDnsMapping": MessageLookupByLibrary.simpleMessage("Force DNS mapping"),
+    "forceDnsMappingDesc": MessageLookupByLibrary.simpleMessage(
+      "Force sniffing for redir-host type traffic",
+    ),
+    "parsePureIp": MessageLookupByLibrary.simpleMessage("Parse pure IP"),
+    "parsePureIpDesc": MessageLookupByLibrary.simpleMessage(
+      "Force sniffing for all traffic without domain",
+    ),
+    "overrideDestination": MessageLookupByLibrary.simpleMessage("Override destination"),
+    "overrideDestinationDesc": MessageLookupByLibrary.simpleMessage(
+      "Use sniffing result as actual destination",
+    ),
+    "sniffProtocol": MessageLookupByLibrary.simpleMessage("Sniff protocol"),
+    "forceDomain": MessageLookupByLibrary.simpleMessage("Force domain"),
+    "forceDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Force sniffing for these domains",
+    ),
+    "skipDomain": MessageLookupByLibrary.simpleMessage("Skip domain"),
+    "skipDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Skip sniffing for these domains",
+    ),
+    "skipSrcAddress": MessageLookupByLibrary.simpleMessage("Skip source address"),
+    "skipSrcAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Skip sniffing for these source IP ranges",
+    ),
+    "skipDstAddress": MessageLookupByLibrary.simpleMessage("Skip destination address"),
+    "skipDstAddressDesc": MessageLookupByLibrary.simpleMessage(
+      "Skip sniffing for these destination IP ranges",
+    ),
+    "filter": MessageLookupByLibrary.simpleMessage("Filter"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "passwordTip": MessageLookupByLibrary.simpleMessage(
       "Password cannot be empty",

@@ -126,6 +126,56 @@ typedef GeoXMap = Map<String, String>;
 
 typedef HostsMap = Map<String, String>;
 
+typedef SniffMap = Map<String, SniffProtocol>;
+
+List<String> _portsFromJson(List<dynamic>? ports) {
+  return ports?.map((e) => e.toString()).toList() ?? [];
+}
+
+@freezed
+class SniffProtocol with _$SniffProtocol {
+  const factory SniffProtocol({
+    @Default([]) @JsonKey(fromJson: _portsFromJson) List<String> ports,
+    @JsonKey(name: "override-destination") bool? overrideDestination,
+  }) = _SniffProtocol;
+
+  factory SniffProtocol.fromJson(Map<String, Object?> json) =>
+      _$SniffProtocolFromJson(json);
+}
+
+const defaultSniffer = Sniffer();
+
+@freezed
+class Sniffer with _$Sniffer {
+  const factory Sniffer({
+    @Default(false) bool enable,
+    @JsonKey(name: "force-dns-mapping") @Default(true) bool forceDnsMapping,
+    @JsonKey(name: "parse-pure-ip") @Default(true) bool parsePureIp,
+    @JsonKey(name: "override-destination") @Default(true) bool overrideDestination,
+    @Default({
+      "HTTP": SniffProtocol(ports: ["80", "8080-8880"], overrideDestination: true),
+      "TLS": SniffProtocol(ports: ["443", "8443"]),
+      "QUIC": SniffProtocol(ports: ["443", "8443"]),
+    })
+    Map<String, SniffProtocol> sniff,
+    @JsonKey(name: "force-domain") @Default([]) List<String> forceDomain,
+    @JsonKey(name: "skip-domain") @Default([]) List<String> skipDomain,
+    @JsonKey(name: "skip-src-address") @Default([]) List<String> skipSrcAddress,
+    @JsonKey(name: "skip-dst-address") @Default([]) List<String> skipDstAddress,
+  }) = _Sniffer;
+
+  factory Sniffer.fromJson(Map<String, Object?> json) => _$SnifferFromJson(json);
+
+  factory Sniffer.safeFromJson(Map<String, Object?>? json) {
+    if (json == null) return defaultSniffer;
+    try {
+      return Sniffer.fromJson(json);
+    } catch (_) {
+      return defaultSniffer;
+    }
+  }
+}
+
 const defaultMixedPort = 7890;
 const defaultKeepAliveInterval = 30;
 
@@ -230,6 +280,7 @@ class ClashConfig extends ChangeNotifier {
   bool _udp;
   Tun _tun;
   Dns _dns;
+  Sniffer _sniffer;
   GeoXMap _geoXUrl;
   List<String> _rules;
   String? _globalRealUa;
@@ -252,6 +303,7 @@ class ClashConfig extends ChangeNotifier {
         _externalController = '',
         _keepAliveInterval = defaultKeepAliveInterval,
         _dns = defaultDns,
+        _sniffer = defaultSniffer,
         _geoXUrl = defaultGeoXMap,
         _routeMode = RouteMode.config,
         _includeRouteAddress = [],
@@ -399,6 +451,16 @@ class ClashConfig extends ChangeNotifier {
     }
   }
 
+  @JsonKey(fromJson: Sniffer.safeFromJson)
+  Sniffer get sniffer => _sniffer;
+
+  set sniffer(Sniffer value) {
+    if (_sniffer != value) {
+      _sniffer = value;
+      notifyListeners();
+    }
+  }
+
   List<String> get rules => _rules;
 
   set rules(List<String> value) {
@@ -492,6 +554,7 @@ class ClashConfig extends ChangeNotifier {
       _externalController = clashConfig._externalController;
       _geodataLoader = clashConfig._geodataLoader;
       _dns = clashConfig._dns;
+      _sniffer = clashConfig._sniffer;
       _rules = clashConfig._rules;
       _routeMode = clashConfig._routeMode;
       _includeRouteAddress = clashConfig._includeRouteAddress;
@@ -515,6 +578,7 @@ class ClashConfig extends ChangeNotifier {
       ..externalController = _externalController
       ..keepAliveInterval = _keepAliveInterval
       ..dns = _dns
+      ..sniffer = _sniffer
       ..geoXUrl = _geoXUrl
       ..routeMode = _routeMode
       ..includeRouteAddress = _includeRouteAddress

@@ -2,6 +2,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/fragments/config/dns.dart';
 import 'package:fl_clash/fragments/config/general.dart';
 import 'package:fl_clash/fragments/config/network.dart';
+import 'package:fl_clash/fragments/config/sniffer.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -48,6 +49,18 @@ class _ConfigFragmentState extends State<ConfigFragment> {
         delegate: const OpenDelegate(
           title: "DNS",
           widget: DnsListView(),
+          isScaffold: true,
+          isBlur: false,
+          extendPageWidth: 360,
+        ),
+      ),
+      ListItem.open(
+        title: Text(appLocalizations.sniffer),
+        subtitle: Text(appLocalizations.snifferDesc),
+        leading: const Icon(Icons.travel_explore),
+        delegate: const OpenDelegate(
+          title: "Sniffer",
+          widget: SnifferListView(),
           isScaffold: true,
           isBlur: false,
           extendPageWidth: 360,

@@ -1142,3 +1142,557 @@ abstract class _Dns implements Dns {
   _$$DnsImplCopyWith<_$DnsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
+
+SniffProtocol _$SniffProtocolFromJson(Map<String, dynamic> json) {
+  return _SniffProtocol.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SniffProtocol {
+  @JsonKey(fromJson: _portsFromJson)
+  List<String> get ports => throw _privateConstructorUsedError;
+  @JsonKey(name: "override-destination")
+  bool? get overrideDestination => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $SniffProtocolCopyWith<SniffProtocol> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SniffProtocolCopyWith<$Res> {
+  factory $SniffProtocolCopyWith(
+          SniffProtocol value, $Res Function(SniffProtocol) then) =
+      _$SniffProtocolCopyWithImpl<$Res, SniffProtocol>;
+  @useResult
+  $Res call(
+      {@JsonKey(fromJson: _portsFromJson) List<String> ports,
+      @JsonKey(name: "override-destination") bool? overrideDestination});
+}
+
+/// @nodoc
+class _$SniffProtocolCopyWithImpl<$Res, $Val extends SniffProtocol>
+    implements $SniffProtocolCopyWith<$Res> {
+  _$SniffProtocolCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? ports = null,
+    Object? overrideDestination = freezed,
+  }) {
+    return _then(_value.copyWith(
+      ports: null == ports
+          ? _value.ports
+          : ports // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      overrideDestination: freezed == overrideDestination
+          ? _value.overrideDestination
+          : overrideDestination // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SniffProtocolImplCopyWith<$Res>
+    implements $SniffProtocolCopyWith<$Res> {
+  factory _$$SniffProtocolImplCopyWith(
+          _$SniffProtocolImpl value, $Res Function(_$SniffProtocolImpl) then) =
+      __$$SniffProtocolImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {@JsonKey(fromJson: _portsFromJson) List<String> ports,
+      @JsonKey(name: "override-destination") bool? overrideDestination});
+}
+
+/// @nodoc
+class __$$SniffProtocolImplCopyWithImpl<$Res>
+    extends _$SniffProtocolCopyWithImpl<$Res, _$SniffProtocolImpl>
+    implements _$$SniffProtocolImplCopyWith<$Res> {
+  __$$SniffProtocolImplCopyWithImpl(
+      _$SniffProtocolImpl _value, $Res Function(_$SniffProtocolImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? ports = null,
+    Object? overrideDestination = freezed,
+  }) {
+    return _then(_$SniffProtocolImpl(
+      ports: null == ports
+          ? _value._ports
+          : ports // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      overrideDestination: freezed == overrideDestination
+          ? _value.overrideDestination
+          : overrideDestination // ignore: cast_nullable_to_non_nullable
+              as bool?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SniffProtocolImpl implements _SniffProtocol {
+  const _$SniffProtocolImpl(
+      {@JsonKey(fromJson: _portsFromJson) final List<String> ports = const [],
+      @JsonKey(name: "override-destination") this.overrideDestination})
+      : _ports = ports;
+
+  factory _$SniffProtocolImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SniffProtocolImplFromJson(json);
+
+  final List<String> _ports;
+  @override
+  @JsonKey(fromJson: _portsFromJson)
+  List<String> get ports {
+    if (_ports is EqualUnmodifiableListView) return _ports;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_ports);
+  }
+
+  @override
+  @JsonKey(name: "override-destination")
+  final bool? overrideDestination;
+
+  @override
+  String toString() {
+    return 'SniffProtocol(ports: $ports, overrideDestination: $overrideDestination)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SniffProtocolImpl &&
+            const DeepCollectionEquality().equals(other._ports, _ports) &&
+            (identical(other.overrideDestination, overrideDestination) ||
+                other.overrideDestination == overrideDestination));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType,
+      const DeepCollectionEquality().hash(_ports), overrideDestination);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SniffProtocolImplCopyWith<_$SniffProtocolImpl> get copyWith =>
+      __$$SniffProtocolImplCopyWithImpl<_$SniffProtocolImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SniffProtocolImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _SniffProtocol implements SniffProtocol {
+  const factory _SniffProtocol(
+      {@JsonKey(fromJson: _portsFromJson) final List<String> ports,
+      @JsonKey(name: "override-destination")
+      final bool? overrideDestination}) = _$SniffProtocolImpl;
+
+  factory _SniffProtocol.fromJson(Map<String, dynamic> json) =
+      _$SniffProtocolImpl.fromJson;
+
+  @override
+  @JsonKey(fromJson: _portsFromJson)
+  List<String> get ports;
+  @override
+  @JsonKey(name: "override-destination")
+  bool? get overrideDestination;
+  @override
+  @JsonKey(ignore: true)
+  _$$SniffProtocolImplCopyWith<_$SniffProtocolImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+Sniffer _$SnifferFromJson(Map<String, dynamic> json) {
+  return _Sniffer.fromJson(json);
+}
+
+/// @nodoc
+mixin _$Sniffer {
+  bool get enable => throw _privateConstructorUsedError;
+  @JsonKey(name: "force-dns-mapping")
+  bool get forceDnsMapping => throw _privateConstructorUsedError;
+  @JsonKey(name: "parse-pure-ip")
+  bool get parsePureIp => throw _privateConstructorUsedError;
+  @JsonKey(name: "override-destination")
+  bool get overrideDestination => throw _privateConstructorUsedError;
+  Map<String, SniffProtocol> get sniff => throw _privateConstructorUsedError;
+  @JsonKey(name: "force-domain")
+  List<String> get forceDomain => throw _privateConstructorUsedError;
+  @JsonKey(name: "skip-domain")
+  List<String> get skipDomain => throw _privateConstructorUsedError;
+  @JsonKey(name: "skip-src-address")
+  List<String> get skipSrcAddress => throw _privateConstructorUsedError;
+  @JsonKey(name: "skip-dst-address")
+  List<String> get skipDstAddress => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $SnifferCopyWith<Sniffer> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SnifferCopyWith<$Res> {
+  factory $SnifferCopyWith(Sniffer value, $Res Function(Sniffer) then) =
+      _$SnifferCopyWithImpl<$Res, Sniffer>;
+  @useResult
+  $Res call(
+      {bool enable,
+      @JsonKey(name: "force-dns-mapping") bool forceDnsMapping,
+      @JsonKey(name: "parse-pure-ip") bool parsePureIp,
+      @JsonKey(name: "override-destination") bool overrideDestination,
+      Map<String, SniffProtocol> sniff,
+      @JsonKey(name: "force-domain") List<String> forceDomain,
+      @JsonKey(name: "skip-domain") List<String> skipDomain,
+      @JsonKey(name: "skip-src-address") List<String> skipSrcAddress,
+      @JsonKey(name: "skip-dst-address") List<String> skipDstAddress});
+}
+
+/// @nodoc
+class _$SnifferCopyWithImpl<$Res, $Val extends Sniffer>
+    implements $SnifferCopyWith<$Res> {
+  _$SnifferCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enable = null,
+    Object? forceDnsMapping = null,
+    Object? parsePureIp = null,
+    Object? overrideDestination = null,
+    Object? sniff = null,
+    Object? forceDomain = null,
+    Object? skipDomain = null,
+    Object? skipSrcAddress = null,
+    Object? skipDstAddress = null,
+  }) {
+    return _then(_value.copyWith(
+      enable: null == enable
+          ? _value.enable
+          : enable // ignore: cast_nullable_to_non_nullable
+              as bool,
+      forceDnsMapping: null == forceDnsMapping
+          ? _value.forceDnsMapping
+          : forceDnsMapping // ignore: cast_nullable_to_non_nullable
+              as bool,
+      parsePureIp: null == parsePureIp
+          ? _value.parsePureIp
+          : parsePureIp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideDestination: null == overrideDestination
+          ? _value.overrideDestination
+          : overrideDestination // ignore: cast_nullable_to_non_nullable
+              as bool,
+      sniff: null == sniff
+          ? _value.sniff
+          : sniff // ignore: cast_nullable_to_non_nullable
+              as Map<String, SniffProtocol>,
+      forceDomain: null == forceDomain
+          ? _value.forceDomain
+          : forceDomain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipDomain: null == skipDomain
+          ? _value.skipDomain
+          : skipDomain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipSrcAddress: null == skipSrcAddress
+          ? _value.skipSrcAddress
+          : skipSrcAddress // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipDstAddress: null == skipDstAddress
+          ? _value.skipDstAddress
+          : skipDstAddress // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SnifferImplCopyWith<$Res> implements $SnifferCopyWith<$Res> {
+  factory _$$SnifferImplCopyWith(
+          _$SnifferImpl value, $Res Function(_$SnifferImpl) then) =
+      __$$SnifferImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {bool enable,
+      @JsonKey(name: "force-dns-mapping") bool forceDnsMapping,
+      @JsonKey(name: "parse-pure-ip") bool parsePureIp,
+      @JsonKey(name: "override-destination") bool overrideDestination,
+      Map<String, SniffProtocol> sniff,
+      @JsonKey(name: "force-domain") List<String> forceDomain,
+      @JsonKey(name: "skip-domain") List<String> skipDomain,
+      @JsonKey(name: "skip-src-address") List<String> skipSrcAddress,
+      @JsonKey(name: "skip-dst-address") List<String> skipDstAddress});
+}
+
+/// @nodoc
+class __$$SnifferImplCopyWithImpl<$Res>
+    extends _$SnifferCopyWithImpl<$Res, _$SnifferImpl>
+    implements _$$SnifferImplCopyWith<$Res> {
+  __$$SnifferImplCopyWithImpl(
+      _$SnifferImpl _value, $Res Function(_$SnifferImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enable = null,
+    Object? forceDnsMapping = null,
+    Object? parsePureIp = null,
+    Object? overrideDestination = null,
+    Object? sniff = null,
+    Object? forceDomain = null,
+    Object? skipDomain = null,
+    Object? skipSrcAddress = null,
+    Object? skipDstAddress = null,
+  }) {
+    return _then(_$SnifferImpl(
+      enable: null == enable
+          ? _value.enable
+          : enable // ignore: cast_nullable_to_non_nullable
+              as bool,
+      forceDnsMapping: null == forceDnsMapping
+          ? _value.forceDnsMapping
+          : forceDnsMapping // ignore: cast_nullable_to_non_nullable
+              as bool,
+      parsePureIp: null == parsePureIp
+          ? _value.parsePureIp
+          : parsePureIp // ignore: cast_nullable_to_non_nullable
+              as bool,
+      overrideDestination: null == overrideDestination
+          ? _value.overrideDestination
+          : overrideDestination // ignore: cast_nullable_to_non_nullable
+              as bool,
+      sniff: null == sniff
+          ? _value._sniff
+          : sniff // ignore: cast_nullable_to_non_nullable
+              as Map<String, SniffProtocol>,
+      forceDomain: null == forceDomain
+          ? _value._forceDomain
+          : forceDomain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipDomain: null == skipDomain
+          ? _value._skipDomain
+          : skipDomain // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipSrcAddress: null == skipSrcAddress
+          ? _value._skipSrcAddress
+          : skipSrcAddress // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      skipDstAddress: null == skipDstAddress
+          ? _value._skipDstAddress
+          : skipDstAddress // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SnifferImpl implements _Sniffer {
+  const _$SnifferImpl(
+      {this.enable = false,
+      @JsonKey(name: "force-dns-mapping") this.forceDnsMapping = true,
+      @JsonKey(name: "parse-pure-ip") this.parsePureIp = true,
+      @JsonKey(name: "override-destination") this.overrideDestination = true,
+      final Map<String, SniffProtocol> sniff = const {
+        "HTTP": SniffProtocol(
+            ports: ["80", "8080-8880"], overrideDestination: true),
+        "TLS": SniffProtocol(ports: ["443", "8443"]),
+        "QUIC": SniffProtocol(ports: ["443", "8443"])
+      },
+      @JsonKey(name: "force-domain") final List<String> forceDomain = const [],
+      @JsonKey(name: "skip-domain") final List<String> skipDomain = const [],
+      @JsonKey(name: "skip-src-address")
+      final List<String> skipSrcAddress = const [],
+      @JsonKey(name: "skip-dst-address")
+      final List<String> skipDstAddress = const []})
+      : _sniff = sniff,
+        _forceDomain = forceDomain,
+        _skipDomain = skipDomain,
+        _skipSrcAddress = skipSrcAddress,
+        _skipDstAddress = skipDstAddress;
+
+  factory _$SnifferImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SnifferImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final bool enable;
+  @override
+  @JsonKey(name: "force-dns-mapping")
+  final bool forceDnsMapping;
+  @override
+  @JsonKey(name: "parse-pure-ip")
+  final bool parsePureIp;
+  @override
+  @JsonKey(name: "override-destination")
+  final bool overrideDestination;
+  final Map<String, SniffProtocol> _sniff;
+  @override
+  @JsonKey()
+  Map<String, SniffProtocol> get sniff {
+    if (_sniff is EqualUnmodifiableMapView) return _sniff;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_sniff);
+  }
+
+  final List<String> _forceDomain;
+  @override
+  @JsonKey(name: "force-domain")
+  List<String> get forceDomain {
+    if (_forceDomain is EqualUnmodifiableListView) return _forceDomain;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_forceDomain);
+  }
+
+  final List<String> _skipDomain;
+  @override
+  @JsonKey(name: "skip-domain")
+  List<String> get skipDomain {
+    if (_skipDomain is EqualUnmodifiableListView) return _skipDomain;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_skipDomain);
+  }
+
+  final List<String> _skipSrcAddress;
+  @override
+  @JsonKey(name: "skip-src-address")
+  List<String> get skipSrcAddress {
+    if (_skipSrcAddress is EqualUnmodifiableListView) return _skipSrcAddress;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_skipSrcAddress);
+  }
+
+  final List<String> _skipDstAddress;
+  @override
+  @JsonKey(name: "skip-dst-address")
+  List<String> get skipDstAddress {
+    if (_skipDstAddress is EqualUnmodifiableListView) return _skipDstAddress;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_skipDstAddress);
+  }
+
+  @override
+  String toString() {
+    return 'Sniffer(enable: $enable, forceDnsMapping: $forceDnsMapping, parsePureIp: $parsePureIp, overrideDestination: $overrideDestination, sniff: $sniff, forceDomain: $forceDomain, skipDomain: $skipDomain, skipSrcAddress: $skipSrcAddress, skipDstAddress: $skipDstAddress)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SnifferImpl &&
+            (identical(other.enable, enable) || other.enable == enable) &&
+            (identical(other.forceDnsMapping, forceDnsMapping) ||
+                other.forceDnsMapping == forceDnsMapping) &&
+            (identical(other.parsePureIp, parsePureIp) ||
+                other.parsePureIp == parsePureIp) &&
+            (identical(other.overrideDestination, overrideDestination) ||
+                other.overrideDestination == overrideDestination) &&
+            const DeepCollectionEquality().equals(other._sniff, _sniff) &&
+            const DeepCollectionEquality()
+                .equals(other._forceDomain, _forceDomain) &&
+            const DeepCollectionEquality()
+                .equals(other._skipDomain, _skipDomain) &&
+            const DeepCollectionEquality()
+                .equals(other._skipSrcAddress, _skipSrcAddress) &&
+            const DeepCollectionEquality()
+                .equals(other._skipDstAddress, _skipDstAddress));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      enable,
+      forceDnsMapping,
+      parsePureIp,
+      overrideDestination,
+      const DeepCollectionEquality().hash(_sniff),
+      const DeepCollectionEquality().hash(_forceDomain),
+      const DeepCollectionEquality().hash(_skipDomain),
+      const DeepCollectionEquality().hash(_skipSrcAddress),
+      const DeepCollectionEquality().hash(_skipDstAddress));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SnifferImplCopyWith<_$SnifferImpl> get copyWith =>
+      __$$SnifferImplCopyWithImpl<_$SnifferImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SnifferImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Sniffer implements Sniffer {
+  const factory _Sniffer(
+      {final bool enable,
+      @JsonKey(name: "force-dns-mapping") final bool forceDnsMapping,
+      @JsonKey(name: "parse-pure-ip") final bool parsePureIp,
+      @JsonKey(name: "override-destination") final bool overrideDestination,
+      final Map<String, SniffProtocol> sniff,
+      @JsonKey(name: "force-domain") final List<String> forceDomain,
+      @JsonKey(name: "skip-domain") final List<String> skipDomain,
+      @JsonKey(name: "skip-src-address") final List<String> skipSrcAddress,
+      @JsonKey(name: "skip-dst-address")
+      final List<String> skipDstAddress}) = _$SnifferImpl;
+
+  factory _Sniffer.fromJson(Map<String, dynamic> json) = _$SnifferImpl.fromJson;
+
+  @override
+  bool get enable;
+  @override
+  @JsonKey(name: "force-dns-mapping")
+  bool get forceDnsMapping;
+  @override
+  @JsonKey(name: "parse-pure-ip")
+  bool get parsePureIp;
+  @override
+  @JsonKey(name: "override-destination")
+  bool get overrideDestination;
+  @override
+  Map<String, SniffProtocol> get sniff;
+  @override
+  @JsonKey(name: "force-domain")
+  List<String> get forceDomain;
+  @override
+  @JsonKey(name: "skip-domain")
+  List<String> get skipDomain;
+  @override
+  @JsonKey(name: "skip-src-address")
+  List<String> get skipSrcAddress;
+  @override
+  @JsonKey(name: "skip-dst-address")
+  List<String> get skipDstAddress;
+  @override
+  @JsonKey(ignore: true)
+  _$$SnifferImplCopyWith<_$SnifferImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}

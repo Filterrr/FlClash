@@ -76,6 +76,7 @@ class ConfigExtendedParams with _$ConfigExtendedParams {
     @JsonKey(name: "is-compatible") required bool isCompatible,
     @JsonKey(name: "selected-map") required SelectedMap selectedMap,
     @JsonKey(name: "override-dns") required bool overrideDns,
+    @JsonKey(name: "override-sniffer") required bool overrideSniffer,
     @JsonKey(name: "override-auto-route") required bool overrideAutoRoute,
     @JsonKey(name: "override-strict-route") required bool overrideStrictRoute,
     @JsonKey(name: "override-auto-detect-interface") required bool overrideAutoDetectInterface,

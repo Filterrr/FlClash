@@ -124,6 +124,7 @@ class GlobalState {
           isCompatible: true,
           selectedMap: config.currentSelectedMap,
           overrideDns: config.overrideDns,
+          overrideSniffer: config.overrideSniffer,
           overrideAutoRoute: config.overrideAutoRoute,
           overrideStrictRoute: config.overrideStrictRoute,
           overrideAutoDetectInterface: config.overrideAutoDetectInterface,

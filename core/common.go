@@ -12,6 +12,7 @@ import (
 	"github.com/metacubex/mihomo/common/batch"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/component/sniffer"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
@@ -275,6 +276,9 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 			targetConfig.DNS.Enable = true
 		}
 	}
+	if configParams.OverrideSniffer {
+		targetConfig.Sniffer = patchConfig.Sniffer
+	}
 	overrideRules(&targetConfig.Rule)
 }
 
@@ -283,7 +287,15 @@ func patchConfig() {
 	general := currentConfig.General
 	controller := currentConfig.Controller
 	tls := currentConfig.TLS
-	tunnel.SetSniffing(general.Sniffing)
+	if currentConfig.Sniffer != nil {
+		dispatcher, err := sniffer.NewDispatcher(currentConfig.Sniffer)
+		if err != nil {
+			log.Warnln("initial sniffer failed, err:%v", err)
+		}
+		tunnel.UpdateSniffer(dispatcher)
+	} else {
+		tunnel.SetSniffing(false)
+	}
 	tunnel.SetFindProcessMode(general.FindProcessMode)
 	dialer.SetTcpConcurrent(general.TCPConcurrent)
 	dialer.DefaultInterface.Store(general.Interface)
