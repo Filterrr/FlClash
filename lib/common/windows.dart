@@ -70,11 +70,11 @@ class Windows {
   bool emptyWorkingSet() {
     final getCurrentProcess = _kernel32.lookupFunction<
         IntPtr Function(),
-        int Function()>('GetCurrentProcess');
+        IntPtr Function()>('GetCurrentProcess');
 
     final emptyWorkingSet = _psapi.lookupFunction<
         Int32 Function(IntPtr hProcess),
-        int Function(int hProcess)>('EmptyWorkingSet');
+        int Function(IntPtr hProcess)>('EmptyWorkingSet');
 
     final processHandle = getCurrentProcess();
     final result = emptyWorkingSet(processHandle);
