@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
@@ -146,6 +147,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
       if (_isInBackground) {
         _clearNonEssentialCaches();
         _requestGc();
+        _emptyWorkingSet();
       }
     });
 
@@ -336,6 +338,12 @@ class BackgroundMemoryManager extends ChangeNotifier {
     try {
       WidgetsBinding.instance.handleMemoryPressure();
     } catch (_) {}
+  }
+
+  void _emptyWorkingSet() {
+    if (Platform.isWindows) {
+      windows?.emptyWorkingSet();
+    }
   }
 
   void _performAggressiveCleanup() {

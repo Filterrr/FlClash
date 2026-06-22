@@ -10,9 +10,13 @@ import 'package:path/path.dart';
 class Windows {
   static Windows? _instance;
   late DynamicLibrary _shell32;
+  late DynamicLibrary _kernel32;
+  late DynamicLibrary _psapi;
 
   Windows._internal() {
     _shell32 = DynamicLibrary.open('shell32.dll');
+    _kernel32 = DynamicLibrary.open('kernel32.dll');
+    _psapi = DynamicLibrary.open('psapi.dll');
   }
 
   factory Windows() {
@@ -60,6 +64,23 @@ class Windows {
       return false;
     }
     return true;
+  }
+
+  /// 调用 Windows EmptyWorkingSet 让系统回收进程暂时不用的物理内存页
+  bool emptyWorkingSet() {
+    final getCurrentProcess = _kernel32.lookupFunction<
+        IntPtr Function(),
+        int Function()>('GetCurrentProcess');
+
+    final emptyWorkingSet = _psapi.lookupFunction<
+        Int32 Function(IntPtr hProcess),
+        int Function(int hProcess)>('EmptyWorkingSet');
+
+    final processHandle = getCurrentProcess();
+    final result = emptyWorkingSet(processHandle);
+
+    debugPrint("[Windows] emptyWorkingSet result: $result");
+    return result != 0;
   }
 
   _killProcess(int port) async {
