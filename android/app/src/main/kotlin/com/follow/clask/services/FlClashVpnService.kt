@@ -201,9 +201,14 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        // 仅在中高内存压力时触发 GC，低级别时跳过以减少 CPU 唤醒
-        if (level >= TRIM_MEMORY_RUNNING_LOW) {
+        if (level >= TRIM_MEMORY_COMPLETE) {
             GlobalState.getCurrentVPNPlugin()?.requestGc()
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
+        } else if (level >= TRIM_MEMORY_MODERATE) {
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
+        } else if (level >= TRIM_MEMORY_RUNNING_LOW) {
+            GlobalState.getCurrentVPNPlugin()?.requestGc()
+            GlobalState.getCurrentVPNPlugin()?.notifyTrimMemory(level)
         }
     }
 
