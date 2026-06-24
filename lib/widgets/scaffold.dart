@@ -107,6 +107,9 @@ class CommonScaffoldState extends State<CommonScaffold> {
       builder: (_, value, __) {
         return Scaffold(
           resizeToAvoidBottomInset: true,
+          floatingActionButtonLocation: _isMobile(context)
+              ? const _FloatingBarAwareLocation()
+              : null,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: Stack(
@@ -161,6 +164,27 @@ class CommonScaffoldState extends State<CommonScaffold> {
           floatingActionButton: value,
         );
       },
+    );
+  }
+}
+
+bool _isMobile(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  return width <= maxMobileWidth;
+}
+
+class _FloatingBarAwareLocation extends FloatingActionButtonLocation {
+  const _FloatingBarAwareLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final defaultOffset =
+        FloatingActionButtonLocation.endFloat.getOffset(scaffoldGeometry);
+    final bottomPadding = scaffoldGeometry.minInsets.bottom;
+    final floatingBarHeight = 20.0;
+    return Offset(
+      defaultOffset.dx,
+      defaultOffset.dy - floatingBarHeight - bottomPadding,
     );
   }
 }

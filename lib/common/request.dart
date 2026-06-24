@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -13,61 +12,88 @@ class Request {
   String? userAgent;
 
   Request() {
-    _dio = Dio();
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          return handler.next(options);
-        },
-      ),
-    );
+    _dio = Dio(BaseOptions(
+      validateStatus: (status) => status != null && status < 500,
+    ));
   }
 
   Future<Response> getFileResponseForUrl(String url) async {
-    final response = await _dio
-        .get(
-          url,
-          options: Options(
-            headers: {
-              "User-Agent": globalState.appController.clashConfig.globalUa
-            },
-            responseType: ResponseType.bytes,
-          ),
-        )
-        .timeout(
-          httpTimeoutDuration * 6,
+    try {
+      final response = await _dio
+          .get(
+            url,
+            options: Options(
+              headers: {
+                "User-Agent": globalState.appController.clashConfig.globalUa
+              },
+              responseType: ResponseType.bytes,
+            ),
+          )
+          .timeout(
+            httpTimeoutDuration * 6,
+          );
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        throw DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+          message: 'HTTP ${response.statusCode}',
         );
-    return response;
+      }
+      return response;
+    } on DioException {
+      rethrow;
+    } catch (e) {
+      throw DioException(
+        requestOptions: RequestOptions(path: url),
+        message: e.toString(),
+      );
+    }
   }
 
   Future<MemoryImage?> getImage(String url) async {
     if (url.isEmpty) return null;
-    final response = await _dio.get<Uint8List>(
-      url,
-      options: Options(
-        responseType: ResponseType.bytes,
-      ),
-    );
-    final data = response.data;
-    if (data == null) return null;
-    return MemoryImage(data);
+    try {
+      final response = await _dio.get<Uint8List>(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+        ),
+      );
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        return null;
+      }
+      final data = response.data;
+      if (data == null) return null;
+      return MemoryImage(data);
+    } catch (e) {
+      debugPrint("getImage error ===> $e");
+      return null;
+    }
   }
 
   Future<Map<String, dynamic>?> checkForUpdate() async {
-    final response = await _dio.get(
-      "https://api.github.com/repos/$repository/releases/latest",
-      options: Options(
-        responseType: ResponseType.json,
-      ),
-    );
-    if (response.statusCode != 200) return null;
-    final data = response.data as Map<String, dynamic>;
-    final remoteVersion = data['tag_name'];
-    final version = globalState.packageInfo.version;
-    final hasUpdate =
-        other.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
-    if (!hasUpdate) return null;
-    return data;
+    try {
+      final response = await _dio
+          .get(
+            "https://api.github.com/repos/$repository/releases/latest",
+            options: Options(
+              responseType: ResponseType.json,
+            ),
+          )
+          .timeout(httpTimeoutDuration);
+      if (response.statusCode != 200) return null;
+      final data = response.data as Map<String, dynamic>;
+      final remoteVersion = data['tag_name'];
+      final version = globalState.packageInfo.version;
+      final hasUpdate =
+          other.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
+      if (!hasUpdate) return null;
+      return data;
+    } catch (e) {
+      debugPrint("checkForUpdate error ===> $e");
+      return null;
+    }
   }
 
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
@@ -125,12 +151,13 @@ class Request {
       final response = await _dio
           .post(
             "http://$localhost:$helperPort/start",
-            data: json.encode({
+            data: {
               "path": appPath.corePath,
               "arg": arg,
-            }),
+            },
             options: Options(
               responseType: ResponseType.plain,
+              contentType: 'application/json',
             ),
           )
           .timeout(

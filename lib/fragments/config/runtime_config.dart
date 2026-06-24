@@ -45,7 +45,9 @@ class _RuntimeConfigFragmentState extends State<RuntimeConfigFragment> {
         });
         return;
       }
-      final dio = Dio();
+      final dio = Dio(BaseOptions(
+        validateStatus: (status) => status != null && status < 500,
+      ));
       final baseUrl = 'http://$controller';
       final results = await Future.wait([
         _safeGet(dio, '$baseUrl/configs'),
@@ -53,15 +55,27 @@ class _RuntimeConfigFragmentState extends State<RuntimeConfigFragment> {
         _safeGet(dio, '$baseUrl/rules'),
         _safeGet(dio, '$baseUrl/providers/proxies'),
         _safeGet(dio, '$baseUrl/providers/rules'),
-        _safeGet(dio, '$baseUrl/group'),
       ]);
       final merged = <String, dynamic>{};
       merged['configs'] = results[0];
-      merged['proxies'] = results[1];
+      final proxiesData = results[1];
+      merged['proxies'] = proxiesData;
       merged['rules'] = results[2];
       merged['proxy-providers'] = results[3];
       merged['rule-providers'] = results[4];
-      merged['proxy-groups'] = results[5];
+      final proxyGroups = <String, dynamic>{};
+      if (proxiesData is Map<String, dynamic> && proxiesData.containsKey('proxies')) {
+        final proxies = proxiesData['proxies'];
+        if (proxies is Map<String, dynamic>) {
+          const groupTypes = {'Selector', 'URLTest', 'Fallback', 'LoadBalance'};
+          proxies.forEach((name, value) {
+            if (value is Map<String, dynamic> && groupTypes.contains(value['type'])) {
+              proxyGroups[name] = value;
+            }
+          });
+        }
+      }
+      merged['proxy-groups'] = proxyGroups;
       final prettyJson =
           const JsonEncoder.withIndent('  ').convert(merged);
       if (!mounted) return;
