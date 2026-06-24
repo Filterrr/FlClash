@@ -1,11 +1,9 @@
-import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -39,45 +37,6 @@ class HomePage extends StatelessWidget {
           final currentIndex = index == -1 ? 0 : index;
           final isMobile = viewMode == ViewMode.mobile;
 
-          final bottomNavigationBar = Container(
-            decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainer,
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 20,
-                  color: Colors.black.withValues(alpha: 0.1),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
-                child: GNav(
-                  rippleColor: context.colorScheme.onSurface.withValues(alpha: 0.1),
-                  hoverColor: context.colorScheme.onSurface.withValues(alpha: 0.05),
-                  gap: 8,
-                  activeColor: context.colorScheme.onSecondaryContainer,
-                  iconSize: 24,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  duration: const Duration(milliseconds: 250),
-                  tabBackgroundColor: context.colorScheme.secondaryContainer,
-                  color: context.colorScheme.onSurfaceVariant,
-                  curve: Curves.easeInOut,
-                  tabs: navigationItems
-                      .map(
-                        (e) => GButton(
-                          icon: e.icon.icon ?? Icons.home,
-                          text: Intl.message(e.label),
-                        ),
-                      )
-                      .toList(),
-                  selectedIndex: currentIndex,
-                  onTabChange: globalState.appController.toPage,
-                ),
-              ),
-            ),
-          );
-
           if (isMobile) {
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: SystemUiOverlayStyle(
@@ -86,14 +45,13 @@ class HomePage extends StatelessWidget {
                     Theme.of(context).brightness == Brightness.dark
                         ? Brightness.light
                         : Brightness.dark,
-                systemNavigationBarColor:
-                    context.colorScheme.surfaceContainer,
+                systemNavigationBarColor: Colors.transparent,
                 systemNavigationBarDividerColor: Colors.transparent,
               ),
-              child: Column(
+              child: Stack(
                 children: [
-                  Flexible(
-                    flex: 1,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 80),
                     child: MediaQuery.removePadding(
                       removeTop: false,
                       removeBottom: true,
@@ -107,13 +65,10 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  MediaQuery.removePadding(
-                    removeTop: true,
-                    removeBottom: false,
-                    removeLeft: true,
-                    removeRight: true,
-                    context: context,
-                    child: bottomNavigationBar,
+                  FloatingBottomBar(
+                    navigationItems: navigationItems,
+                    currentIndex: currentIndex,
+                    onTabChange: globalState.appController.toPage,
                   ),
                 ],
               ),

@@ -19,121 +19,156 @@ class AppSidebarContainer extends StatelessWidget {
     required this.onDestinationSelected,
   });
 
-  Widget _buildBackground({required BuildContext context, required Widget child}) {
-    return Material(color: context.colorScheme.surfaceContainer, child: child);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Stack(
       children: [
-        _buildBackground(
-          context: context,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (system.isMacOS) const SizedBox(height: 22),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: Selector<Config, bool>(
-                    selector: (_, config) => config.appSetting.showLabel,
-                    builder: (_, showLabel, __) {
-                      return ScrollConfiguration(
-                        behavior: _HiddenBarScrollBehavior(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: NavigationRail(
-                                scrollable: true,
-                                minExtendedWidth: 200,
-                                backgroundColor: Colors.transparent,
-                                selectedLabelTextStyle: context
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                        color: context.colorScheme.onSurface),
-                                unselectedLabelTextStyle: context
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                        color: context.colorScheme.onSurface),
-                                destinations: navigationItems
-                                    .map(
-                                      (e) => NavigationRailDestination(
-                                        icon: e.icon,
-                                        label: Text(Intl.message(e.label)),
-                                      ),
-                                    )
-                                    .toList(),
-                                onDestinationSelected: onDestinationSelected,
-                                extended: false,
-                                selectedIndex: currentIndex,
-                                labelType: showLabel
-                                    ? NavigationRailLabelType.all
-                                    : NavigationRailLabelType.none,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const Divider(height: 1, indent: 12, endIndent: 12),
-                Selector<Config, bool>(
-                  selector: (_, config) => config.networkProps.systemProxy,
-                  builder: (_, systemProxy, __) {
-                    return _SidebarQuickIcon(
-                      icon: Icons.shuffle,
-                      tooltip: appLocalizations.systemProxy,
-                      isActive: systemProxy,
-                      onPressed: () {
-                        final config = globalState.appController.config;
-                        config.networkProps =
-                            config.networkProps.copyWith(systemProxy: !systemProxy);
-                      },
-                    );
-                  },
-                ),
-                Selector<ClashConfig, bool>(
-                  selector: (_, clashConfig) => clashConfig.tun.enable,
-                  builder: (_, tunEnable, __) {
-                    return _SidebarQuickIcon(
-                      icon: Icons.stacked_line_chart,
-                      tooltip: appLocalizations.tun,
-                      isActive: tunEnable,
-                      onPressed: () {
-                        final clashConfig = globalState.appController.clashConfig;
-                        clashConfig.tun =
-                            clashConfig.tun.copyWith(enable: !tunEnable);
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                IconButton(
-                  onPressed: () {
-                    final config = globalState.appController.config;
-                    final appSetting = config.appSetting;
-                    config.appSetting = appSetting.copyWith(
-                      showLabel: !appSetting.showLabel,
-                    );
-                  },
-                  icon: Icon(
-                    Icons.menu,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+        Positioned.fill(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 96),
+            child: ClipRect(child: child),
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: ClipRect(child: child),
+        RepaintBoundary(
+          child: Positioned(
+            left: 8,
+            top: 8,
+            bottom: 8,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: commonFilter,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.surfaceContainer
+                        .withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 20,
+                        color: Colors.black.withValues(alpha: 0.1),
+                        offset: const Offset(2, 0),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (system.isMacOS) const SizedBox(height: 22),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: Selector<Config, bool>(
+                            selector: (_, config) =>
+                                config.appSetting.showLabel,
+                            builder: (_, showLabel, __) {
+                              return ScrollConfiguration(
+                                behavior: _HiddenBarScrollBehavior(),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: NavigationRail(
+                                        scrollable: true,
+                                        minExtendedWidth: 200,
+                                        backgroundColor: Colors.transparent,
+                                        selectedLabelTextStyle: context
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
+                                                color: context
+                                                    .colorScheme.onSurface),
+                                        unselectedLabelTextStyle: context
+                                            .textTheme
+                                            .labelLarge!
+                                            .copyWith(
+                                                color: context
+                                                    .colorScheme.onSurface),
+                                        destinations: navigationItems
+                                            .map(
+                                              (e) =>
+                                                  NavigationRailDestination(
+                                                    icon: e.icon,
+                                                    label: Text(
+                                                        Intl.message(e.label)),
+                                                  ),
+                                            )
+                                            .toList(),
+                                        onDestinationSelected:
+                                            onDestinationSelected,
+                                        extended: false,
+                                        selectedIndex: currentIndex,
+                                        labelType: showLabel
+                                            ? NavigationRailLabelType.all
+                                            : NavigationRailLabelType.none,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const Divider(height: 1, indent: 12, endIndent: 12),
+                        Selector<Config, bool>(
+                          selector: (_, config) =>
+                              config.networkProps.systemProxy,
+                          builder: (_, systemProxy, __) {
+                            return _SidebarQuickIcon(
+                              icon: Icons.shuffle,
+                              tooltip: appLocalizations.systemProxy,
+                              isActive: systemProxy,
+                              onPressed: () {
+                                final config =
+                                    globalState.appController.config;
+                                config.networkProps = config.networkProps
+                                    .copyWith(
+                                        systemProxy: !systemProxy);
+                              },
+                            );
+                          },
+                        ),
+                        Selector<ClashConfig, bool>(
+                          selector: (_, clashConfig) =>
+                              clashConfig.tun.enable,
+                          builder: (_, tunEnable, __) {
+                            return _SidebarQuickIcon(
+                              icon: Icons.stacked_line_chart,
+                              tooltip: appLocalizations.tun,
+                              isActive: tunEnable,
+                              onPressed: () {
+                                final clashConfig =
+                                    globalState.appController.clashConfig;
+                                clashConfig.tun = clashConfig.tun
+                                    .copyWith(enable: !tunEnable);
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        IconButton(
+                          onPressed: () {
+                            final config =
+                                globalState.appController.config;
+                            final appSetting = config.appSetting;
+                            config.appSetting = appSetting.copyWith(
+                              showLabel: !appSetting.showLabel,
+                            );
+                          },
+                          icon: Icon(
+                            Icons.menu,
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );

@@ -8,6 +8,7 @@ export 'color_scheme_box.dart';
 export 'connection_item.dart';
 export 'disabled_mask.dart';
 export 'fade_box.dart';
+export 'floating_bottom_bar.dart';
 export 'float_layout.dart';
 export 'grid.dart';
 export 'icon.dart';
