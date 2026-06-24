@@ -36,6 +36,7 @@ class Request {
         throw DioException(
           requestOptions: response.requestOptions,
           response: response,
+          type: DioExceptionType.badResponse,
           message: 'HTTP ${response.statusCode}',
         );
       }

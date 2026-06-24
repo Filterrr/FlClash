@@ -57,7 +57,7 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             appController.applyProfileDebounce();
           }
         } catch (e) {
-          messages.add("${profile.label ?? profile.id}: $e \n");
+          messages.add("$e\n");
           config.setProfile(
             profile.copyWith(
               isUpdating: false,
