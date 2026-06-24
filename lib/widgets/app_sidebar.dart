@@ -29,11 +29,11 @@ class AppSidebarContainer extends StatelessWidget {
             child: ClipRect(child: child),
           ),
         ),
-        RepaintBoundary(
-          child: Positioned(
-            left: 8,
-            top: 8,
-            bottom: 8,
+        Positioned(
+          left: 8,
+          top: 8,
+          bottom: 8,
+          child: RepaintBoundary(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: BackdropFilter(
@@ -90,8 +90,8 @@ class AppSidebarContainer extends StatelessWidget {
                                               (e) =>
                                                   NavigationRailDestination(
                                                     icon: e.icon,
-                                                    label: Text(
-                                                        Intl.message(e.label)),
+                                                    label: Text(Intl.message(
+                                                        e.label)),
                                                   ),
                                             )
                                             .toList(),

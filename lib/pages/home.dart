@@ -65,10 +65,15 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  FloatingBottomBar(
-                    navigationItems: navigationItems,
-                    currentIndex: currentIndex,
-                    onTabChange: globalState.appController.toPage,
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: FloatingBottomBar(
+                      navigationItems: navigationItems,
+                      currentIndex: currentIndex,
+                      onTabChange: globalState.appController.toPage,
+                    ),
                   ),
                 ],
               ),
