@@ -26,9 +26,10 @@ class AboutFragment extends StatelessWidget {
       request.checkForUpdate,
       title: appLocalizations.checkUpdate,
     );
-    globalState.appController.checkUpdateResultHandle(
+    globalState.appController.startInAppUpdate(
       data: data,
       handleError: true,
+      showDialog: true,
     );
   }
 

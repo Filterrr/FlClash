@@ -3046,6 +3046,131 @@ class AppLocalizations {
   String get filter {
     return Intl.message('Filter', name: 'filter', desc: '', args: []);
   }
+
+  /// `New version available`
+  String get newVersionAvailable {
+    return Intl.message(
+      'New version available',
+      name: 'newVersionAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Now`
+  String get updateNow {
+    return Intl.message(
+      'Update Now',
+      name: 'updateNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Later`
+  String get later {
+    return Intl.message('Later', name: 'later', desc: '', args: []);
+  }
+
+  /// `Downloading update`
+  String get downloadingUpdate {
+    return Intl.message(
+      'Downloading update',
+      name: 'downloadingUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verifying integrity`
+  String get verifyingIntegrity {
+    return Intl.message(
+      'Verifying integrity',
+      name: 'verifyingIntegrity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Installing update`
+  String get installingUpdate {
+    return Intl.message(
+      'Installing update',
+      name: 'installingUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The installer will launch and the app will exit.`
+  String get installHintWindows {
+    return Intl.message(
+      'The installer will launch and the app will exit.',
+      name: 'installHintWindows',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm the installation in the system dialog.`
+  String get installHintAndroid {
+    return Intl.message(
+      'Please confirm the installation in the system dialog.',
+      name: 'installHintAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update failed`
+  String get updateFailed {
+    return Intl.message(
+      'Update failed',
+      name: 'updateFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message('Retry', name: 'retry', desc: '', args: []);
+  }
+
+  /// `Update completed`
+  String get updateCompleted {
+    return Intl.message(
+      'Update completed',
+      name: 'updateCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart Now`
+  String get restartNow {
+    return Intl.message(
+      'Restart Now',
+      name: 'restartNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel`
+  String get cancelUpdate {
+    return Intl.message('Cancel', name: 'cancelUpdate', desc: '', args: []);
+  }
+
+  /// `Release notes`
+  String get releaseNotes {
+    return Intl.message(
+      'Release notes',
+      name: 'releaseNotes',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

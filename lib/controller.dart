@@ -5,11 +5,15 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:dio/dio.dart';
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/background_memory_manager.dart';
+import 'package:fl_clash/models/update.dart';
+import 'package:fl_clash/services/update_service.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/update_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -274,7 +278,7 @@ class AppController {
   autoCheckUpdate() async {
     if (!config.appSetting.autoCheckUpdate) return;
     final res = await request.checkForUpdate();
-    checkUpdateResultHandle(data: res);
+    startInAppUpdate(data: res, handleError: false, showDialog: false);
   }
 
   checkUpdateResultHandle({
@@ -317,6 +321,162 @@ class AppController {
           text: appLocalizations.checkUpdateError,
         ),
       );
+    }
+  }
+
+  /// 启动应用内更新流程。
+  /// [data] 是 GitHub release API 返回的完整 JSON。
+  /// [handleError] 为 true 时,无更新也显示提示(用户手动检查场景)。
+  /// [showDialog] 为 true 时显示 UpdateDialog(用户手动检查);
+  /// 为 false 时只显示简单提示(自动检查场景,行为与原 checkUpdateResultHandle 一致)。
+  startInAppUpdate({
+    required Map<String, dynamic>? data,
+    bool handleError = false,
+    bool showDialog = true,
+  }) async {
+    if (data == null) {
+      if (handleError) {
+        globalState.showMessage(
+          title: appLocalizations.checkUpdate,
+          message: TextSpan(
+            text: appLocalizations.checkUpdateError,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!showDialog) {
+      checkUpdateResultHandle(data: data, handleError: handleError);
+      return;
+    }
+
+    final info = updateService.parseReleaseInfo(data);
+    final asset = updateService.selectAssetForCurrentPlatform(info);
+    if (asset == null) {
+      // 当前平台暂不支持应用内更新,降级到浏览器下载提示。
+      checkUpdateResultHandle(data: data, handleError: handleError);
+      return;
+    }
+
+    final state = ValueNotifier<UpdateDialogState>(
+      const UpdateDialogState(status: UpdateStatus.available),
+    );
+    CancelToken? cancelToken;
+
+    Future<void> startFlow() async {
+      cancelToken = CancelToken();
+      await _runUpdateFlow(
+        info: info,
+        asset: asset,
+        state: state,
+        cancelToken: cancelToken!,
+      );
+    }
+
+    await showUpdateDialog(
+      context: context,
+      updateInfo: info,
+      state: state,
+      onUpdate: startFlow,
+      onRetry: startFlow,
+      onRestart: () {
+        updateService.restart();
+      },
+      onCancel: () {
+        final token = cancelToken;
+        if (token != null) {
+          _cancelUpdate(cancelToken: token, state: state);
+        }
+        globalState.navigatorKey.currentState?.pop();
+      },
+    );
+  }
+
+  /// 实际执行 下载 → 校验 → 安装 流程。
+  /// 通过 [state] 驱动对话框 UI 切换:
+  /// downloading → verifying → installing → (Windows: 进程退出)
+  ///                                  → (Android: readyToRestart)
+  /// 任意阶段失败时切换为 failed。
+  _runUpdateFlow({
+    required UpdateInfo info,
+    required UpdateAsset asset,
+    required ValueNotifier<UpdateDialogState> state,
+    required CancelToken cancelToken,
+  }) async {
+    state.value = state.value.copyWith(
+      status: UpdateStatus.downloading,
+      progress: null,
+      errorMessage: null,
+    );
+    try {
+      final filePath = await updateService.download(
+        asset: asset,
+        cancelToken: cancelToken,
+        onProgress: (p) {
+          state.value = state.value.copyWith(
+            status: UpdateStatus.downloading,
+            progress: p,
+          );
+        },
+      );
+
+      state.value = state.value.copyWith(
+        status: UpdateStatus.verifying,
+        progress: null,
+      );
+      final ok = await updateService.verifySha256(
+        filePath,
+        info.sha256Map[asset.name],
+      );
+      if (!ok) {
+        throw UpdateException('sha256 mismatch', UpdateStatus.verifying);
+      }
+
+      state.value = state.value.copyWith(
+        status: UpdateStatus.installing,
+      );
+
+      if (Platform.isWindows) {
+        // install() 在 Windows 上会 exit(0),必须先释放 VPN/代理/配置。
+        try {
+          await updateStatus(false);
+          await clashCore.shutdown();
+          await clashService?.destroy();
+          await proxy?.stopProxy();
+          await savePreferences();
+        } catch (_) {}
+        await updateService.install(filePath);
+        // 进程已在 install 中退出,以下代码不会执行。
+        return;
+      }
+
+      // Android: install 触发系统安装界面,不退出应用。
+      await updateService.install(filePath);
+      state.value = state.value.copyWith(
+        status: UpdateStatus.readyToRestart,
+      );
+    } on UpdateException catch (e) {
+      state.value = state.value.copyWith(
+        status: UpdateStatus.failed,
+        errorMessage: e.message,
+      );
+    } catch (e) {
+      state.value = state.value.copyWith(
+        status: UpdateStatus.failed,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// 取消更新(用户点击取消按钮)。
+  /// 仅中断进行中的下载;对话框的关闭由调用方负责。
+  _cancelUpdate({
+    required CancelToken cancelToken,
+    required ValueNotifier<UpdateDialogState> state,
+  }) {
+    if (!cancelToken.isCancelled) {
+      cancelToken.cancel();
     }
   }
 
