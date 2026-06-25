@@ -460,6 +460,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
+    "cancelUpdate": MessageLookupByLibrary.simpleMessage("取消"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage("正在下载更新"),
+    "installHintAndroid": MessageLookupByLibrary.simpleMessage(
+      "请在系统弹窗中确认安装",
+    ),
+    "installHintWindows": MessageLookupByLibrary.simpleMessage(
+      "安装程序将启动,应用将退出",
+    ),
+    "installingUpdate": MessageLookupByLibrary.simpleMessage("正在安装"),
+    "later": MessageLookupByLibrary.simpleMessage("稍后"),
+    "newVersionAvailable": MessageLookupByLibrary.simpleMessage("发现新版本"),
+    "releaseNotes": MessageLookupByLibrary.simpleMessage("更新日志"),
+    "restartNow": MessageLookupByLibrary.simpleMessage("立即重启"),
+    "retry": MessageLookupByLibrary.simpleMessage("重试"),
+    "updateCompleted": MessageLookupByLibrary.simpleMessage("更新已完成"),
+    "updateFailed": MessageLookupByLibrary.simpleMessage("更新失败"),
+    "updateNow": MessageLookupByLibrary.simpleMessage("立即更新"),
+    "verifyingIntegrity": MessageLookupByLibrary.simpleMessage("正在校验完整性"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

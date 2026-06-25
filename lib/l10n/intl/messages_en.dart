@@ -689,6 +689,34 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
     "years": MessageLookupByLibrary.simpleMessage("Years"),
+    "cancelUpdate": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Downloading update",
+    ),
+    "installHintAndroid": MessageLookupByLibrary.simpleMessage(
+      "Please confirm the installation in the system dialog.",
+    ),
+    "installHintWindows": MessageLookupByLibrary.simpleMessage(
+      "The installer will launch and the app will exit.",
+    ),
+    "installingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Installing update",
+    ),
+    "later": MessageLookupByLibrary.simpleMessage("Later"),
+    "newVersionAvailable": MessageLookupByLibrary.simpleMessage(
+      "New version available",
+    ),
+    "releaseNotes": MessageLookupByLibrary.simpleMessage("Release notes"),
+    "restartNow": MessageLookupByLibrary.simpleMessage("Restart Now"),
+    "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+    "updateCompleted": MessageLookupByLibrary.simpleMessage(
+      "Update completed",
+    ),
+    "updateFailed": MessageLookupByLibrary.simpleMessage("Update failed"),
+    "updateNow": MessageLookupByLibrary.simpleMessage("Update Now"),
+    "verifyingIntegrity": MessageLookupByLibrary.simpleMessage(
+      "Verifying integrity",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

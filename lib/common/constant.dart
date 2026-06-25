@@ -58,7 +58,7 @@ final listHeaderPadding = EdgeInsets.only(
 );
 const listItemPadding = EdgeInsets.symmetric(horizontal: 16);
 const double dialogCommonWidth = 300;
-const repository = "chen08209/FlClash";
+const repository = "Filterrr/FlClash";
 const defaultExternalController = "127.0.0.1:9090";
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;

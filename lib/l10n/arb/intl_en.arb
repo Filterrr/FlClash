@@ -379,5 +379,19 @@
   "skipSrcAddressDesc": "Skip sniffing for these source IP ranges",
   "skipDstAddress": "Skip destination address",
   "skipDstAddressDesc": "Skip sniffing for these destination IP ranges",
-  "filter": "Filter"
+  "filter": "Filter",
+  "newVersionAvailable": "New version available",
+  "updateNow": "Update Now",
+  "later": "Later",
+  "downloadingUpdate": "Downloading update",
+  "verifyingIntegrity": "Verifying integrity",
+  "installingUpdate": "Installing update",
+  "installHintWindows": "The installer will launch and the app will exit.",
+  "installHintAndroid": "Please confirm the installation in the system dialog.",
+  "updateFailed": "Update failed",
+  "retry": "Retry",
+  "updateCompleted": "Update completed",
+  "restartNow": "Restart Now",
+  "cancelUpdate": "Cancel",
+  "releaseNotes": "Release notes"
 }
