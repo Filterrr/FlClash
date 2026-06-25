@@ -333,7 +333,7 @@ class _$AppSettingImpl implements _AppSetting {
       this.speedTestUrl = defaultSpeedTestUrl,
       this.testConcurrency = defaultTestConcurrency,
       this.isAnimateToPage = true,
-      this.autoCheckUpdate = false,
+      this.autoCheckUpdate = true,
       this.showLabel = false,
       this.disclaimerAccepted = false,
       this.minimizeOnExit = true,
