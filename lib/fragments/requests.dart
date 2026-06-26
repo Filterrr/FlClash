@@ -8,6 +8,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'background_polling_strategy.dart';
 
 class RequestsFragment extends StatefulWidget {
   const RequestsFragment({super.key});
@@ -33,53 +34,40 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      if (_isVisible) _startTimer();
+      _syncTimerWithState();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
     backgroundMemoryManager.addListener(_onBackgroundStateChanged);
   }
 
   void _onBackgroundStateChanged() {
-    if (backgroundMemoryManager.isInBackground) {
-      _stopTimer();
-    } else if (_isVisible) {
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode) {
-        _startReducedTimer();
-      } else {
-        _startTimer();
-      }
-    }
+    _syncTimerWithState();
   }
 
   void _onLowMemoryModeChanged() {
-    if (isLowMemoryMode) {
+    _syncTimerWithState();
+  }
+
+  void _syncTimerWithState() {
+    final pollingMode = resolvePollingMode(
+      isVisible: _isVisible,
+      isInBackground: backgroundMemoryManager.isInBackground,
+      lowMemoryMode: lowMemoryModeNotifier.value,
+    );
+
+    if (pollingMode == PollingMode.stopped) {
       _stopTimer();
-    } else if (isReducedMemoryMode) {
-      if (_isVisible) _startReducedTimer();
+    } else if (pollingMode == PollingMode.reduced) {
+      _startReducedTimer();
     } else {
-      if (_isVisible) _startTimer();
+      _startTimer();
     }
   }
 
   void _onVisibilityChanged(bool visible) {
     if (_isVisible == visible) return;
     _isVisible = visible;
-    // 应用在后台时完全停止定时器
-    if (backgroundMemoryManager.isInBackground) {
-      _stopTimer();
-      return;
-    }
-    if (visible) {
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode) {
-        _startReducedTimer();
-      } else {
-        _startTimer();
-      }
-    } else {
-      _stopTimer();
-    }
+    _syncTimerWithState();
   }
 
   void _startTimer() {

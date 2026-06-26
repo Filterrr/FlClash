@@ -166,10 +166,6 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         flutterMethodChannel.invokeMethod("gc", null)
     }
 
-    fun notifyTrimMemory(level: Int) {
-        flutterMethodChannel.invokeMethod("trimMemory", level)
-    }
-
     val networks = mutableSetOf<Network>()
 
     fun onUpdateNetwork() {
