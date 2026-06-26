@@ -53,7 +53,7 @@ class UpdateService {
       }
     }
     return UpdateInfo(
-      version: tagName.replaceAll('v', ''),
+      version: normalizeVersion(tagName),
       tagName: tagName,
       releaseNotes: body,
       assets: assets,

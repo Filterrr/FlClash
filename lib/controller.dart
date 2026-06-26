@@ -277,8 +277,44 @@ class AppController {
 
   autoCheckUpdate() async {
     if (!config.appSetting.autoCheckUpdate) return;
-    final res = await request.checkForUpdate();
-    startInAppUpdate(data: res, handleError: false, showDialog: false);
+    final result = await request.checkForUpdate();
+    handleUpdateCheckResult(
+      result: result,
+      manual: false,
+    );
+  }
+
+  handleUpdateCheckResult({
+    required UpdateCheckResult result,
+    required bool manual,
+  }) {
+    switch (result.status) {
+      case UpdateCheckStatus.available:
+        startInAppUpdate(
+          data: result.data,
+          handleError: manual,
+          showDialog: manual,
+        );
+        return;
+      case UpdateCheckStatus.upToDate:
+        if (!manual) return;
+        globalState.showMessage(
+          title: appLocalizations.checkUpdate,
+          message: TextSpan(
+            text: appLocalizations.checkUpdateError,
+          ),
+        );
+        return;
+      case UpdateCheckStatus.failed:
+        if (!manual) return;
+        globalState.showMessage(
+          title: appLocalizations.checkUpdate,
+          message: TextSpan(
+            text: appLocalizations.checkError,
+          ),
+        );
+        return;
+    }
   }
 
   checkUpdateResultHandle({

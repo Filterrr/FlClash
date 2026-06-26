@@ -72,7 +72,7 @@ class Request {
     }
   }
 
-  Future<Map<String, dynamic>?> checkForUpdate() async {
+  Future<UpdateCheckResult> checkForUpdate() async {
     try {
       final response = await _dio
           .get(
@@ -82,17 +82,34 @@ class Request {
             ),
           )
           .timeout(httpTimeoutDuration);
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200 || response.data is! Map<String, dynamic>) {
+        return const UpdateCheckResult(
+          status: UpdateCheckStatus.failed,
+        );
+      }
       final data = response.data as Map<String, dynamic>;
-      final remoteVersion = data['tag_name'];
-      final version = globalState.packageInfo.version;
-      final hasUpdate =
-          other.compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
-      if (!hasUpdate) return null;
-      return data;
+      final tagName = data['tag_name'];
+      if (tagName is! String || tagName.trim().isEmpty) {
+        return const UpdateCheckResult(
+          status: UpdateCheckStatus.failed,
+        );
+      }
+      final version = globalState.packageInfo.fullVersion;
+      final compare = other.compareVersions(tagName, version);
+      if (compare > 0) {
+        return UpdateCheckResult(
+          status: UpdateCheckStatus.available,
+          data: data,
+        );
+      }
+      return const UpdateCheckResult(
+        status: UpdateCheckStatus.upToDate,
+      );
     } catch (e) {
       debugPrint("checkForUpdate error ===> $e");
-      return null;
+      return const UpdateCheckResult(
+        status: UpdateCheckStatus.failed,
+      );
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/list.dart';
 import 'package:flutter/material.dart';
@@ -22,14 +23,14 @@ class AboutFragment extends StatelessWidget {
   _checkUpdate(BuildContext context) async {
     final commonScaffoldState = context.commonScaffoldState;
     if (commonScaffoldState?.mounted != true) return;
-    final data = await commonScaffoldState?.loadingRun<Map<String, dynamic>?>(
+    final result = await commonScaffoldState?.loadingRun<UpdateCheckResult>(
       request.checkForUpdate,
       title: appLocalizations.checkUpdate,
     );
-    globalState.appController.startInAppUpdate(
-      data: data,
-      handleError: true,
-      showDialog: true,
+    if (result == null) return;
+    globalState.appController.handleUpdateCheckResult(
+      result: result,
+      manual: true,
     );
   }
 
