@@ -35,5 +35,6 @@ export 'string.dart';
 export 'system.dart';
 export 'text.dart';
 export 'tray.dart';
+export 'version.dart';
 export 'window.dart';
 export 'windows.dart';
