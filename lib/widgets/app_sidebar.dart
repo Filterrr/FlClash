@@ -111,6 +111,21 @@ class AppSidebarContainer extends StatelessWidget {
                           ),
                         ),
                         const Divider(height: 1, indent: 12, endIndent: 12),
+                        Selector<AppFlowingState, bool>(
+                          selector: (_, appFlowingState) =>
+                              appFlowingState.isStart,
+                          builder: (_, isStart, __) {
+                            return _SidebarQuickIcon(
+                              icon: Icons.play_arrow,
+                              tooltip: appLocalizations.start,
+                              isActive: isStart,
+                              onPressed: () {
+                                globalState.appController
+                                    .updateStatus(!isStart);
+                              },
+                            );
+                          },
+                        ),
                         Selector<Config, bool>(
                           selector: (_, config) =>
                               config.networkProps.systemProxy,
