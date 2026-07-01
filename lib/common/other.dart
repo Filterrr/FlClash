@@ -177,17 +177,6 @@ class Other {
     return WidgetsBinding.instance.platformDispatcher.views.first;
   }
 
-  List<String> parseReleaseBody(String? body) {
-    if (body == null) return [];
-    const pattern = r'- \s*(.*)';
-    final regex = RegExp(pattern);
-    return regex
-        .allMatches(body)
-        .map((match) => match.group(1) ?? '')
-        .where((item) => item.isNotEmpty)
-        .toList();
-  }
-
   ViewMode getViewMode(double viewWidth) {
     if (viewWidth <= maxMobileWidth) return ViewMode.mobile;
     if (viewWidth <= maxLaptopWidth) return ViewMode.laptop;

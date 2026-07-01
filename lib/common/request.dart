@@ -11,6 +11,11 @@ class Request {
   late final Dio _dio;
   String? userAgent;
 
+  /// 缓存最近一次更新检查结果及时间，避免短时间内重复请求 GitHub API。
+  static const _cacheDuration = Duration(minutes: 5);
+  UpdateCheckResult? _cachedUpdateResult;
+  DateTime? _cachedUpdateTime;
+
   Request() {
     _dio = Dio(BaseOptions(
       validateStatus: (status) => status != null && status < 500,
@@ -73,6 +78,12 @@ class Request {
   }
 
   Future<UpdateCheckResult> checkForUpdate() async {
+    final now = DateTime.now();
+    if (_cachedUpdateResult != null && _cachedUpdateTime != null) {
+      if (now.difference(_cachedUpdateTime!) < _cacheDuration) {
+        return _cachedUpdateResult!;
+      }
+    }
     try {
       final response = await _dio
           .get(
@@ -83,33 +94,47 @@ class Request {
           )
           .timeout(httpTimeoutDuration);
       if (response.statusCode != 200 || response.data is! Map<String, dynamic>) {
-        return const UpdateCheckResult(
+        final result = const UpdateCheckResult(
           status: UpdateCheckStatus.failed,
         );
+        _cachedUpdateResult = result;
+        _cachedUpdateTime = now;
+        return result;
       }
       final data = response.data as Map<String, dynamic>;
       final tagName = data['tag_name'];
       if (tagName is! String || tagName.trim().isEmpty) {
-        return const UpdateCheckResult(
+        final result = const UpdateCheckResult(
           status: UpdateCheckStatus.failed,
         );
+        _cachedUpdateResult = result;
+        _cachedUpdateTime = now;
+        return result;
       }
       final version = globalState.packageInfo.fullVersion;
       final compare = other.compareVersions(tagName, version);
+      final UpdateCheckResult result;
       if (compare > 0) {
-        return UpdateCheckResult(
+        result = UpdateCheckResult(
           status: UpdateCheckStatus.available,
           data: data,
         );
+      } else {
+        result = const UpdateCheckResult(
+          status: UpdateCheckStatus.upToDate,
+        );
       }
-      return const UpdateCheckResult(
-        status: UpdateCheckStatus.upToDate,
-      );
+      _cachedUpdateResult = result;
+      _cachedUpdateTime = now;
+      return result;
     } catch (e) {
       debugPrint("checkForUpdate error ===> $e");
-      return const UpdateCheckResult(
+      final result = const UpdateCheckResult(
         status: UpdateCheckStatus.failed,
       );
+      _cachedUpdateResult = result;
+      _cachedUpdateTime = now;
+      return result;
     }
   }
 

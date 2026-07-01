@@ -293,7 +293,8 @@ class AppController {
         startInAppUpdate(
           data: result.data,
           handleError: manual,
-          showDialog: manual,
+          showDialog: true,
+          dismissible: !manual,
         );
         return;
       case UpdateCheckStatus.upToDate:
@@ -322,23 +323,44 @@ class AppController {
     bool handleError = false,
   }) async {
     if (data != null) {
-      final tagName = data['tag_name'];
-      final body = data['body'];
-      final submits = other.parseReleaseBody(body);
+      final tagName = data['tag_name'] as String? ?? '';
+      final version = normalizeVersion(tagName);
+      final body = (data['body'] ?? '') as String;
+      final paragraphs = body
+          .split('\n')
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+      final publishedAt = data['published_at'] as String? ?? '';
+      final dateText = publishedAt.isNotEmpty
+          ? (() {
+              final dt = DateTime.tryParse(publishedAt);
+              if (dt == null) return '';
+              final y = dt.year.toString();
+              final m = dt.month.toString().padLeft(2, '0');
+              final d = dt.day.toString().padLeft(2, '0');
+              return '$y-$m-$d';
+            })()
+          : '';
       final textTheme = context.textTheme;
       globalState.showMessage(
         title: appLocalizations.discoverNewVersion,
         message: TextSpan(
-          text: "$tagName \n",
+          text: "v$version\n",
           style: textTheme.headlineSmall,
           children: [
-            TextSpan(
-              text: "\n",
-              style: textTheme.bodyMedium,
-            ),
-            for (final submit in submits)
+            if (dateText.isNotEmpty)
               TextSpan(
-                text: "- $submit \n",
+                text: "$dateText\n\n",
+                style: textTheme.bodySmall,
+              )
+            else
+              TextSpan(
+                text: "\n",
+                style: textTheme.bodyMedium,
+              ),
+            for (final p in paragraphs)
+              TextSpan(
+                text: "$p\n",
                 style: textTheme.bodyMedium,
               ),
           ],
@@ -363,12 +385,14 @@ class AppController {
   /// 启动应用内更新流程。
   /// [data] 是 GitHub release API 返回的完整 JSON。
   /// [handleError] 为 true 时,无更新也显示提示(用户手动检查场景)。
-  /// [showDialog] 为 true 时显示 UpdateDialog(用户手动检查);
-  /// 为 false 时只显示简单提示(自动检查场景,行为与原 checkUpdateResultHandle 一致)。
+  /// [showDialog] 为 true 时显示 UpdateDialog;
+  /// 为 false 时只显示简单提示(降级到 checkUpdateResultHandle)。
+  /// [dismissible] 为 true 时对话框可点击外部关闭(自动检查场景)。
   startInAppUpdate({
     required Map<String, dynamic>? data,
     bool handleError = false,
     bool showDialog = true,
+    bool dismissible = false,
   }) async {
     if (data == null) {
       if (handleError) {
@@ -414,6 +438,7 @@ class AppController {
       context: context,
       updateInfo: info,
       state: state,
+      dismissible: dismissible,
       onUpdate: startFlow,
       onRetry: startFlow,
       onRestart: () {
