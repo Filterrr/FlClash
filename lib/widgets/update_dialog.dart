@@ -341,13 +341,14 @@ Future<void> showUpdateDialog({
   VoidCallback? onRetry,
   VoidCallback? onRestart,
   VoidCallback? onCancel,
+  bool dismissible = false,
 }) {
   final notifier = state ??
       ValueNotifier(
         const UpdateDialogState(status: UpdateStatus.available),
       );
   return globalState.showCommonDialog(
-    dismissible: false,
+    dismissible: dismissible,
     child: ValueListenableBuilder<UpdateDialogState>(
       valueListenable: notifier,
       builder: (context, value, _) {
