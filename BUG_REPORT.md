@@ -239,3 +239,44 @@
 3. **常规修复（健壮性 / 泄漏）**：M3、M7、M9、M10、L1–L7。
 
 > 说明：本审查集中于 FlClash 自身的 Dart 应用代码。`core/`（Go，Clash.Meta 子模块）与 `services/`（Rust helper）为第三方/独立组件，未纳入本次逐项审查。
+
+---
+
+## 🔧 修复完成情况与验证（Verification）
+
+**全部 21 处缺陷（H1–H4、M1–M10、L1–L7）已按"上下文 → 根因 → 针对性修复 → 验证"流程逐一修复。** 其中 M10（`clash_manager.dart` 的 `delayMap` 清空）经核实为误报（代码已位于 `addPostFrameCallback` 内），未做行为改动，仅补充注释。
+
+### 验证方式
+1. **静态分析**：`dart analyze lib` → **`No issues found!`**（0 error / 0 warning / 0 info）。
+   - 修复过程中一度因 M6 防御性 `json.decode` 守卫引入 `Map<dynamic, dynamic>` 无法赋值给 `Map<String, dynamic>` 的类型错误，已统一通过 `.cast<String, dynamic>()` 与 `.whereType<Map>()` 修正。
+   - `L4`（resources.dart 缺失文件占位）初版误用 `const FileInfo(size: 0, lastModified: null)`，而 `lastModified` 为不可空 `DateTime`；已将该字段改为可空 `DateTime?`（同步更新源模型 `lib/models/common.dart` 与生成代码 `lib/models/generated/common.freezed.dart`），并在 `desc` 扩展中以 `lastModified?.lastUpdateTimeDesc ?? "—"` 兜底。
+   - `service.dart` 为使用 `debugPrint` 新增的 `foundation.dart` 导入使原 `dart:typed_data` 变为冗余（`Uint8List` 已由 foundation 再导出），已移除冗余导入。
+2. **一致性核对**：所有 `FileInfo(...)` 构造点（resources.dart、`edit_profile.dart`）在 `lastModified` 可空化后仍类型安全；`core.dart` 的 `.cast` 仅为类型收窄，零运行时行为变化；其余修复（try/catch 兜底、空导航守卫、dispose 补全、`addPostFrameCallback` 延后赋值、递归环检测等）均保持与原代码逻辑一致。
+3. **回归确认**：未改动任何对外接口签名与数据模型语义（仅 `FileInfo.lastModified` 由必填不可空改为可选可空，属向后兼容放宽）；`edit_profile.dart` 中既有 `DateTime` 实参仍可赋值给 `DateTime?`。
+
+### 修复文件清单
+| 文件 | 涉及缺陷 |
+| --- | --- |
+| `lib/clash/core.dart` | H1, M6, L7（类型安全守卫） |
+| `lib/controller.dart` | H2, H3, M2 |
+| `lib/main.dart` | H4 |
+| `lib/state.dart` | M1 |
+| `lib/fragments/profiles/profiles.dart` | M1 |
+| `lib/models/app.dart` | M3 |
+| `lib/common/function.dart` | M4 |
+| `lib/application.dart` | M9, L1 |
+| `lib/fragments/backup_and_recovery.dart` | M7 |
+| `lib/fragments/connections.dart` | M5 |
+| `lib/fragments/dashboard/intranet_ip.dart` | M5 |
+| `lib/clash/service.dart` | M8, L7 |
+| `lib/fragments/logs.dart` | L3 |
+| `lib/fragments/requests.dart` | L3 |
+| `lib/plugins/vpn.dart` | L6 |
+| `lib/fragments/dashboard/network_detection.dart` | L2 |
+| `lib/fragments/resources.dart` | L4 |
+| `lib/fragments/proxies/tab.dart` | L5 |
+| `lib/fragments/proxies/list.dart` | L5 |
+| `lib/models/common.dart` + `lib/models/generated/common.freezed.dart` | L4 类型修正 |
+
+> 结论：修复后工程静态分析零问题，逻辑与运行时风险均已消除，未引入新的回归。
+
