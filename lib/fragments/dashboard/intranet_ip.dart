@@ -74,12 +74,7 @@ class _IntranetIPState extends State<IntranetIP> {
     subscription = Connectivity().onConnectivityChanged.listen((_) async {
       ipNotifier.value = null;
       debugPrint("[App] Connection change");
-      try {
-        ipNotifier.value = await getLocalIpAddress() ?? "";
-      } catch (e) {
-        debugPrint('getLocalIpAddress failed: $e');
-        ipNotifier.value = "";
-      }
+      ipNotifier.value = await getLocalIpAddress() ?? "";
     });
     resourceController.registerPausableSubscription(
       subscription,
@@ -87,12 +82,7 @@ class _IntranetIPState extends State<IntranetIP> {
       label: 'intranet_ip_connectivity',
     );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        ipNotifier.value = await getLocalIpAddress() ?? "";
-      } catch (e) {
-        debugPrint('getLocalIpAddress failed: $e');
-        ipNotifier.value = "";
-      }
+      ipNotifier.value = await getLocalIpAddress() ?? "";
     });
   }
 

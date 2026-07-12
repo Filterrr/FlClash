@@ -95,52 +95,52 @@ Future<void> vpnService() async {
 
   await app?.tip(appLocalizations.startVpn);
 
-  try {
-    await globalState.updateClashConfig(
-      appState: appState,
-      clashConfig: clashConfig,
-      config: config,
-      isPatch: false,
-    );
-    await globalState.handleStart();
+  globalState
+      .updateClashConfig(
+    appState: appState,
+    clashConfig: clashConfig,
+    config: config,
+    isPatch: false,
+  )
+      .then(
+    (_) async {
+      await globalState.handleStart();
 
-    tile?.addListener(
-      TileListenerWithVpn(
-        onStop: () async {
-          await app?.tip(appLocalizations.stopVpn);
-          await globalState.handleStop();
-          clashCore.shutdown();
-          exit(0);
-        },
-      ),
-    );
+      tile?.addListener(
+        TileListenerWithVpn(
+          onStop: () async {
+            await app?.tip(appLocalizations.stopVpn);
+            await globalState.handleStop();
+            clashCore.shutdown();
+            exit(0);
+          },
+        ),
+      );
 
-    // VPN 服务模式下使用更长的空闲间隔以节省电量
-    globalState.updateFunctionLists = [
-      () async {
-        await globalState.updateTraffic(config: config);
-      }
-    ];
-    globalState.adaptiveTimer = AdaptiveTimer(
-      activeInterval: const Duration(seconds: 1),
-      idleInterval: const Duration(seconds: 10),
-      deepIdleInterval: const Duration(seconds: 30),
-      idleThreshold: 5,
-      deepIdleThreshold: 15,
-      callback: () {
-        for (final function in globalState.updateFunctionLists) {
-          function();
+      // VPN 服务模式下使用更长的空闲间隔以节省电量
+      globalState.updateFunctionLists = [
+        () {
+          globalState.updateTraffic(config: config);
         }
-        final traffic = globalState.lastTraffic;
-        if (traffic == null) return false;
-        return traffic.up.value > 0 || traffic.down.value > 0;
-      },
-    );
-    globalState.adaptiveTimer!.start();
-  } catch (e) {
-    // 避免未处理的异步异常导致 VPN 服务无声失败
-    debugPrint('vpn service init failed: $e');
-  }
+      ];
+      globalState.adaptiveTimer = AdaptiveTimer(
+        activeInterval: const Duration(seconds: 1),
+        idleInterval: const Duration(seconds: 10),
+        deepIdleInterval: const Duration(seconds: 30),
+        idleThreshold: 5,
+        deepIdleThreshold: 15,
+        callback: () {
+          for (final function in globalState.updateFunctionLists) {
+            function();
+          }
+          final traffic = globalState.lastTraffic;
+          if (traffic == null) return false;
+          return traffic.up.value > 0 || traffic.down.value > 0;
+        },
+      );
+      globalState.adaptiveTimer!.start();
+    },
+  );
 
   vpn?.setServiceMessageHandler(
     ServiceMessageHandler(

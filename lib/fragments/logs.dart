@@ -32,7 +32,6 @@ class _LogsFragmentState extends State<LogsFragment> {
       final appFlowingState = globalState.appController.appFlowingState;
       logsNotifier.value =
           logsNotifier.value.copyWith(logs: appFlowingState.logs);
-      if (_isVisible) _initActions();
       _syncTimerWithState();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
@@ -66,7 +65,6 @@ class _LogsFragmentState extends State<LogsFragment> {
   void _onVisibilityChanged(bool visible) {
     if (_isVisible == visible) return;
     _isVisible = visible;
-    if (visible) _initActions();
     _syncTimerWithState();
   }
 
@@ -194,6 +192,9 @@ class _LogsFragmentState extends State<LogsFragment> {
       builder: (_, isCurrent, child) {
         final visible = isCurrent == null || isCurrent;
         _onVisibilityChanged(visible);
+        if (visible) {
+          _initActions();
+        }
         return child!;
       },
       child: ValueListenableBuilder<LogsAndKeywords>(

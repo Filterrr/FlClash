@@ -133,10 +133,6 @@ class _NetworkDetectionState extends State<NetworkDetection> {
 
   @override
   dispose() {
-    // 取消可能仍在进行中的 IP 检查请求与所有定时器，避免 widget 销毁后继续回调
-    cancelToken?.cancel();
-    cancelToken = null;
-    _clearSetTimeoutTimer();
     _clearIpCheckTimeoutTimer();
     super.dispose();
   }
