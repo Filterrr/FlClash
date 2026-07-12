@@ -214,6 +214,7 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
     final groupNames = currentGroups.map((e) => e.name).toList();
     final findIndex = groupNames.indexWhere((item) => item == groupName);
     final index = findIndex != -1 ? findIndex : 0;
+    if (index >= _headerOffset.length) return;
     final currentInitOffset = _headerOffset[index];
     final proxies = _lastGroupNameProxiesMap[groupName];
     _controller.animateTo(

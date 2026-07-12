@@ -114,6 +114,10 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
   Future<FileInfo> _getGeoFileLastModified(String fileName) async {
     final homePath = await appPath.getHomeDirPath();
     final file = File(join(homePath, fileName));
+    if (!await file.exists()) {
+      // 文件缺失时返回占位信息，避免 FutureBuilder 因异常而卡在加载态
+      return const FileInfo(size: 0, lastModified: null);
+    }
     final lastModified = await file.lastModified();
     final size = await file.length();
     return FileInfo(

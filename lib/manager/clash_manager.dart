@@ -71,6 +71,7 @@ class _ClashContainerState extends State<ClashManager> with AppMessageListener {
         if (prev != next) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             final appController = globalState.appController;
+            // 延迟到渲染后清空延迟缓存，避免在 shouldRebuild 期间同步变更状态
             appController.appState.delayMap = {};
             appController.applyProfile();
           });

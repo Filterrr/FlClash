@@ -78,9 +78,14 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
         if (!context.mounted) {
           return;
         }
-        connectionsNotifier.value = connectionsNotifier.value.copyWith(
-          connections: await clashCore.getConnections(),
-        );
+        try {
+          connectionsNotifier.value = connectionsNotifier.value.copyWith(
+            connections: await clashCore.getConnections(),
+          );
+        } catch (e) {
+          // 单次拉取失败不应中断定时器，也不应成为未处理的异步异常
+          debugPrint('getConnections failed: $e');
+        }
       },
     );
   }
@@ -93,9 +98,13 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
         if (!context.mounted) {
           return;
         }
-        connectionsNotifier.value = connectionsNotifier.value.copyWith(
-          connections: await clashCore.getConnections(),
-        );
+        try {
+          connectionsNotifier.value = connectionsNotifier.value.copyWith(
+            connections: await clashCore.getConnections(),
+          );
+        } catch (e) {
+          debugPrint('getConnections failed: $e');
+        }
       },
     );
   }

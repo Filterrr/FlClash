@@ -1585,7 +1585,7 @@ abstract class _DAV implements DAV {
 /// @nodoc
 mixin _$FileInfo {
   int get size => throw _privateConstructorUsedError;
-  DateTime get lastModified => throw _privateConstructorUsedError;
+  DateTime? get lastModified => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $FileInfoCopyWith<FileInfo> get copyWith =>
@@ -1597,7 +1597,7 @@ abstract class $FileInfoCopyWith<$Res> {
   factory $FileInfoCopyWith(FileInfo value, $Res Function(FileInfo) then) =
       _$FileInfoCopyWithImpl<$Res, FileInfo>;
   @useResult
-  $Res call({int size, DateTime lastModified});
+  $Res call({int size, DateTime? lastModified});
 }
 
 /// @nodoc
@@ -1624,7 +1624,7 @@ class _$FileInfoCopyWithImpl<$Res, $Val extends FileInfo>
       lastModified: null == lastModified
           ? _value.lastModified
           : lastModified // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -1637,7 +1637,7 @@ abstract class _$$FileInfoImplCopyWith<$Res>
       __$$FileInfoImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int size, DateTime lastModified});
+  $Res call({int size, DateTime? lastModified});
 }
 
 /// @nodoc
@@ -1662,7 +1662,7 @@ class __$$FileInfoImplCopyWithImpl<$Res>
       lastModified: null == lastModified
           ? _value.lastModified
           : lastModified // ignore: cast_nullable_to_non_nullable
-              as DateTime,
+              as DateTime?,
     ));
   }
 }
@@ -1670,12 +1670,12 @@ class __$$FileInfoImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$FileInfoImpl implements _FileInfo {
-  const _$FileInfoImpl({required this.size, required this.lastModified});
+  const _$FileInfoImpl({required this.size, this.lastModified});
 
   @override
   final int size;
   @override
-  final DateTime lastModified;
+  final DateTime? lastModified;
 
   @override
   String toString() {
@@ -1705,12 +1705,12 @@ class _$FileInfoImpl implements _FileInfo {
 abstract class _FileInfo implements FileInfo {
   const factory _FileInfo(
       {required final int size,
-      required final DateTime lastModified}) = _$FileInfoImpl;
+      final DateTime? lastModified}) = _$FileInfoImpl;
 
   @override
   int get size;
   @override
-  DateTime get lastModified;
+  DateTime? get lastModified;
   @override
   @JsonKey(ignore: true)
   _$$FileInfoImplCopyWith<_$FileInfoImpl> get copyWith =>
