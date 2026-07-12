@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 72),
+                    padding: const EdgeInsets.only(bottom: 0),
                     child: MediaQuery.removePadding(
                       removeTop: false,
                       removeBottom: true,

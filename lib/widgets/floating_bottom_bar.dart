@@ -30,7 +30,7 @@ class FloatingBottomBar extends StatelessWidget {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.colorScheme.surfaceContainer
-                      .withValues(alpha: 0.75),
+                      .withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
