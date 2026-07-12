@@ -20,15 +20,13 @@ class Vpn {
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case "started":
-          final fd = call.arguments as int?;
-          if (fd == null) return;
+          final fd = call.arguments as int;
           onStarted(fd);
           break;
         case "gc":
           clashCore.requestGc();
         case "dnsChanged":
-          final dns = call.arguments as String?;
-          if (dns == null) return;
+          final dns = call.arguments as String;
           clashLib?.updateDns(dns);
         default:
           throw MissingPluginException();

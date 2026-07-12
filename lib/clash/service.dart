@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/clash/interface.dart';
@@ -79,16 +78,11 @@ class ClashService with ClashInterface {
           .transform(LineSplitter())
           .listen(
             (data) {
-              try {
-                _handleAction(
-                  Action.fromJson(
-                    json.decode(data.trim()),
-                  ),
-                );
-              } catch (e) {
-                // 核心进程输出非法行时不应作为未处理异常上报
-                debugPrint('failed to parse clash action: $e');
-              }
+              _handleAction(
+                Action.fromJson(
+                  json.decode(data.trim()),
+                ),
+              );
             },
           );
     }
@@ -146,7 +140,7 @@ class ClashService with ClashInterface {
       case ActionMethod.closeConnections:
       case ActionMethod.closeConnection:
       case ActionMethod.stopListener:
-        completer?.complete((action.data as bool?) ?? false);
+        completer?.complete(action.data as bool);
         return;
       case ActionMethod.changeProxy:
       case ActionMethod.getProxies:
@@ -162,10 +156,10 @@ class ClashService with ClashInterface {
       case ActionMethod.updateGeoData:
       case ActionMethod.updateExternalProvider:
       case ActionMethod.sideLoadExternalProvider:
-        completer?.complete((action.data as String?) ?? '');
+        completer?.complete(action.data as String);
         return;
       case ActionMethod.message:
-        clashMessage.controller.add((action.data as String?) ?? '');
+        clashMessage.controller.add(action.data as String);
         return;
       case ActionMethod.forceGc:
       case ActionMethod.startLog:

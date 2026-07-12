@@ -31,12 +31,10 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
   Function? applyConfigDebounce;
 
   _handleShowAddExtendPage() {
-    final navigatorState = globalState.navigatorKey.currentState;
-    if (navigatorState == null) return;
     showExtendPage(
-      navigatorState.context,
+      globalState.navigatorKey.currentState!.context,
       body: AddProfile(
-        context: navigatorState.context,
+        context: globalState.navigatorKey.currentState!.context,
       ),
       title: "${appLocalizations.add}${appLocalizations.profile}",
     );

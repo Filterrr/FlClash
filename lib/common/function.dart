@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 class Debouncer {
   final Duration delay;
   Timer? _timer;
@@ -22,12 +20,7 @@ Function debounce<F extends Function>(F func,{int milliseconds = 600}) {
       timer!.cancel();
     }
     timer = Timer(Duration(milliseconds: milliseconds), () async {
-      try {
-        await Function.apply(func, args ?? [], namedArgs);
-      } catch (e) {
-        // 避免 debounce 回调中的异步异常成为未处理的 Future 错误
-        debugPrint('debounced task failed: $e');
-      }
+      await Function.apply(func, args ?? [], namedArgs);
     });
   };
 }

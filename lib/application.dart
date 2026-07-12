@@ -39,11 +39,8 @@ runAppWithPreferences(
       ChangeNotifierProxyProvider2<Config, ClashConfig, AppState>(
         create: (_) => appState,
         update: (_, config, clashConfig, appState) {
-          // 延迟到本帧渲染完成后再同步，避免在 build 过程中变更另一个 ChangeNotifier 引发重入
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            appState?.mode = clashConfig.mode;
-            appState?.selectedMap = config.currentSelectedMap;
-          });
+          appState?.mode = clashConfig.mode;
+          appState?.selectedMap = config.currentSelectedMap;
           return appState!;
         },
       )
@@ -300,9 +297,6 @@ class ApplicationState extends State<Application> {
     }
     connectivitySubscription?.cancel();
     clashMessage.dispose();
-    // 释放全局持有的 PageController，避免长期对象泄漏
-    globalState.pageController?.dispose();
-    globalState.pageController = null;
     await clashService?.destroy();
     await globalState.appController.savePreferences();
     await globalState.appController.handleExit();

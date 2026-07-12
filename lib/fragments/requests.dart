@@ -34,7 +34,6 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       final appState = globalState.appController.appState;
       requestsNotifier.value =
           requestsNotifier.value.copyWith(connections: appState.requests);
-      if (_isVisible) _initActions();
       _syncTimerWithState();
     });
     lowMemoryModeNotifier.addListener(_onLowMemoryModeChanged);
@@ -68,7 +67,6 @@ class _RequestsFragmentState extends State<RequestsFragment> {
   void _onVisibilityChanged(bool visible) {
     if (_isVisible == visible) return;
     _isVisible = visible;
-    if (visible) _initActions();
     _syncTimerWithState();
   }
 
@@ -177,6 +175,9 @@ class _RequestsFragmentState extends State<RequestsFragment> {
       builder: (_, isCurrent, child) {
         final visible = isCurrent == null || isCurrent;
         _onVisibilityChanged(visible);
+        if (visible) {
+          _initActions();
+        }
         return child!;
       },
       child: ValueListenableBuilder<ConnectionsAndKeywords>(

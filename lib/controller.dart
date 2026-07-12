@@ -270,13 +270,8 @@ class AppController {
       await clashCore.shutdown();
       await clashService?.destroy();
       await proxy?.stopProxy();
-    } catch (_) {}
-    // 单独处理偏好保存，避免其失败被上面的 catch 静默吞掉导致配置丢失
-    try {
       await savePreferences();
-    } catch (e) {
-      debugPrint('Failed to save preferences on exit: $e');
-    }
+    } catch (_) {}
     system.exit();
   }
 
@@ -549,8 +544,7 @@ class AppController {
   init() async {
     final isDisclaimerAccepted = await handlerDisclaimer();
     if (!isDisclaimerAccepted) {
-      await handleExit();
-      return;
+      handleExit();
     }
     if (!config.appSetting.silentLaunch) {
       window?.show();
@@ -922,28 +916,19 @@ class AppController {
         configs.indexWhere((config) => config.name == "config.json");
     final clashConfigIndex =
         configs.indexWhere((config) => config.name == "clashConfig.json");
-    if (configIndex == -1 || clashConfigIndex == -1) {
-      throw "invalid backup.zip";
-    }
+    if (configIndex == -1 || clashConfigIndex == -1) throw "invalid backup.zip";
     final configFile = configs[configIndex];
     final clashConfigFile = configs[clashConfigIndex];
-    // 先解析并校验配置，失败则在写入任何 profile 文件之前抛出，避免部分恢复
-    late final Config tempConfig;
-    late final ClashConfig tempClashConfig;
-    try {
-      tempConfig = Config.fromJson(
-        json.decode(
-          utf8.decode(configFile.content),
-        ),
-      );
-      tempClashConfig = ClashConfig.fromJson(
-        json.decode(
-          utf8.decode(clashConfigFile.content),
-        ),
-      );
-    } catch (e) {
-      throw "invalid backup config: $e";
-    }
+    final tempConfig = Config.fromJson(
+      json.decode(
+        utf8.decode(configFile.content),
+      ),
+    );
+    final tempClashConfig = ClashConfig.fromJson(
+      json.decode(
+        utf8.decode(clashConfigFile.content),
+      ),
+    );
     for (final profile in profiles) {
       final filePath = join(homeDirPath, profile.name);
       final file = File(filePath);

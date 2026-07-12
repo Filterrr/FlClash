@@ -155,13 +155,13 @@ class DAV with _$DAV {
 class FileInfo with _$FileInfo {
   const factory FileInfo({
     required int size,
-    DateTime? lastModified,
+    required DateTime lastModified,
   }) = _FileInfo;
 }
 
 extension FileInfoExt on FileInfo {
   String get desc =>
-      "${TrafficValue(value: size).show}  ·  ${lastModified?.lastUpdateTimeDesc ?? "—"}";
+      "${TrafficValue(value: size).show}  ·  ${lastModified.lastUpdateTimeDesc}";
 }
 
 @freezed

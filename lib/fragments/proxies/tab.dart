@@ -115,10 +115,7 @@ class ProxiesTabFragmentState extends State<ProxiesTabFragment>
     if (_tabController?.index == null) {
       return;
     }
-    final safeIndex = (index ?? _tabController!.index)
-        .clamp(0, currentGroups.length - 1);
-    if (currentGroups.isEmpty) return;
-    final currentGroup = currentGroups[safeIndex];
+    final currentGroup = currentGroups[index ?? _tabController!.index];
     currentProxies = currentGroup.all;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appController.config.updateCurrentGroupName(
