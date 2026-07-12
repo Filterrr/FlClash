@@ -21,6 +21,7 @@ class FloatingBottomBar extends StatelessWidget {
     return RepaintBoundary(
       child: SafeArea(
         top: false,
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
           child: ClipRRect(
@@ -29,7 +30,8 @@ class FloatingBottomBar extends StatelessWidget {
               filter: commonFilter,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
+                  color: context.colorScheme.surfaceContainer
+                      .withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
