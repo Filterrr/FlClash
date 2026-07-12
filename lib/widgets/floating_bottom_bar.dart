@@ -10,7 +10,7 @@ class FloatingBottomBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTabChange;
 
-  const FloatingBottomBar({
+  FloatingBottomBar({
     super.key,
     required this.navigationItems,
     required this.currentIndex,
