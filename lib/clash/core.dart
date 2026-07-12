@@ -8,6 +8,7 @@ import 'package:fl_clash/clash/interface.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
@@ -54,8 +55,9 @@ class ClashCore {
         List<int> bytes = data.buffer.asUint8List();
         await geoFile.writeAsBytes(bytes, flush: true);
       }
-    } catch (e) {
-      exit(0);
+    } catch (e, stackTrace) {
+      // 降级：地理数据提取失败时仅记录日志并跳过，不再直接 exit(0) 终止整个应用
+      debugPrint('Failed to initialize geo data: $e\n$stackTrace');
     }
   }
 
@@ -86,28 +88,38 @@ class ClashCore {
     final proxiesRawString = await clashInterface.getProxies();
     return Isolate.run<List<Group>>(() {
       if (proxiesRawString.isEmpty) return [];
-      final proxies = (json.decode(proxiesRawString) ?? {}) as Map;
+      final raw = json.decode(proxiesRawString);
+      // FFI 返回结构可能异常：解码失败或非 Map 时降级为空，避免 CastError
+      if (raw is! Map) return [];
+      final proxies = raw.cast<String, dynamic>();
       if (proxies.isEmpty) return [];
+      final globalGroup = proxies[UsedProxy.GLOBAL.name];
+      if (globalGroup is! Map) return [];
       final groupNames = [
         UsedProxy.GLOBAL.name,
-        ...(proxies[UsedProxy.GLOBAL.name]["all"] as List).where((e) {
-          final proxy = proxies[e] ?? {};
-          return GroupTypeExtension.valueList.contains(proxy['type']);
-        })
+        ...((globalGroup["all"] as List? ?? [])
+            .where((e) {
+              final proxy = proxies[e] ?? {};
+              return GroupTypeExtension.valueList.contains(proxy['type']);
+            })
+            .toList())
       ];
       final groupsRaw = groupNames.map((groupName) {
         final group = proxies[groupName];
-        group["all"] = ((group["all"] ?? []) as List)
-            .map(
-              (name) => proxies[name],
-            )
-            .where((proxy) => proxy != null)
-            .toList();
+        if (group is Map) {
+          group["all"] = ((group["all"] as List? ?? []))
+              .map(
+                (name) => proxies[name],
+              )
+              .where((proxy) => proxy != null)
+              .toList();
+        }
         return group;
       }).toList();
       return groupsRaw
+          .whereType<Map>()
           .map(
-            (e) => Group.fromJson(e),
+            (e) => Group.fromJson(e.cast<String, dynamic>()),
           )
           .toList();
     });
@@ -119,9 +131,16 @@ class ClashCore {
 
   Future<List<Connection>> getConnections() async {
     final res = await clashInterface.getConnections();
-    final connectionsData = json.decode(res) as Map;
+    if (res.isEmpty) return [];
+    final raw = json.decode(res);
+    // 与 getProxiesGroups 同理：FFI 返回异常时降级，避免 FormatException / CastError
+    if (raw is! Map) return [];
+    final connectionsData = raw.cast<String, dynamic>();
     final connectionsRaw = connectionsData['connections'] as List? ?? [];
-    return connectionsRaw.map((e) => Connection.fromJson(e)).toList();
+    return connectionsRaw
+        .whereType<Map>()
+        .map((e) => Connection.fromJson(e.cast<String, dynamic>()))
+        .toList();
   }
 
   closeConnection(String id) {
@@ -137,12 +156,14 @@ class ClashCore {
         await clashInterface.getExternalProviders();
     return Isolate.run<List<ExternalProvider>>(
       () {
-        final externalProviders =
-            (json.decode(externalProvidersRawString) as List<dynamic>)
-                .map(
-                  (item) => ExternalProvider.fromJson(item),
-                )
-                .toList();
+        final raw = json.decode(externalProvidersRawString);
+        if (raw is! List) return <ExternalProvider>[];
+        final externalProviders = raw
+            .whereType<Map>()
+            .map(
+              (item) => ExternalProvider.fromJson(item.cast<String, dynamic>()),
+            )
+            .toList();
         return externalProviders;
       },
     );
@@ -152,13 +173,13 @@ class ClashCore {
       String externalProviderName) async {
     final externalProvidersRawString =
         await clashInterface.getExternalProvider(externalProviderName);
-    if (externalProvidersRawString == null) {
+    if (externalProvidersRawString == null ||
+        externalProvidersRawString.isEmpty) {
       return null;
     }
-    if (externalProvidersRawString.isEmpty) {
-      return null;
-    }
-    return ExternalProvider.fromJson(json.decode(externalProvidersRawString));
+    final raw = json.decode(externalProvidersRawString);
+    if (raw is! Map) return null;
+    return ExternalProvider.fromJson(raw.cast<String, dynamic>());
   }
 
   Future<String> updateGeoData({
@@ -192,22 +213,32 @@ class ClashCore {
 
   Future<Delay> getDelay(String proxyName) async {
     final data = await clashInterface.asyncTestDelay(proxyName);
-    return Delay.fromJson(json.decode(data));
+    if (data.isEmpty) return Delay.fromJson(const {});
+    final raw = json.decode(data);
+    if (raw is! Map) return Delay.fromJson(const {});
+    return Delay.fromJson(raw.cast<String, dynamic>());
   }
 
   Future<SpeedResult> getSpeed(String proxyName, String url, int timeout) async {
     final data = await clashInterface.asyncTestSpeed(proxyName, url, timeout);
-    return SpeedResult.fromJson(json.decode(data));
+    if (data.isEmpty) return SpeedResult.fromJson(const {});
+    final raw = json.decode(data);
+    if (raw is! Map) return SpeedResult.fromJson(const {});
+    return SpeedResult.fromJson(raw.cast<String, dynamic>());
   }
 
   Future<Traffic> getTraffic(bool value) async {
     final trafficString = await clashInterface.getTraffic(value);
-    return Traffic.fromMap(json.decode(trafficString));
+    final raw = json.decode(trafficString.isEmpty ? '{}' : trafficString);
+    if (raw is! Map) return Traffic.fromMap(const {});
+    return Traffic.fromMap(raw.cast<String, dynamic>());
   }
 
   Future<Traffic> getTotalTraffic(bool value) async {
     final totalTrafficString = await clashInterface.getTotalTraffic(value);
-    return Traffic.fromMap(json.decode(totalTrafficString));
+    final raw = json.decode(totalTrafficString.isEmpty ? '{}' : totalTrafficString);
+    if (raw is! Map) return Traffic.fromMap(const {});
+    return Traffic.fromMap(raw.cast<String, dynamic>());
   }
 
   resetTraffic() {

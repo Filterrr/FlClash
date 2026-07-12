@@ -293,8 +293,10 @@ class GlobalState {
     required Widget child,
     bool dismissible = true,
   }) async {
+    final navigatorState = navigatorKey.currentState;
+    if (navigatorState == null) return null;
     return await showModal<T>(
-      context: navigatorKey.currentState!.context,
+      context: navigatorState.context,
       configuration: FadeScaleTransitionConfiguration(
         barrierColor: Colors.black38,
         barrierDismissible: dismissible,

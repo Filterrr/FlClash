@@ -105,8 +105,12 @@ class AppState with ChangeNotifier {
     }
   }
 
-  String getRealProxyName(String proxyName) {
+  String getRealProxyName(String proxyName, [Set<String>? visited]) {
     if (proxyName.isEmpty) return proxyName;
+    // 防止嵌套 selector 分组形成环（A->B->A）导致无限递归 / 栈溢出
+    visited ??= {};
+    if (visited.contains(proxyName)) return proxyName;
+    visited.add(proxyName);
     final index = groups.indexWhere((element) => element.name == proxyName);
     if (index == -1) return proxyName;
     final group = groups[index];
@@ -115,6 +119,7 @@ class AppState with ChangeNotifier {
     if (currentSelectedName.isEmpty) return proxyName;
     return getRealProxyName(
       currentSelectedName,
+      visited,
     );
   }
 
