@@ -1,5 +1,6 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/state.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,9 +17,23 @@ class FloatingBottomBar extends StatelessWidget {
     required this.onTabChange,
   });
 
+  final GlobalKey _barKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final renderBox =
+          _barKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final height = renderBox.size.height;
+        if ((globalState.bottomBarHeightNotifier.value - height).abs() >
+            0.5) {
+          globalState.bottomBarHeightNotifier.value = height;
+        }
+      }
+    });
     return RepaintBoundary(
+      key: _barKey,
       child: SafeArea(
         top: false,
         child: Padding(

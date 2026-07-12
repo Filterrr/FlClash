@@ -58,10 +58,13 @@ class HomePage extends StatelessWidget {
                       removeLeft: true,
                       removeRight: true,
                       context: context,
-                      child: CommonScaffold(
-                        key: globalState.homeScaffoldKey,
-                        title: Intl.message(currentLabel),
-                        body: child!,
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: globalState.bottomBarHeightNotifier,
+                        builder: (_, __, ___) => CommonScaffold(
+                          key: globalState.homeScaffoldKey,
+                          title: Intl.message(currentLabel),
+                          body: child!,
+                        ),
                       ),
                     ),
                   ),

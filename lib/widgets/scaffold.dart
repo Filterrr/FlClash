@@ -180,11 +180,10 @@ class _FloatingBarAwareLocation extends FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final defaultOffset =
         FloatingActionButtonLocation.endFloat.getOffset(scaffoldGeometry);
-    final bottomPadding = scaffoldGeometry.minInsets.bottom;
-    final floatingBarHeight = 20.0;
+    final floatingBarHeight = globalState.bottomBarHeightNotifier.value;
     return Offset(
       defaultOffset.dx,
-      defaultOffset.dy - floatingBarHeight - bottomPadding,
+      defaultOffset.dy - floatingBarHeight,
     );
   }
 }
