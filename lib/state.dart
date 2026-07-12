@@ -28,6 +28,7 @@ class GlobalState {
   final navigatorKey = GlobalKey<NavigatorState>();
   late AppController appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
+  final bottomBarHeightNotifier = ValueNotifier<double>(92.0);
   List<Function> updateFunctionLists = [];
   bool lastTunEnable = false;
   int? lastProfileModified;

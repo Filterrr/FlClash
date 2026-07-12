@@ -51,17 +51,20 @@ class HomePage extends StatelessWidget {
               child: Stack(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 72),
+                    padding: const EdgeInsets.only(bottom: 0),
                     child: MediaQuery.removePadding(
                       removeTop: false,
                       removeBottom: true,
                       removeLeft: true,
                       removeRight: true,
                       context: context,
-                      child: CommonScaffold(
-                        key: globalState.homeScaffoldKey,
-                        title: Intl.message(currentLabel),
-                        body: child!,
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: globalState.bottomBarHeightNotifier,
+                        builder: (_, __, ___) => CommonScaffold(
+                          key: globalState.homeScaffoldKey,
+                          title: Intl.message(currentLabel),
+                          body: child!,
+                        ),
                       ),
                     ),
                   ),
