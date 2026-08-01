@@ -2,7 +2,7 @@ name: Delete All Workflows
 
 on:
   schedule:
-    - cron: "0 0 */5 * *"
+    - cron: "0 0 5 * *"
   workflow_dispatch:  # 允许手动触发
 
 jobs:
