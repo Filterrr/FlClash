@@ -2,7 +2,7 @@ name: Update Core and Multi-Platform Build
 
 on:
   schedule:
-    - cron: "0 0 */15 * *"
+    - cron: "0 0 15 * *"
   workflow_dispatch:
     inputs:
       commit:
