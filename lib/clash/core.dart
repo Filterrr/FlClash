@@ -28,20 +28,28 @@ class ClashCore {
     return _instance!;
   }
 
-  Future<void> _initGeo() async {
+  Future<void> _initGeo(ClashConfig clashConfig) async {
     final homePath = await appPath.getHomeDirPath();
     final homeDir = Directory(homePath);
     final isExists = await homeDir.exists();
     if (!isExists) {
       await homeDir.create(recursive: true);
     }
-    const geoFileNameList = [
-      mmdbFileName,
-      geoIpFileName,
-      geoSiteFileName,
-      asnFileName,
-    ];
+    // 按 geodata-loader 模式只复制所需的一套 geo 数据，减少首次启动 I/O
+    final geoFileNameList = switch (clashConfig.geodataLoader) {
+      geodataLoaderMemconservative => [
+          mmdbFileName,
+          geoSiteFileName,
+          asnFileName,
+        ],
+      _ => [
+          geoIpFileName,
+          geoSiteFileName,
+          asnFileName,
+        ],
+    };
     try {
+      final filesToWrite = <(String, Uint8List)>[];
       for (final geoFileName in geoFileNameList) {
         final geoFile = File(
           join(homePath, geoFileName),
@@ -51,11 +59,26 @@ class ClashCore {
           continue;
         }
         final data = await rootBundle.load('assets/data/$geoFileName');
-        List<int> bytes = data.buffer.asUint8List();
-        await geoFile.writeAsBytes(bytes, flush: true);
+        filesToWrite.add((
+          join(homePath, geoFileName),
+          data.buffer.asUint8List(),
+        ));
+      }
+      if (filesToWrite.isNotEmpty) {
+        // 写盘放到后台 isolate，避免大文件 IO 阻塞主 isolate
+        await Isolate.run(() => _writeGeoFiles(filesToWrite));
       }
     } catch (e) {
       exit(0);
+    }
+  }
+
+  /// 在后台 isolate 中执行：先写临时文件再原子 rename，避免慢磁盘上 fsync 阻塞
+  static Future<void> _writeGeoFiles(List<(String, Uint8List)> files) async {
+    for (final (path, bytes) in files) {
+      final tempFile = File('$path.tmp');
+      await tempFile.writeAsBytes(bytes);
+      await tempFile.rename(path);
     }
   }
 
@@ -63,7 +86,7 @@ class ClashCore {
     required ClashConfig clashConfig,
     required Config config,
   }) async {
-    await _initGeo();
+    await _initGeo(clashConfig);
     final homeDirPath = await appPath.getHomeDirPath();
     return await clashInterface.init(homeDirPath);
   }

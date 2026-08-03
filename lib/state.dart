@@ -79,6 +79,7 @@ class GlobalState {
       appState: appState,
       config: config,
       clashConfig: clashConfig,
+      forceGc: false, // 首次启动 core 刚初始化，主动 GC 反而可能造成停顿
     );
   }
 
@@ -184,8 +185,11 @@ class GlobalState {
     required AppState appState,
     required Config config,
     required ClashConfig clashConfig,
+    bool forceGc = true,
   }) async {
-    clashCore.requestGc();
+    if (forceGc) {
+      clashCore.requestGc();
+    }
     await updateClashConfig(
       appState: appState,
       clashConfig: clashConfig,
