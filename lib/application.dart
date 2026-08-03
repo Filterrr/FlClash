@@ -63,6 +63,11 @@ class ApplicationState extends State<Application> {
   AdaptiveTimer? groupUpdateTimer;
   StreamSubscription? connectivitySubscription;
 
+  // 主题色缓存：ColorScheme.fromSeed 是 CPU 密集运算，避免每次 build 重算
+  ColorScheme? _lightColorSchemeCache;
+  ColorScheme? _darkColorSchemeCache;
+  int? _cachedPrimaryColor;
+
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       TargetPlatform.android: SharedAxisPageTransitionsBuilder(
@@ -86,10 +91,27 @@ class ApplicationState extends State<Application> {
     required SystemColorSchemes systemColorSchemes,
   }) {
     if (primaryColor != null) {
-      return ColorScheme.fromSeed(
+      if (_cachedPrimaryColor != primaryColor) {
+        _cachedPrimaryColor = primaryColor;
+        _lightColorSchemeCache = null;
+        _darkColorSchemeCache = null;
+      }
+      final cached = brightness == Brightness.light
+          ? _lightColorSchemeCache
+          : _darkColorSchemeCache;
+      if (cached != null) {
+        return cached;
+      }
+      final scheme = ColorScheme.fromSeed(
         seedColor: Color(primaryColor),
         brightness: brightness,
       );
+      if (brightness == Brightness.light) {
+        _lightColorSchemeCache = scheme;
+      } else {
+        _darkColorSchemeCache = scheme;
+      }
+      return scheme;
     } else {
       return systemColorSchemes.getSystemColorSchemeForBrightness(brightness);
     }
@@ -189,6 +211,70 @@ class ApplicationState extends State<Application> {
     );
   }
 
+  Widget _buildMaterialApp(
+    ApplicationSelectorState state,
+    Widget? child,
+  ) {
+    return MaterialApp(
+      navigatorKey: globalState.navigatorKey,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate
+      ],
+      builder: (_, child) {
+        return LayoutBuilder(
+          builder: (_, container) {
+            final appController = globalState.appController;
+            final maxWidth = container.maxWidth;
+            if (appController.appState.viewWidth != maxWidth) {
+              globalState.appController.updateViewWidth(maxWidth);
+            }
+            return _buildPage(child!);
+          },
+        );
+      },
+      scrollBehavior: BaseScrollBehavior(),
+      title: appName,
+      locale: other.getLocaleForString(state.locale),
+      supportedLocales:
+          AppLocalizations.delegate.supportedLocales,
+      themeMode: state.themeMode,
+      theme: ThemeData(
+        useMaterial3: true,
+        fontFamily: state.fontFamily.value,
+        pageTransitionsTheme: _pageTransitionsTheme,
+        colorScheme: _getAppColorScheme(
+          brightness: Brightness.light,
+          systemColorSchemes: systemColorSchemes,
+          primaryColor: state.primaryColor,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        fontFamily: state.fontFamily.value,
+        pageTransitionsTheme: _pageTransitionsTheme,
+        colorScheme: _getAppColorScheme(
+          brightness: Brightness.dark,
+          systemColorSchemes: systemColorSchemes,
+          primaryColor: state.primaryColor,
+        ).toPureBlack(state.prueBlack),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16.0)),
+          ),
+        ),
+      ),
+      home: child,
+    );
+  }
+
   _updateSystemColorSchemes(
     ColorScheme? lightDynamic,
     ColorScheme? darkDynamic,
@@ -216,67 +302,14 @@ class ApplicationState extends State<Application> {
               fontFamily: config.themeProps.fontFamily,
             ),
             builder: (_, state, child) {
+              if (system.isDesktop) {
+                _updateSystemColorSchemes(null, null);
+                return _buildMaterialApp(state, child);
+              }
               return DynamicColorBuilder(
                 builder: (lightDynamic, darkDynamic) {
                   _updateSystemColorSchemes(lightDynamic, darkDynamic);
-                  return MaterialApp(
-                    navigatorKey: globalState.navigatorKey,
-                    localizationsDelegates: const [
-                      AppLocalizations.delegate,
-                      GlobalMaterialLocalizations.delegate,
-                      GlobalCupertinoLocalizations.delegate,
-                      GlobalWidgetsLocalizations.delegate
-                    ],
-                    builder: (_, child) {
-                      return LayoutBuilder(
-                        builder: (_, container) {
-                          final appController = globalState.appController;
-                          final maxWidth = container.maxWidth;
-                          if (appController.appState.viewWidth != maxWidth) {
-                            globalState.appController.updateViewWidth(maxWidth);
-                          }
-                          return _buildPage(child!);
-                        },
-                      );
-                    },
-                    scrollBehavior: BaseScrollBehavior(),
-                    title: appName,
-                    locale: other.getLocaleForString(state.locale),
-                    supportedLocales:
-                        AppLocalizations.delegate.supportedLocales,
-                    themeMode: state.themeMode,
-                    theme: ThemeData(
-                      useMaterial3: true,
-                      fontFamily: state.fontFamily.value,
-                      pageTransitionsTheme: _pageTransitionsTheme,
-                      colorScheme: _getAppColorScheme(
-                        brightness: Brightness.light,
-                        systemColorSchemes: systemColorSchemes,
-                        primaryColor: state.primaryColor,
-                      ),
-                      floatingActionButtonTheme: FloatingActionButtonThemeData(
-                        shape: const RoundedSuperellipseBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                        ),
-                      ),
-                    ),
-                    darkTheme: ThemeData(
-                      useMaterial3: true,
-                      fontFamily: state.fontFamily.value,
-                      pageTransitionsTheme: _pageTransitionsTheme,
-                      colorScheme: _getAppColorScheme(
-                        brightness: Brightness.dark,
-                        systemColorSchemes: systemColorSchemes,
-                        primaryColor: state.primaryColor,
-                      ).toPureBlack(state.prueBlack),
-                      floatingActionButtonTheme: FloatingActionButtonThemeData(
-                        shape: const RoundedSuperellipseBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                        ),
-                      ),
-                    ),
-                    home: child,
-                  );
+                  return _buildMaterialApp(state, child);
                 },
               );
             },

@@ -555,8 +555,14 @@ class AppController {
       config: config,
     );
     await _initStatus();
-    autoUpdateProfiles();
-    autoCheckUpdate();
+    // 延迟后台网络任务，避免启动初期与 core 初始化争抢 CPU/带宽
+    Future.delayed(
+      const Duration(seconds: 8),
+      () {
+        autoUpdateProfiles();
+        autoCheckUpdate();
+      },
+    );
   }
 
   _initStatus() async {
