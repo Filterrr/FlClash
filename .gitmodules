@@ -1,6 +1,6 @@
 [submodule "plugins/flutter_distributor"]
 	path = plugins/flutter_distributor
-	url = https://github.com/chen08209/flutter_distributor.git
+	url = https://github.com/Filterrr/flutter_distributor.git
 	branch = FlClash
 [submodule "core/Clash.Meta"]
 	path = core/Clash.Meta
