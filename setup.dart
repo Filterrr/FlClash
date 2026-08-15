@@ -291,6 +291,7 @@ class Build {
   // Flutter 3.47+ 禁止通过 --dart-define 传入框架保留的
   // FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER，
   // flutter_distributor 子模块仍会注入这两个变量，激活前先移除。
+  // Windows 上 git 可能把子模块文件检出为 CRLF，先归一化换行再匹配。
   static _patchAppBuilder() {
     final file = File(join(
       current,
@@ -303,7 +304,7 @@ class Build {
       "builders",
       "app_builder.dart",
     ));
-    final content = file.readAsStringSync();
+    final content = file.readAsStringSync().replaceAll('\r\n', '\n');
     final block = r"""
     buildArguments.addAll([
       '--dart-define',
@@ -316,6 +317,8 @@ class Build {
     if (content.contains(block)) {
       file.writeAsStringSync(content.replaceAll(block, ""));
       print("patched app_builder");
+    } else {
+      print("app_builder patch target not found, skip");
     }
   }
 
