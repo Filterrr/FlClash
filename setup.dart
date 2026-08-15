@@ -288,6 +288,37 @@ class Build {
     return command.split(" ");
   }
 
+  // Flutter 3.47+ 禁止通过 --dart-define 传入框架保留的
+  // FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER，
+  // flutter_distributor 子模块仍会注入这两个变量，激活前先移除。
+  static _patchAppBuilder() {
+    final file = File(join(
+      current,
+      "plugins",
+      "flutter_distributor",
+      "packages",
+      "flutter_app_builder",
+      "lib",
+      "src",
+      "builders",
+      "app_builder.dart",
+    ));
+    final content = file.readAsStringSync();
+    final block = r"""
+    buildArguments.addAll([
+      '--dart-define',
+      'FLUTTER_BUILD_NAME=$appBuildName',
+      '--dart-define',
+      'FLUTTER_BUILD_NUMBER=$appBuildNumber',
+    ]);
+
+""";
+    if (content.contains(block)) {
+      file.writeAsStringSync(content.replaceAll(block, ""));
+      print("patched app_builder");
+    }
+  }
+
   static getDistributor() async {
     final distributorDir = join(
       current,
@@ -307,6 +338,7 @@ class Build {
       Build.getExecutable("flutter pub upgrade"),
       workingDirectory: distributorDir,
     );
+    _patchAppBuilder();
     await exec(
       name: "get distributor",
       Build.getExecutable("dart pub global activate -s path $distributorDir"),
