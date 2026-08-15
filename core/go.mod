@@ -19,7 +19,7 @@ require (
 	github.com/metacubex/jls-quic-go v0.0.0-20260727080412-732f2fc9a34d // indirect
 	github.com/metacubex/jls-tls v0.0.0-20260723084315-67adc0e2f796 // indirect
 	github.com/metacubex/jsonv2 v0.0.0-20260721082349-16b4998c8f89 // indirect
-	github.com/metacubex/mipstack v0.0.0-20260814030134-37b80324ed9a // indirect
+	github.com/metacubex/mipstack v0.0.0-20260815022418-9db62d54de59 // indirect
 	github.com/metacubex/sevenzip v1.6.4 // indirect
 	github.com/metacubex/ssh v0.1.0 // indirect
 	github.com/metacubex/tailscale v0.0.0-20260807072706-a4fb5feabcbb // indirect
