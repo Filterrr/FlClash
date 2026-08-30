@@ -1,3 +1,5 @@
+
+
 <div>
 
 [**简体中文**](README_zh_CN.md)
@@ -88,7 +90,7 @@ Support the following actions
 
         1. You need a windows client
 
-        2. Install  `Gcc`，`Inno Setup`
+        2. Install  `Gcc`，`Inno Setup`，`Rust`
 
         3. Run build script
 
