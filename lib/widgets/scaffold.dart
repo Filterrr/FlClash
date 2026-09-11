@@ -10,6 +10,13 @@ class CommonScaffold extends StatefulWidget {
   final List<Widget>? actions;
   final bool automaticallyImplyLeading;
 
+  /// When true, the body extends under the floating bottom bar (Stack
+  /// overlay) and the bar's measured height is re-injected into
+  /// MediaQuery.padding.bottom (after SafeArea) so scrollables can use it
+  /// as content padding — the Flutter Scaffold extendBody equivalent for
+  /// this app's custom shell.
+  final bool extendBody;
+
   const CommonScaffold({
     super.key,
     required this.body,
@@ -17,6 +24,7 @@ class CommonScaffold extends StatefulWidget {
     required this.title,
     this.actions,
     this.automaticallyImplyLeading = true,
+    this.extendBody = false,
   });
 
   CommonScaffold.open({
@@ -98,7 +106,31 @@ class CommonScaffoldState extends State<CommonScaffold> {
     }
   }
 
-  Widget get body => SafeArea(child: widget.body);
+  Widget get body {
+    final bodyWidget = SafeArea(child: widget.body);
+    if (!widget.extendBody) {
+      return bodyWidget;
+    }
+    // Re-inject the floating bar height (bar + system nav inset, measured by
+    // FloatingBottomBar's SafeArea) below SafeArea so scrollables can apply it
+    // as content padding while the viewport itself stays full-height.
+    return Builder(
+      builder: (context) {
+        return ValueListenableBuilder<double>(
+          valueListenable: globalState.bottomBarHeightNotifier,
+          builder: (_, bottomBarHeight, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: MediaQuery.of(context).padding.copyWith(
+                    bottom: bottomBarHeight,
+                  ),
+            ),
+            child: child!,
+          ),
+          child: bodyWidget,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

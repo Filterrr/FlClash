@@ -223,7 +223,12 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
         return ListView.builder(
           itemCount: items.length,
           itemBuilder: (_, index) => items[index],
-          padding: const EdgeInsets.only(bottom: 20),
+          // Media padding carries the floating bottom bar height (injected by
+          // CommonScaffold with extendBody) so the last item can scroll fully
+          // above the translucent bar; falls back to 0 on desktop.
+          padding: EdgeInsets.only(
+            bottom: 20 + MediaQuery.paddingOf(context).bottom,
+          ),
         );
       },
     );

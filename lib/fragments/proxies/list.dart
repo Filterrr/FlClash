@@ -279,7 +279,13 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
                 child: ScrollConfiguration(
                   behavior: HiddenBarScrollBehavior(),
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16).copyWith(
+                      // MediaQuery padding carries the floating bottom bar
+                      // height (injected by CommonScaffold with extendBody)
+                      // so the last proxy card can scroll fully above the
+                      // translucent bar; 0 on desktop.
+                      bottom: 16 + MediaQuery.paddingOf(context).bottom,
+                    ),
                     controller: _controller,
                     itemExtentBuilder: (index, __) {
                       return itemsOffset[index];
