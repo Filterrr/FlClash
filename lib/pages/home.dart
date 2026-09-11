@@ -50,17 +50,33 @@ class HomePage extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 0),
-                    child: MediaQuery.removePadding(
-                      removeTop: false,
-                      removeBottom: true,
-                      removeLeft: true,
-                      removeRight: true,
-                      context: context,
-                      child: ValueListenableBuilder<double>(
+                  MediaQuery.removePadding(
+                    removeTop: false,
+                    removeBottom: true,
+                    removeLeft: true,
+                    removeRight: true,
+                    context: context,
+                    // The floating bottom bar is overlaid via Stack, so it
+                    // never participates in the body's layout. Feed its
+                    // measured height (bar + system navigation bar inset,
+                    // measured inside FloatingBottomBar's SafeArea) back into
+                    // MediaQuery.padding.bottom so the SafeArea inside
+                    // CommonScaffold reserves that space for every tab page.
+                    child: Builder(
+                      builder: (mediaQueryContext) =>
+                          ValueListenableBuilder<double>(
                         valueListenable: globalState.bottomBarHeightNotifier,
-                        builder: (_, __, ___) => CommonScaffold(
+                        builder: (_, bottomBarHeight, bodyChild) => MediaQuery(
+                          data: MediaQuery.of(mediaQueryContext).copyWith(
+                            padding: MediaQuery.of(mediaQueryContext)
+                                .padding
+                                .copyWith(
+                                  bottom: bottomBarHeight,
+                                ),
+                          ),
+                          child: bodyChild!,
+                        ),
+                        child: CommonScaffold(
                           key: globalState.homeScaffoldKey,
                           title: Intl.message(currentLabel),
                           body: child!,
