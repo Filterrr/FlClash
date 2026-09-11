@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:fl_clash/common/common.dart';
@@ -150,14 +149,11 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
           return Align(
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                 left: 16,
                 right: 16,
                 top: 16,
-                // Max with the floating bottom bar height (extendBody media
-                // padding) so the last grid item never hides under the
-                // translucent bar.
-                bottom: max(88, MediaQuery.paddingOf(context).bottom),
+                bottom: 88,
               ),
               child: Grid(
                 mainAxisSpacing: 16,

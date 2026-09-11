@@ -50,19 +50,23 @@ class HomePage extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // The floating bottom bar is overlaid via Stack, so it
-                  // never participates in the body's layout. System insets
-                  // flow through untouched and are consumed by the SafeArea
-                  // inside CommonScaffold; the bar's measured height (bar +
-                  // system nav inset) is re-injected by CommonScaffold
-                  // (extendBody) below that SafeArea so scrollables can use
-                  // it as content padding while the viewport stays
-                  // full-height.
-                  CommonScaffold(
-                    key: globalState.homeScaffoldKey,
-                    title: Intl.message(currentLabel),
-                    extendBody: true,
-                    body: child!,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 0),
+                    child: MediaQuery.removePadding(
+                      removeTop: false,
+                      removeBottom: true,
+                      removeLeft: true,
+                      removeRight: true,
+                      context: context,
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: globalState.bottomBarHeightNotifier,
+                        builder: (_, __, ___) => CommonScaffold(
+                          key: globalState.homeScaffoldKey,
+                          title: Intl.message(currentLabel),
+                          body: child!,
+                        ),
+                      ),
+                    ),
                   ),
                   Positioned(
                     left: 0,

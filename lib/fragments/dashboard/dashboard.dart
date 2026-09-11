@@ -44,10 +44,8 @@ class _DashboardFragmentState extends State<DashboardFragment> {
       child: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16).copyWith(
-            // Max with the floating bottom bar height (extendBody media
-            // padding) so the last row never hides under the translucent bar.
-            bottom: max(88, MediaQuery.paddingOf(context).bottom),
+          padding: const EdgeInsets.all(16).copyWith(
+            bottom: 88,
           ),
           child: Selector<AppState, double>(
             selector: (_, appState) => appState.viewWidth,

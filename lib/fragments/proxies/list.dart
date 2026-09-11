@@ -278,22 +278,27 @@ class _ProxiesListFragmentState extends State<ProxiesListFragment> {
               Positioned.fill(
                 child: ScrollConfiguration(
                   behavior: HiddenBarScrollBehavior(),
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(16).copyWith(
-                      // MediaQuery padding carries the floating bottom bar
-                      // height (injected by CommonScaffold with extendBody)
-                      // so the last proxy card can scroll fully above the
-                      // translucent bar; 0 on desktop.
-                      bottom: 16 + MediaQuery.paddingOf(context).bottom,
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: globalState.bottomBarHeightNotifier,
+                    builder: (_, bottomBarHeight, __) => ListView.builder(
+                      padding: EdgeInsets.all(16).copyWith(
+                        // Extra scroll headroom equal to the floating bottom
+                        // bar height (mobile only) so the last proxy card can
+                        // scroll fully above it.
+                        bottom: 16 +
+                            (MediaQuery.sizeOf(context).width <= maxMobileWidth
+                                ? bottomBarHeight
+                                : 0),
+                      ),
+                      controller: _controller,
+                      itemExtentBuilder: (index, __) {
+                        return itemsOffset[index];
+                      },
+                      itemCount: items.length,
+                      itemBuilder: (_, index) {
+                        return items[index];
+                      },
                     ),
-                    controller: _controller,
-                    itemExtentBuilder: (index, __) {
-                      return itemsOffset[index];
-                    },
-                    itemCount: items.length,
-                    itemBuilder: (_, index) {
-                      return items[index];
-                    },
                   ),
                 ),
               ),
