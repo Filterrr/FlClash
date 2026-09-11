@@ -34,4 +34,7 @@ jobs:
         run: flutter analyze lib test
 
       - name: Test
-        run: flutter test
+        # Exclude test/command_test.dart: it is a manual integration harness
+        # that requires a running clash core listening on a unix socket,
+        # so it can never pass in CI.
+        run: flutter test --exclude-tags=none $(ls test/*_test.dart | grep -v command_test | tr '\n' ' ')
