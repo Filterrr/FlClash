@@ -47,7 +47,7 @@ class _DashboardFragmentState extends State<DashboardFragment> {
           padding: EdgeInsets.all(16).copyWith(
             // Max with the floating bottom bar height (extendBody media
             // padding) so the last row never hides under the translucent bar.
-            bottom: math.max(88, MediaQuery.paddingOf(context).bottom),
+            bottom: max(88, MediaQuery.paddingOf(context).bottom),
           ),
           child: Selector<AppState, double>(
             selector: (_, appState) => appState.viewWidth,

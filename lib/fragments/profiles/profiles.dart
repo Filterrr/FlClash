@@ -157,7 +157,7 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
                 // Max with the floating bottom bar height (extendBody media
                 // padding) so the last grid item never hides under the
                 // translucent bar.
-                bottom: math.max(88, MediaQuery.paddingOf(context).bottom),
+                bottom: max(88, MediaQuery.paddingOf(context).bottom),
               ),
               child: Grid(
                 mainAxisSpacing: 16,
