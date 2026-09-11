@@ -29,7 +29,9 @@ jobs:
           dart run build_runner build -d || true
 
       - name: Analyze
-        run: flutter analyze
+        # Scope to app code: vendored plugins/ and packages/ carry
+        # pre-existing analyzer noise unrelated to this repository's app.
+        run: flutter analyze lib test
 
       - name: Test
         run: flutter test
