@@ -220,10 +220,20 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
           ..._getSettingList(),
           ..._getOtherList(),
         ];
-        return ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (_, index) => items[index],
-          padding: const EdgeInsets.only(bottom: 20),
+        return ValueListenableBuilder<double>(
+          valueListenable: globalState.bottomBarHeightNotifier,
+          builder: (_, bottomBarHeight, __) => ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (_, index) => items[index],
+            // Extra scroll headroom equal to the floating bottom bar height
+            // (mobile only) so the last item can scroll fully above it.
+            padding: EdgeInsets.only(
+              bottom: 20 +
+                  (MediaQuery.sizeOf(context).width <= maxMobileWidth
+                      ? bottomBarHeight
+                      : 0),
+            ),
+          ),
         );
       },
     );
