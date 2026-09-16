@@ -132,6 +132,7 @@ const _$TunStackEnumMap = {
   TunStack.gvisor: 'gvisor',
   TunStack.system: 'system',
   TunStack.mixed: 'mixed',
+  TunStack.mips: 'mips',
 };
 
 _$FallbackFilterImpl _$$FallbackFilterImplFromJson(Map<String, dynamic> json) =>
