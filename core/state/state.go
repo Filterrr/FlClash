@@ -17,6 +17,7 @@ type AndroidVpnOptions struct {
 	Ipv4Address      string         `json:"ipv4Address"`
 	Ipv6Address      string         `json:"ipv6Address"`
 	DnsServerAddress string         `json:"dnsServerAddress"`
+	FcmKeepAlive     bool           `json:"fcmKeepAlive"`
 }
 
 type AccessControl struct {
@@ -36,6 +37,7 @@ type AndroidVpnRawOptions struct {
 	BypassDomain            []string       `json:"bypassDomain"`
 	DisableICMPForwarding   bool           `json:"disableIcmpForwarding"`
 	IcmpTimeout             int64          `json:"icmpTimeout"`
+	FcmKeepAlive            bool           `json:"fcmKeepAlive"`
 }
 
 type State struct {

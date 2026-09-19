@@ -266,6 +266,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallbackLazyQueryDesc": MessageLookupByLibrary.simpleMessage(
       "Query fallback DNS only after the nameserver result fails the filter",
     ),
+    "fcmKeepAlive": MessageLookupByLibrary.simpleMessage("Keep FCM alive"),
+    "fcmKeepAliveDesc": MessageLookupByLibrary.simpleMessage(
+      "Route Google push (FCM) via the VPN so notifications stay reachable",
+    ),
     "file": MessageLookupByLibrary.simpleMessage("File"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Directly upload profile"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(

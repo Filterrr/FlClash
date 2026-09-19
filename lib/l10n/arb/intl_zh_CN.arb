@@ -164,6 +164,8 @@
   "search": "搜索",
   "allowBypass": "允许应用绕过VPN",
   "allowBypassDesc": "开启后部分应用可绕过VPN",
+  "fcmKeepAlive": "FCM 保活",
+  "fcmKeepAliveDesc": "让 Google 推送（FCM）流量走 VPN，保证推送始终可达",
   "externalController": "外部控制器",
   "externalControllerDesc": "开启后将可以通过9090端口控制Clash内核",
   "ipv6Desc": "开启后将可以接收IPv6流量",

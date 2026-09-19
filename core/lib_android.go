@@ -241,6 +241,7 @@ func getAndroidVpnOptions() *C.char {
 		RouteAddress:     state.CurrentState.RouteAddress,
 		BypassDomain:     state.CurrentState.BypassDomain,
 		DnsServerAddress: state.GetDnsServerAddress(),
+		FcmKeepAlive:     state.CurrentState.FcmKeepAlive,
 	}
 	data, err := json.Marshal(options)
 	if err != nil {

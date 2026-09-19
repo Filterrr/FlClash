@@ -39,6 +39,7 @@ class _AndroidContainerState extends State<AndroidManager> {
         routeAddress: clashConfig.routeAddress,
         disableIcmpForwarding: clashConfig.tun.disableIcmpForwarding,
         icmpTimeout: clashConfig.tun.icmpTimeout,
+        fcmKeepAlive: config.vpnProps.fcmKeepAlive,
       ),
       builder: (__, state, child) {
         clashLib?.setState(state);

@@ -2344,6 +2344,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Keep FCM alive`
+  String get fcmKeepAlive {
+    return Intl.message(
+      'Keep FCM alive',
+      name: 'fcmKeepAlive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route Google push (FCM) via the VPN so notifications stay reachable`
+  String get fcmKeepAliveDesc {
+    return Intl.message(
+      'Route Google push (FCM) via the VPN so notifications stay reachable',
+      name: 'fcmKeepAliveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Geoip code`
   String get geoipCode {
     return Intl.message('Geoip code', name: 'geoipCode', desc: '', args: []);

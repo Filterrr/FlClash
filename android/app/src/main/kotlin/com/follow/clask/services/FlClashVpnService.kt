@@ -69,15 +69,18 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
             addDnsServer(options.dnsServerAddress)
             setMtu(9000)
             options.accessControl?.let { accessControl ->
+                val fcmPackages = options.fcmKeepAlivePackages
                 when (accessControl.mode) {
                     AccessControlMode.acceptSelected -> {
-                        (accessControl.acceptList + packageName).forEach {
+                        val allowed = accessControl.acceptList + packageName + fcmPackages
+                        allowed.distinct().forEach {
                             addAllowedApplication(it)
                         }
                     }
 
                     AccessControlMode.rejectSelected -> {
-                        (accessControl.rejectList - packageName).forEach {
+                        val disallowed = accessControl.rejectList - packageName - fcmPackages.toSet()
+                        disallowed.forEach {
                             addDisallowedApplication(it)
                         }
                     }
