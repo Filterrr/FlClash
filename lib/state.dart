@@ -228,6 +228,7 @@ class GlobalState {
           currentProfileName:
               config.currentProfile?.label ?? config.currentProfileId ?? "",
           disableIcmpForwarding: clashConfig.tun.disableIcmpForwarding,
+          icmpTimeout: clashConfig.tun.icmpTimeout,
         ),
       );
     }

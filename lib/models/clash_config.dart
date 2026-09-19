@@ -23,6 +23,7 @@ class Tun with _$Tun {
     @JsonKey(name: "strict-route") @Default(false) bool strictRoute,
     @JsonKey(name: "auto-detect-interface") @Default(false) bool autoDetectInterface,
     @JsonKey(name: "disable-icmp-forwarding") @Default(false) bool disableIcmpForwarding,
+    @JsonKey(name: "icmp-timeout") @Default(0) int icmpTimeout,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
@@ -68,6 +69,7 @@ class Dns with _$Dns {
     @Default(true) @JsonKey(name: "use-hosts") bool useHosts,
     @Default(true) @JsonKey(name: "use-system-hosts") bool useSystemHosts,
     @Default(false) @JsonKey(name: "respect-rules") bool respectRules,
+    @Default(false) @JsonKey(name: "fallback-lazy-query") bool fallbackLazyQuery,
     @Default(false) bool ipv6,
     @Default(["223.5.5.5"])
     @JsonKey(name: "default-nameserver")

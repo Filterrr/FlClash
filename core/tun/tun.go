@@ -57,6 +57,7 @@ func Start(fd int, device string, stack constant.TUNStack) (*sing_tun.Listener, 
 		MTU:                   9000,
 		FileDescriptor:        fd,
 		DisableICMPForwarding: state.CurrentState.DisableICMPForwarding,
+		ICMPTimeout:           state.CurrentState.IcmpTimeout,
 	}
 
 	listener, err := sing_tun.New(options, tunnel.Tunnel)

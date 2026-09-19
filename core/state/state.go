@@ -35,6 +35,7 @@ type AndroidVpnRawOptions struct {
 	Ipv6                    bool           `json:"ipv6"`
 	BypassDomain            []string       `json:"bypassDomain"`
 	DisableICMPForwarding   bool           `json:"disableIcmpForwarding"`
+	IcmpTimeout             int64          `json:"icmpTimeout"`
 }
 
 type State struct {

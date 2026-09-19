@@ -33,6 +33,8 @@ mixin _$Tun {
   bool get autoDetectInterface => throw _privateConstructorUsedError;
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding => throw _privateConstructorUsedError;
+  @JsonKey(name: "icmp-timeout")
+  int get icmpTimeout => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -52,7 +54,8 @@ abstract class $TunCopyWith<$Res> {
       @JsonKey(name: "auto-route") bool autoRoute,
       @JsonKey(name: "strict-route") bool strictRoute,
       @JsonKey(name: "auto-detect-interface") bool autoDetectInterface,
-      @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding});
+      @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding,
+      @JsonKey(name: "icmp-timeout") int icmpTimeout});
 }
 
 /// @nodoc
@@ -75,6 +78,7 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
     Object? strictRoute = null,
     Object? autoDetectInterface = null,
     Object? disableIcmpForwarding = null,
+    Object? icmpTimeout = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -109,6 +113,10 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
           ? _value.disableIcmpForwarding
           : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
               as bool,
+      icmpTimeout: null == icmpTimeout
+          ? _value.icmpTimeout
+          : icmpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -127,7 +135,8 @@ abstract class _$$TunImplCopyWith<$Res> implements $TunCopyWith<$Res> {
       @JsonKey(name: "auto-route") bool autoRoute,
       @JsonKey(name: "strict-route") bool strictRoute,
       @JsonKey(name: "auto-detect-interface") bool autoDetectInterface,
-      @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding});
+      @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding,
+      @JsonKey(name: "icmp-timeout") int icmpTimeout});
 }
 
 /// @nodoc
@@ -147,6 +156,7 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
     Object? strictRoute = null,
     Object? autoDetectInterface = null,
     Object? disableIcmpForwarding = null,
+    Object? icmpTimeout = null,
   }) {
     return _then(_$TunImpl(
       enable: null == enable
@@ -181,6 +191,10 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
           ? _value.disableIcmpForwarding
           : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
               as bool,
+      icmpTimeout: null == icmpTimeout
+          ? _value.icmpTimeout
+          : icmpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -198,7 +212,8 @@ class _$TunImpl implements _Tun {
       @JsonKey(name: "strict-route") this.strictRoute = false,
       @JsonKey(name: "auto-detect-interface") this.autoDetectInterface = false,
       @JsonKey(name: "disable-icmp-forwarding")
-      this.disableIcmpForwarding = false})
+      this.disableIcmpForwarding = false,
+      @JsonKey(name: "icmp-timeout") this.icmpTimeout = 0})
       : _dnsHijack = dnsHijack;
 
   factory _$TunImpl.fromJson(Map<String, dynamic> json) =>
@@ -234,10 +249,13 @@ class _$TunImpl implements _Tun {
   @override
   @JsonKey(name: "disable-icmp-forwarding")
   final bool disableIcmpForwarding;
+  @override
+  @JsonKey(name: "icmp-timeout")
+  final int icmpTimeout;
 
   @override
   String toString() {
-    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, autoRoute: $autoRoute, strictRoute: $strictRoute, autoDetectInterface: $autoDetectInterface, disableIcmpForwarding: $disableIcmpForwarding)';
+    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, autoRoute: $autoRoute, strictRoute: $strictRoute, autoDetectInterface: $autoDetectInterface, disableIcmpForwarding: $disableIcmpForwarding, icmpTimeout: $icmpTimeout)';
   }
 
   @override
@@ -257,7 +275,9 @@ class _$TunImpl implements _Tun {
             (identical(other.autoDetectInterface, autoDetectInterface) ||
                 other.autoDetectInterface == autoDetectInterface) &&
             (identical(other.disableIcmpForwarding, disableIcmpForwarding) ||
-                other.disableIcmpForwarding == disableIcmpForwarding));
+                other.disableIcmpForwarding == disableIcmpForwarding) &&
+            (identical(other.icmpTimeout, icmpTimeout) ||
+                other.icmpTimeout == icmpTimeout));
   }
 
   @JsonKey(ignore: true)
@@ -271,7 +291,8 @@ class _$TunImpl implements _Tun {
       autoRoute,
       strictRoute,
       autoDetectInterface,
-      disableIcmpForwarding);
+      disableIcmpForwarding,
+      icmpTimeout);
 
   @JsonKey(ignore: true)
   @override
@@ -297,7 +318,8 @@ abstract class _Tun implements Tun {
       @JsonKey(name: "strict-route") final bool strictRoute,
       @JsonKey(name: "auto-detect-interface") final bool autoDetectInterface,
       @JsonKey(name: "disable-icmp-forwarding")
-      final bool disableIcmpForwarding}) = _$TunImpl;
+      final bool disableIcmpForwarding,
+      @JsonKey(name: "icmp-timeout") final int icmpTimeout}) = _$TunImpl;
 
   factory _Tun.fromJson(Map<String, dynamic> json) = _$TunImpl.fromJson;
 
@@ -322,6 +344,9 @@ abstract class _Tun implements Tun {
   @override
   @JsonKey(name: "disable-icmp-forwarding")
   bool get disableIcmpForwarding;
+  @override
+  @JsonKey(name: "icmp-timeout")
+  int get icmpTimeout;
   @override
   @JsonKey(ignore: true)
   _$$TunImplCopyWith<_$TunImpl> get copyWith =>
@@ -602,6 +627,8 @@ mixin _$Dns {
   bool get useSystemHosts => throw _privateConstructorUsedError;
   @JsonKey(name: "respect-rules")
   bool get respectRules => throw _privateConstructorUsedError;
+  @JsonKey(name: "fallback-lazy-query")
+  bool get fallbackLazyQuery => throw _privateConstructorUsedError;
   bool get ipv6 => throw _privateConstructorUsedError;
   @JsonKey(name: "default-nameserver")
   List<String> get defaultNameserver => throw _privateConstructorUsedError;
@@ -637,6 +664,7 @@ abstract class $DnsCopyWith<$Res> {
       @JsonKey(name: "use-hosts") bool useHosts,
       @JsonKey(name: "use-system-hosts") bool useSystemHosts,
       @JsonKey(name: "respect-rules") bool respectRules,
+      @JsonKey(name: "fallback-lazy-query") bool fallbackLazyQuery,
       bool ipv6,
       @JsonKey(name: "default-nameserver") List<String> defaultNameserver,
       @JsonKey(name: "enhanced-mode") DnsMode enhancedMode,
@@ -669,6 +697,7 @@ class _$DnsCopyWithImpl<$Res, $Val extends Dns> implements $DnsCopyWith<$Res> {
     Object? useHosts = null,
     Object? useSystemHosts = null,
     Object? respectRules = null,
+    Object? fallbackLazyQuery = null,
     Object? ipv6 = null,
     Object? defaultNameserver = null,
     Object? enhancedMode = null,
@@ -700,6 +729,10 @@ class _$DnsCopyWithImpl<$Res, $Val extends Dns> implements $DnsCopyWith<$Res> {
       respectRules: null == respectRules
           ? _value.respectRules
           : respectRules // ignore: cast_nullable_to_non_nullable
+              as bool,
+      fallbackLazyQuery: null == fallbackLazyQuery
+          ? _value.fallbackLazyQuery
+          : fallbackLazyQuery // ignore: cast_nullable_to_non_nullable
               as bool,
       ipv6: null == ipv6
           ? _value.ipv6
@@ -765,6 +798,7 @@ abstract class _$$DnsImplCopyWith<$Res> implements $DnsCopyWith<$Res> {
       @JsonKey(name: "use-hosts") bool useHosts,
       @JsonKey(name: "use-system-hosts") bool useSystemHosts,
       @JsonKey(name: "respect-rules") bool respectRules,
+      @JsonKey(name: "fallback-lazy-query") bool fallbackLazyQuery,
       bool ipv6,
       @JsonKey(name: "default-nameserver") List<String> defaultNameserver,
       @JsonKey(name: "enhanced-mode") DnsMode enhancedMode,
@@ -795,6 +829,7 @@ class __$$DnsImplCopyWithImpl<$Res> extends _$DnsCopyWithImpl<$Res, _$DnsImpl>
     Object? useHosts = null,
     Object? useSystemHosts = null,
     Object? respectRules = null,
+    Object? fallbackLazyQuery = null,
     Object? ipv6 = null,
     Object? defaultNameserver = null,
     Object? enhancedMode = null,
@@ -826,6 +861,10 @@ class __$$DnsImplCopyWithImpl<$Res> extends _$DnsCopyWithImpl<$Res, _$DnsImpl>
       respectRules: null == respectRules
           ? _value.respectRules
           : respectRules // ignore: cast_nullable_to_non_nullable
+              as bool,
+      fallbackLazyQuery: null == fallbackLazyQuery
+          ? _value.fallbackLazyQuery
+          : fallbackLazyQuery // ignore: cast_nullable_to_non_nullable
               as bool,
       ipv6: null == ipv6
           ? _value.ipv6
@@ -880,6 +919,7 @@ class _$DnsImpl implements _Dns {
       @JsonKey(name: "use-hosts") this.useHosts = true,
       @JsonKey(name: "use-system-hosts") this.useSystemHosts = true,
       @JsonKey(name: "respect-rules") this.respectRules = false,
+      @JsonKey(name: "fallback-lazy-query") this.fallbackLazyQuery = false,
       this.ipv6 = false,
       @JsonKey(name: "default-nameserver")
       final List<String> defaultNameserver = const ["223.5.5.5"],
@@ -931,6 +971,9 @@ class _$DnsImpl implements _Dns {
   @override
   @JsonKey(name: "respect-rules")
   final bool respectRules;
+  @override
+  @JsonKey(name: "fallback-lazy-query")
+  final bool fallbackLazyQuery;
   @override
   @JsonKey()
   final bool ipv6;
@@ -1002,7 +1045,7 @@ class _$DnsImpl implements _Dns {
 
   @override
   String toString() {
-    return 'Dns(enable: $enable, preferH3: $preferH3, useHosts: $useHosts, useSystemHosts: $useSystemHosts, respectRules: $respectRules, ipv6: $ipv6, defaultNameserver: $defaultNameserver, enhancedMode: $enhancedMode, fakeIpRange: $fakeIpRange, fakeIpFilter: $fakeIpFilter, nameserverPolicy: $nameserverPolicy, nameserver: $nameserver, fallback: $fallback, proxyServerNameserver: $proxyServerNameserver, fallbackFilter: $fallbackFilter)';
+    return 'Dns(enable: $enable, preferH3: $preferH3, useHosts: $useHosts, useSystemHosts: $useSystemHosts, respectRules: $respectRules, fallbackLazyQuery: $fallbackLazyQuery, ipv6: $ipv6, defaultNameserver: $defaultNameserver, enhancedMode: $enhancedMode, fakeIpRange: $fakeIpRange, fakeIpFilter: $fakeIpFilter, nameserverPolicy: $nameserverPolicy, nameserver: $nameserver, fallback: $fallback, proxyServerNameserver: $proxyServerNameserver, fallbackFilter: $fallbackFilter)';
   }
 
   @override
@@ -1019,6 +1062,8 @@ class _$DnsImpl implements _Dns {
                 other.useSystemHosts == useSystemHosts) &&
             (identical(other.respectRules, respectRules) ||
                 other.respectRules == respectRules) &&
+            (identical(other.fallbackLazyQuery, fallbackLazyQuery) ||
+                other.fallbackLazyQuery == fallbackLazyQuery) &&
             (identical(other.ipv6, ipv6) || other.ipv6 == ipv6) &&
             const DeepCollectionEquality()
                 .equals(other._defaultNameserver, _defaultNameserver) &&
@@ -1048,6 +1093,7 @@ class _$DnsImpl implements _Dns {
       useHosts,
       useSystemHosts,
       respectRules,
+      fallbackLazyQuery,
       ipv6,
       const DeepCollectionEquality().hash(_defaultNameserver),
       enhancedMode,
@@ -1080,6 +1126,7 @@ abstract class _Dns implements Dns {
       @JsonKey(name: "use-hosts") final bool useHosts,
       @JsonKey(name: "use-system-hosts") final bool useSystemHosts,
       @JsonKey(name: "respect-rules") final bool respectRules,
+      @JsonKey(name: "fallback-lazy-query") final bool fallbackLazyQuery,
       final bool ipv6,
       @JsonKey(name: "default-nameserver") final List<String> defaultNameserver,
       @JsonKey(name: "enhanced-mode") final DnsMode enhancedMode,
@@ -1110,6 +1157,9 @@ abstract class _Dns implements Dns {
   @override
   @JsonKey(name: "respect-rules")
   bool get respectRules;
+  @override
+  @JsonKey(name: "fallback-lazy-query")
+  bool get fallbackLazyQuery;
   @override
   bool get ipv6;
   @override
