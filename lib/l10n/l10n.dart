@@ -2324,6 +2324,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Fallback lazy query`
+  String get fallbackLazyQuery {
+    return Intl.message(
+      'Fallback lazy query',
+      name: 'fallbackLazyQuery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Query fallback DNS only after the nameserver result fails the filter`
+  String get fallbackLazyQueryDesc {
+    return Intl.message(
+      'Query fallback DNS only after the nameserver result fails the filter',
+      name: 'fallbackLazyQueryDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Geoip code`
   String get geoipCode {
     return Intl.message('Geoip code', name: 'geoipCode', desc: '', args: []);
@@ -2694,6 +2714,16 @@ class AppLocalizations {
     return Intl.message(
       'Prevent ICMP loopback issues, ping will not show real latency',
       name: 'disableIcmpForwardingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ICMP Timeout`
+  String get icmpTimeout {
+    return Intl.message(
+      'ICMP Timeout',
+      name: 'icmpTimeout',
       desc: '',
       args: [],
     );

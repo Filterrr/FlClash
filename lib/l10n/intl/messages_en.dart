@@ -260,6 +260,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Generally use offshore DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback filter"),
+    "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
+      "Fallback lazy query",
+    ),
+    "fallbackLazyQueryDesc": MessageLookupByLibrary.simpleMessage(
+      "Query fallback DNS only after the nameserver result fails the filter",
+    ),
     "file": MessageLookupByLibrary.simpleMessage("File"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("Directly upload profile"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
@@ -295,6 +301,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use keyboard to control applications",
     ),
     "hours": MessageLookupByLibrary.simpleMessage("Hours"),
+    "icmpTimeout": MessageLookupByLibrary.simpleMessage("ICMP Timeout"),
     "icon": MessageLookupByLibrary.simpleMessage("Icon"),
     "iconConfiguration": MessageLookupByLibrary.simpleMessage(
       "Icon configuration",

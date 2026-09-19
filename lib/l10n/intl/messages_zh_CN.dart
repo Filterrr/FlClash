@@ -183,6 +183,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage("一般情况下使用境外DNS"),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback过滤"),
+    "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("延迟回退查询"),
+    "fallbackLazyQueryDesc": MessageLookupByLibrary.simpleMessage(
+      "先判断主 DNS 结果是否满足过滤条件，不满足时才发起 fallback 查询",
+    ),
     "file": MessageLookupByLibrary.simpleMessage("文件"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("直接上传配置文件"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage("过滤系统应用"),
@@ -204,6 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "hotkeyManagement": MessageLookupByLibrary.simpleMessage("快捷键管理"),
     "hotkeyManagementDesc": MessageLookupByLibrary.simpleMessage("使用键盘控制应用程序"),
     "hours": MessageLookupByLibrary.simpleMessage("小时"),
+    "icmpTimeout": MessageLookupByLibrary.simpleMessage("ICMP 超时时间"),
     "icon": MessageLookupByLibrary.simpleMessage("图片"),
     "iconConfiguration": MessageLookupByLibrary.simpleMessage("图片配置"),
     "iconStyle": MessageLookupByLibrary.simpleMessage("图标样式"),

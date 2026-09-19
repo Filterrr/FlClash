@@ -200,6 +200,54 @@ class DisableICMPForwardingItem extends StatelessWidget {
   }
 }
 
+class IcmpTimeoutItem extends StatelessWidget {
+  const IcmpTimeoutItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, int>(
+      selector: (_, clashConfig) => clashConfig.tun.icmpTimeout,
+      builder: (_, value, __) {
+        return ListItem.input(
+          title: Text(appLocalizations.icmpTimeout),
+          subtitle: Text(
+            value == 0
+                ? appLocalizations.defaultText
+                : "$value ${appLocalizations.seconds}",
+          ),
+          delegate: InputDelegate(
+            title: appLocalizations.icmpTimeout,
+            suffixText: appLocalizations.seconds,
+            resetValue: "0",
+            value: "$value",
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  final intValue = int.parse(value);
+                  if (intValue < 0) {
+                    throw "Invalid icmpTimeout";
+                  }
+                  final clashConfig = globalState.appController.clashConfig;
+                  clashConfig.tun = clashConfig.tun.copyWith(
+                    icmpTimeout: intValue,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.icmpTimeout,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class AutoRouteItem extends StatelessWidget {
   const AutoRouteItem({super.key});
 
@@ -450,6 +498,7 @@ final networkItems = [
       const StrictRouteItem(),
       const AutoDetectInterfaceItem(),
       const DisableICMPForwardingItem(),
+      const IcmpTimeoutItem(),
       const RouteModeItem(),
       const RouteAddressItem(),
     ],

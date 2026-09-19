@@ -400,6 +400,33 @@ class NameserverPolicyItem extends StatelessWidget {
   }
 }
 
+class FallbackLazyQueryItem extends StatelessWidget {
+  const FallbackLazyQueryItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, bool>(
+      selector: (_, clashConfig) => clashConfig.dns.fallbackLazyQuery,
+      builder: (_, fallbackLazyQuery, __) {
+        return ListItem.switchItem(
+          title: Text(appLocalizations.fallbackLazyQuery),
+          subtitle: Text(appLocalizations.fallbackLazyQueryDesc),
+          delegate: SwitchDelegate(
+            value: fallbackLazyQuery,
+            onChanged: (bool value) async {
+              final clashConfig = globalState.appController.clashConfig;
+              final dns = clashConfig.dns;
+              clashConfig.dns = dns.copyWith(
+                fallbackLazyQuery: value,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class ProxyServerNameserverItem extends StatelessWidget {
   const ProxyServerNameserverItem({super.key});
 
@@ -667,6 +694,7 @@ class DnsOptions extends StatelessWidget {
           const NameserverPolicyItem(),
           const NameserverItem(),
           const FallbackItem(),
+          const FallbackLazyQueryItem(),
           const ProxyServerNameserverItem(),
         ],
       ),

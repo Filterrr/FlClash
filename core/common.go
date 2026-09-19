@@ -232,6 +232,7 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.Tun.DNSHijack = patchConfig.Tun.DNSHijack
 	targetConfig.Tun.Stack = patchConfig.Tun.Stack
 	targetConfig.Tun.DisableICMPForwarding = patchConfig.Tun.DisableICMPForwarding
+	targetConfig.Tun.ICMPTimeout = patchConfig.Tun.ICMPTimeout
 	if configParams.OverrideAutoRoute {
 		targetConfig.Tun.AutoRoute = true
 	}

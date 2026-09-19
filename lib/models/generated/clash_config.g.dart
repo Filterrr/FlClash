@@ -115,6 +115,7 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
       strictRoute: json['strict-route'] as bool? ?? false,
       autoDetectInterface: json['auto-detect-interface'] as bool? ?? false,
       disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
+      icmpTimeout: (json['icmp-timeout'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
@@ -126,6 +127,7 @@ Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
       'strict-route': instance.strictRoute,
       'auto-detect-interface': instance.autoDetectInterface,
       'disable-icmp-forwarding': instance.disableIcmpForwarding,
+      'icmp-timeout': instance.icmpTimeout,
     };
 
 const _$TunStackEnumMap = {
@@ -169,6 +171,7 @@ _$DnsImpl _$$DnsImplFromJson(Map<String, dynamic> json) => _$DnsImpl(
       useHosts: json['use-hosts'] as bool? ?? true,
       useSystemHosts: json['use-system-hosts'] as bool? ?? true,
       respectRules: json['respect-rules'] as bool? ?? false,
+      fallbackLazyQuery: json['fallback-lazy-query'] as bool? ?? false,
       ipv6: json['ipv6'] as bool? ?? false,
       defaultNameserver: (json['default-nameserver'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -218,6 +221,7 @@ Map<String, dynamic> _$$DnsImplToJson(_$DnsImpl instance) => <String, dynamic>{
       'use-hosts': instance.useHosts,
       'use-system-hosts': instance.useSystemHosts,
       'respect-rules': instance.respectRules,
+      'fallback-lazy-query': instance.fallbackLazyQuery,
       'ipv6': instance.ipv6,
       'default-nameserver': instance.defaultNameserver,
       'enhanced-mode': _$DnsModeEnumMap[instance.enhancedMode]!,
