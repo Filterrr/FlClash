@@ -997,6 +997,7 @@ mixin _$VpnProps {
   bool get systemProxy => throw _privateConstructorUsedError;
   bool get ipv6 => throw _privateConstructorUsedError;
   bool get allowBypass => throw _privateConstructorUsedError;
+  bool get fcmKeepAlive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -1009,7 +1010,12 @@ abstract class $VpnPropsCopyWith<$Res> {
   factory $VpnPropsCopyWith(VpnProps value, $Res Function(VpnProps) then) =
       _$VpnPropsCopyWithImpl<$Res, VpnProps>;
   @useResult
-  $Res call({bool enable, bool systemProxy, bool ipv6, bool allowBypass});
+  $Res call(
+      {bool enable,
+      bool systemProxy,
+      bool ipv6,
+      bool allowBypass,
+      bool fcmKeepAlive});
 }
 
 /// @nodoc
@@ -1029,6 +1035,7 @@ class _$VpnPropsCopyWithImpl<$Res, $Val extends VpnProps>
     Object? systemProxy = null,
     Object? ipv6 = null,
     Object? allowBypass = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -1047,6 +1054,10 @@ class _$VpnPropsCopyWithImpl<$Res, $Val extends VpnProps>
           ? _value.allowBypass
           : allowBypass // ignore: cast_nullable_to_non_nullable
               as bool,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -1059,7 +1070,12 @@ abstract class _$$VpnPropsImplCopyWith<$Res>
       __$$VpnPropsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({bool enable, bool systemProxy, bool ipv6, bool allowBypass});
+  $Res call(
+      {bool enable,
+      bool systemProxy,
+      bool ipv6,
+      bool allowBypass,
+      bool fcmKeepAlive});
 }
 
 /// @nodoc
@@ -1077,6 +1093,7 @@ class __$$VpnPropsImplCopyWithImpl<$Res>
     Object? systemProxy = null,
     Object? ipv6 = null,
     Object? allowBypass = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_$VpnPropsImpl(
       enable: null == enable
@@ -1095,6 +1112,10 @@ class __$$VpnPropsImplCopyWithImpl<$Res>
           ? _value.allowBypass
           : allowBypass // ignore: cast_nullable_to_non_nullable
               as bool,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -1106,7 +1127,8 @@ class _$VpnPropsImpl implements _VpnProps {
       {this.enable = true,
       this.systemProxy = true,
       this.ipv6 = false,
-      this.allowBypass = true});
+      this.allowBypass = true,
+      this.fcmKeepAlive = true});
 
   factory _$VpnPropsImpl.fromJson(Map<String, dynamic> json) =>
       _$$VpnPropsImplFromJson(json);
@@ -1123,10 +1145,13 @@ class _$VpnPropsImpl implements _VpnProps {
   @override
   @JsonKey()
   final bool allowBypass;
+  @override
+  @JsonKey()
+  final bool fcmKeepAlive;
 
   @override
   String toString() {
-    return 'VpnProps(enable: $enable, systemProxy: $systemProxy, ipv6: $ipv6, allowBypass: $allowBypass)';
+    return 'VpnProps(enable: $enable, systemProxy: $systemProxy, ipv6: $ipv6, allowBypass: $allowBypass, fcmKeepAlive: $fcmKeepAlive)';
   }
 
   @override
@@ -1139,13 +1164,15 @@ class _$VpnPropsImpl implements _VpnProps {
                 other.systemProxy == systemProxy) &&
             (identical(other.ipv6, ipv6) || other.ipv6 == ipv6) &&
             (identical(other.allowBypass, allowBypass) ||
-                other.allowBypass == allowBypass));
+                other.allowBypass == allowBypass) &&
+            (identical(other.fcmKeepAlive, fcmKeepAlive) ||
+                other.fcmKeepAlive == fcmKeepAlive));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, enable, systemProxy, ipv6, allowBypass);
+  int get hashCode => Object.hash(
+      runtimeType, enable, systemProxy, ipv6, allowBypass, fcmKeepAlive);
 
   @JsonKey(ignore: true)
   @override
@@ -1166,7 +1193,8 @@ abstract class _VpnProps implements VpnProps {
       {final bool enable,
       final bool systemProxy,
       final bool ipv6,
-      final bool allowBypass}) = _$VpnPropsImpl;
+      final bool allowBypass,
+      final bool fcmKeepAlive}) = _$VpnPropsImpl;
 
   factory _VpnProps.fromJson(Map<String, dynamic> json) =
       _$VpnPropsImpl.fromJson;
@@ -1179,6 +1207,8 @@ abstract class _VpnProps implements VpnProps {
   bool get ipv6;
   @override
   bool get allowBypass;
+  @override
+  bool get fcmKeepAlive;
   @override
   @JsonKey(ignore: true)
   _$$VpnPropsImplCopyWith<_$VpnPropsImpl> get copyWith =>

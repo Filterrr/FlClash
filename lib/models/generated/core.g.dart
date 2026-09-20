@@ -26,6 +26,7 @@ _$CoreStateImpl _$$CoreStateImplFromJson(Map<String, dynamic> json) =>
       onlyProxy: json['onlyProxy'] as bool,
       disableIcmpForwarding: json['disableIcmpForwarding'] as bool,
       icmpTimeout: (json['icmpTimeout'] as num).toInt(),
+      fcmKeepAlive: json['fcmKeepAlive'] as bool,
     );
 
 Map<String, dynamic> _$$CoreStateImplToJson(_$CoreStateImpl instance) =>
@@ -41,6 +42,7 @@ Map<String, dynamic> _$$CoreStateImplToJson(_$CoreStateImpl instance) =>
       'onlyProxy': instance.onlyProxy,
       'disableIcmpForwarding': instance.disableIcmpForwarding,
       'icmpTimeout': instance.icmpTimeout,
+      'fcmKeepAlive': instance.fcmKeepAlive,
     };
 
 _$AndroidVpnOptionsImpl _$$AndroidVpnOptionsImplFromJson(
@@ -63,6 +65,7 @@ _$AndroidVpnOptionsImpl _$$AndroidVpnOptionsImplFromJson(
           .map((e) => e as String)
           .toList(),
       dnsServerAddress: json['dnsServerAddress'] as String,
+      fcmKeepAlive: json['fcmKeepAlive'] as bool,
     );
 
 Map<String, dynamic> _$$AndroidVpnOptionsImplToJson(
@@ -78,6 +81,7 @@ Map<String, dynamic> _$$AndroidVpnOptionsImplToJson(
       'ipv6Address': instance.ipv6Address,
       'routeAddress': instance.routeAddress,
       'dnsServerAddress': instance.dnsServerAddress,
+      'fcmKeepAlive': instance.fcmKeepAlive,
     };
 
 _$ConfigExtendedParamsImpl _$$ConfigExtendedParamsImplFromJson(

@@ -229,6 +229,7 @@ class GlobalState {
               config.currentProfile?.label ?? config.currentProfileId ?? "",
           disableIcmpForwarding: clashConfig.tun.disableIcmpForwarding,
           icmpTimeout: clashConfig.tun.icmpTimeout,
+          fcmKeepAlive: config.vpnProps.fcmKeepAlive,
         ),
       );
     }

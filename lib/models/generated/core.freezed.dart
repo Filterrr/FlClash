@@ -33,6 +33,8 @@ mixin _$CoreState {
   bool get disableIcmpForwarding => throw _privateConstructorUsedError;
   @JsonKey(name: "icmpTimeout")
   int get icmpTimeout => throw _privateConstructorUsedError;
+  @JsonKey(name: "fcmKeepAlive")
+  bool get fcmKeepAlive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -56,7 +58,8 @@ abstract class $CoreStateCopyWith<$Res> {
       bool ipv6,
       bool onlyProxy,
       @JsonKey(name: "disableIcmpForwarding") bool disableIcmpForwarding,
-      @JsonKey(name: "icmpTimeout") int icmpTimeout});
+      @JsonKey(name: "icmpTimeout") int icmpTimeout,
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
 
   $AccessControlCopyWith<$Res>? get accessControl;
 }
@@ -85,6 +88,7 @@ class _$CoreStateCopyWithImpl<$Res, $Val extends CoreState>
     Object? onlyProxy = null,
     Object? disableIcmpForwarding = null,
     Object? icmpTimeout = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -131,6 +135,10 @@ class _$CoreStateCopyWithImpl<$Res, $Val extends CoreState>
           ? _value.icmpTimeout
           : icmpTimeout // ignore: cast_nullable_to_non_nullable
               as int,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -166,7 +174,8 @@ abstract class _$$CoreStateImplCopyWith<$Res>
       bool ipv6,
       bool onlyProxy,
       @JsonKey(name: "disableIcmpForwarding") bool disableIcmpForwarding,
-      @JsonKey(name: "icmpTimeout") int icmpTimeout});
+      @JsonKey(name: "icmpTimeout") int icmpTimeout,
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
 
   @override
   $AccessControlCopyWith<$Res>? get accessControl;
@@ -194,6 +203,7 @@ class __$$CoreStateImplCopyWithImpl<$Res>
     Object? onlyProxy = null,
     Object? disableIcmpForwarding = null,
     Object? icmpTimeout = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_$CoreStateImpl(
       enable: null == enable
@@ -240,6 +250,10 @@ class __$$CoreStateImplCopyWithImpl<$Res>
           ? _value.icmpTimeout
           : icmpTimeout // ignore: cast_nullable_to_non_nullable
               as int,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -259,7 +273,8 @@ class _$CoreStateImpl implements _CoreState {
       required this.onlyProxy,
       @JsonKey(name: "disableIcmpForwarding")
       required this.disableIcmpForwarding,
-      @JsonKey(name: "icmpTimeout") required this.icmpTimeout})
+      @JsonKey(name: "icmpTimeout") required this.icmpTimeout,
+      @JsonKey(name: "fcmKeepAlive") required this.fcmKeepAlive})
       : _bypassDomain = bypassDomain,
         _routeAddress = routeAddress;
 
@@ -302,10 +317,13 @@ class _$CoreStateImpl implements _CoreState {
   @override
   @JsonKey(name: "icmpTimeout")
   final int icmpTimeout;
+  @override
+  @JsonKey(name: "fcmKeepAlive")
+  final bool fcmKeepAlive;
 
   @override
   String toString() {
-    return 'CoreState(enable: $enable, accessControl: $accessControl, currentProfileName: $currentProfileName, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeAddress: $routeAddress, ipv6: $ipv6, onlyProxy: $onlyProxy, disableIcmpForwarding: $disableIcmpForwarding, icmpTimeout: $icmpTimeout)';
+    return 'CoreState(enable: $enable, accessControl: $accessControl, currentProfileName: $currentProfileName, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeAddress: $routeAddress, ipv6: $ipv6, onlyProxy: $onlyProxy, disableIcmpForwarding: $disableIcmpForwarding, icmpTimeout: $icmpTimeout, fcmKeepAlive: $fcmKeepAlive)';
   }
 
   @override
@@ -332,7 +350,9 @@ class _$CoreStateImpl implements _CoreState {
             (identical(other.disableIcmpForwarding, disableIcmpForwarding) ||
                 other.disableIcmpForwarding == disableIcmpForwarding) &&
             (identical(other.icmpTimeout, icmpTimeout) ||
-                other.icmpTimeout == icmpTimeout));
+                other.icmpTimeout == icmpTimeout) &&
+            (identical(other.fcmKeepAlive, fcmKeepAlive) ||
+                other.fcmKeepAlive == fcmKeepAlive));
   }
 
   @JsonKey(ignore: true)
@@ -349,7 +369,8 @@ class _$CoreStateImpl implements _CoreState {
       ipv6,
       onlyProxy,
       disableIcmpForwarding,
-      icmpTimeout);
+      icmpTimeout,
+      fcmKeepAlive);
 
   @JsonKey(ignore: true)
   @override
@@ -378,7 +399,8 @@ abstract class _CoreState implements CoreState {
       required final bool onlyProxy,
       @JsonKey(name: "disableIcmpForwarding")
       required final bool disableIcmpForwarding,
-      @JsonKey(name: "icmpTimeout") required final int icmpTimeout}) =
+      @JsonKey(name: "icmpTimeout") required final int icmpTimeout,
+      @JsonKey(name: "fcmKeepAlive") required final bool fcmKeepAlive}) =
       _$CoreStateImpl;
 
   factory _CoreState.fromJson(Map<String, dynamic> json) =
@@ -409,6 +431,9 @@ abstract class _CoreState implements CoreState {
   @JsonKey(name: "icmpTimeout")
   int get icmpTimeout;
   @override
+  @JsonKey(name: "fcmKeepAlive")
+  bool get fcmKeepAlive;
+  @override
   @JsonKey(ignore: true)
   _$$CoreStateImplCopyWith<_$CoreStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -430,6 +455,8 @@ mixin _$AndroidVpnOptions {
   String get ipv6Address => throw _privateConstructorUsedError;
   List<String> get routeAddress => throw _privateConstructorUsedError;
   String get dnsServerAddress => throw _privateConstructorUsedError;
+  @JsonKey(name: "fcmKeepAlive")
+  bool get fcmKeepAlive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -453,7 +480,8 @@ abstract class $AndroidVpnOptionsCopyWith<$Res> {
       String ipv4Address,
       String ipv6Address,
       List<String> routeAddress,
-      String dnsServerAddress});
+      String dnsServerAddress,
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
 
   $AccessControlCopyWith<$Res>? get accessControl;
 }
@@ -481,6 +509,7 @@ class _$AndroidVpnOptionsCopyWithImpl<$Res, $Val extends AndroidVpnOptions>
     Object? ipv6Address = null,
     Object? routeAddress = null,
     Object? dnsServerAddress = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -523,6 +552,10 @@ class _$AndroidVpnOptionsCopyWithImpl<$Res, $Val extends AndroidVpnOptions>
           ? _value.dnsServerAddress
           : dnsServerAddress // ignore: cast_nullable_to_non_nullable
               as String,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 
@@ -557,7 +590,8 @@ abstract class _$$AndroidVpnOptionsImplCopyWith<$Res>
       String ipv4Address,
       String ipv6Address,
       List<String> routeAddress,
-      String dnsServerAddress});
+      String dnsServerAddress,
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
 
   @override
   $AccessControlCopyWith<$Res>? get accessControl;
@@ -584,6 +618,7 @@ class __$$AndroidVpnOptionsImplCopyWithImpl<$Res>
     Object? ipv6Address = null,
     Object? routeAddress = null,
     Object? dnsServerAddress = null,
+    Object? fcmKeepAlive = null,
   }) {
     return _then(_$AndroidVpnOptionsImpl(
       enable: null == enable
@@ -626,6 +661,10 @@ class __$$AndroidVpnOptionsImplCopyWithImpl<$Res>
           ? _value.dnsServerAddress
           : dnsServerAddress // ignore: cast_nullable_to_non_nullable
               as String,
+      fcmKeepAlive: null == fcmKeepAlive
+          ? _value.fcmKeepAlive
+          : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -643,7 +682,8 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
       required this.ipv4Address,
       required this.ipv6Address,
       required final List<String> routeAddress,
-      required this.dnsServerAddress})
+      required this.dnsServerAddress,
+      @JsonKey(name: "fcmKeepAlive") required this.fcmKeepAlive})
       : _bypassDomain = bypassDomain,
         _routeAddress = routeAddress;
 
@@ -682,10 +722,13 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
 
   @override
   final String dnsServerAddress;
+  @override
+  @JsonKey(name: "fcmKeepAlive")
+  final bool fcmKeepAlive;
 
   @override
   String toString() {
-    return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress)';
+    return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress, fcmKeepAlive: $fcmKeepAlive)';
   }
 
   @override
@@ -710,7 +753,9 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
             const DeepCollectionEquality()
                 .equals(other._routeAddress, _routeAddress) &&
             (identical(other.dnsServerAddress, dnsServerAddress) ||
-                other.dnsServerAddress == dnsServerAddress));
+                other.dnsServerAddress == dnsServerAddress) &&
+            (identical(other.fcmKeepAlive, fcmKeepAlive) ||
+                other.fcmKeepAlive == fcmKeepAlive));
   }
 
   @JsonKey(ignore: true)
@@ -726,7 +771,8 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
       ipv4Address,
       ipv6Address,
       const DeepCollectionEquality().hash(_routeAddress),
-      dnsServerAddress);
+      dnsServerAddress,
+      fcmKeepAlive);
 
   @JsonKey(ignore: true)
   @override
@@ -754,7 +800,9 @@ abstract class _AndroidVpnOptions implements AndroidVpnOptions {
       required final String ipv4Address,
       required final String ipv6Address,
       required final List<String> routeAddress,
-      required final String dnsServerAddress}) = _$AndroidVpnOptionsImpl;
+      required final String dnsServerAddress,
+      @JsonKey(name: "fcmKeepAlive") required final bool fcmKeepAlive}) =
+      _$AndroidVpnOptionsImpl;
 
   factory _AndroidVpnOptions.fromJson(Map<String, dynamic> json) =
       _$AndroidVpnOptionsImpl.fromJson;
@@ -779,6 +827,9 @@ abstract class _AndroidVpnOptions implements AndroidVpnOptions {
   List<String> get routeAddress;
   @override
   String get dnsServerAddress;
+  @override
+  @JsonKey(name: "fcmKeepAlive")
+  bool get fcmKeepAlive;
   @override
   @JsonKey(ignore: true)
   _$$AndroidVpnOptionsImplCopyWith<_$AndroidVpnOptionsImpl> get copyWith =>

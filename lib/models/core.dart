@@ -45,6 +45,7 @@ class CoreState with _$CoreState {
     required bool onlyProxy,
     @JsonKey(name: "disableIcmpForwarding") required bool disableIcmpForwarding,
     @JsonKey(name: "icmpTimeout") required int icmpTimeout,
+    @JsonKey(name: "fcmKeepAlive") required bool fcmKeepAlive,
   }) = _CoreState;
 
   factory CoreState.fromJson(Map<String, Object?> json) =>
@@ -64,6 +65,7 @@ class AndroidVpnOptions with _$AndroidVpnOptions {
     required String ipv6Address,
     required List<String> routeAddress,
     required String dnsServerAddress,
+    @JsonKey(name: "fcmKeepAlive") required bool fcmKeepAlive,
   }) = _AndroidVpnOptions;
 
   factory AndroidVpnOptions.fromJson(Map<String, Object?> json) =>

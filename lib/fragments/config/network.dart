@@ -88,6 +88,33 @@ class AllowBypassItem extends StatelessWidget {
   }
 }
 
+class FcmKeepAliveItem extends StatelessWidget {
+  const FcmKeepAliveItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.vpnProps.fcmKeepAlive,
+      builder: (_, fcmKeepAlive, __) {
+        return ListItem.switchItem(
+          title: Text(appLocalizations.fcmKeepAlive),
+          subtitle: Text(appLocalizations.fcmKeepAliveDesc),
+          delegate: SwitchDelegate(
+            value: fcmKeepAlive,
+            onChanged: (bool value) async {
+              final config = globalState.appController.config;
+              final vpnProps = config.vpnProps;
+              config.vpnProps = vpnProps.copyWith(
+                fcmKeepAlive: value,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class VpnSystemProxyItem extends StatelessWidget {
   const VpnSystemProxyItem({super.key});
 
@@ -479,6 +506,7 @@ final networkItems = [
       items: [
         const SystemProxyItem(),
         const AllowBypassItem(),
+        const FcmKeepAliveItem(),
       ],
     ),
   if (system.isDesktop)

@@ -187,6 +187,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallbackLazyQueryDesc": MessageLookupByLibrary.simpleMessage(
       "先判断主 DNS 结果是否满足过滤条件，不满足时才发起 fallback 查询",
     ),
+    "fcmKeepAlive": MessageLookupByLibrary.simpleMessage("FCM 保活"),
+    "fcmKeepAliveDesc": MessageLookupByLibrary.simpleMessage("让 Google 推送（FCM）流量走 VPN，保证推送始终可达"),
     "file": MessageLookupByLibrary.simpleMessage("文件"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("直接上传配置文件"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage("过滤系统应用"),
