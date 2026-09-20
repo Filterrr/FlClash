@@ -14,6 +14,18 @@ data class AccessControl(
 
 data class CIDR(val address: InetAddress, val prefixLength: Int)
 
+/**
+ * Package names that can carry the FCM (Google push) connection. The framework
+ * rejects unknown package names with
+ * [android.content.pm.PackageManager.NameNotFoundException], so consumers must
+ * filter this list against the installed packages before handing it to
+ * [android.net.VpnService.Builder].
+ */
+val FCM_CANDIDATE_PACKAGES = listOf(
+    "com.google.android.gms",
+    "com.google.android.gsf",
+)
+
 data class VpnOptions(
     val enable: Boolean,
     val port: Int,
@@ -28,23 +40,11 @@ data class VpnOptions(
     val fcmKeepAlive: Boolean = false,
 ) {
     /**
-     * Google push (FCM) is carried by Google Play services. When the VPN runs in
-     * per-app mode those packages must stay inside the tunnel, otherwise the
-     * long-lived MCS connection is dropped and notifications stop arriving.
-     * [FCM_PACKAGES] is what gets pinned into the tunnel when [fcmKeepAlive] is on.
+     * Package names to pin into the tunnel when [fcmKeepAlive] is on. Still a
+     * candidate list: [com.google.android.gms.persistent] is a process name, not
+     * a package name, so the caller must intersect with the actually installed
+     * packages (see FlClashVpnService).
      */
     val fcmKeepAlivePackages: List<String>
-        get() = if (fcmKeepAlive) FCM_PACKAGES else emptyList()
-
-    companion object {
-        /**
-         * Packets for FCM flow through these; they are the packages the system
-         * attributes the MCS connection to.
-         */
-        val FCM_PACKAGES = listOf(
-            "com.google.android.gms",
-            "com.google.android.gsf",
-            "com.google.android.gms.persistent",
-        )
-    }
+        get() = if (fcmKeepAlive) FCM_CANDIDATE_PACKAGES else emptyList()
 }
