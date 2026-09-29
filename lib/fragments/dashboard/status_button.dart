@@ -29,6 +29,7 @@ class TUNButton extends StatelessWidget {
             },
             title: appLocalizations.tun,
           );
+        },
         info: Info(
           label: appLocalizations.tun,
           iconData: Icons.stacked_line_chart,
