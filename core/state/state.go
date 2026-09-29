@@ -6,6 +6,10 @@ var DefaultIpv4Address = "172.19.0.1/30"
 var DefaultDnsAddress = "172.19.0.2"
 var DefaultIpv6Address = "fdfe:dcba:9876::1/126"
 
+// DefaultMtu mirrors mihomo's TUN default and is applied when the user has
+// not chosen a custom TUN MTU.
+const DefaultMtu = 9000
+
 type AndroidVpnOptions struct {
 	Enable           bool           `json:"enable"`
 	Port             int            `json:"port"`
@@ -18,6 +22,7 @@ type AndroidVpnOptions struct {
 	Ipv6Address      string         `json:"ipv6Address"`
 	DnsServerAddress string         `json:"dnsServerAddress"`
 	FcmKeepAlive     bool           `json:"fcmKeepAlive"`
+	Mtu              uint32         `json:"mtu"`
 }
 
 type AccessControl struct {

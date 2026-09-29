@@ -314,6 +314,97 @@ class IcmpTimeoutItem extends StatelessWidget {
   }
 }
 
+class MtuItem extends StatelessWidget {
+  const MtuItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, int>(
+      selector: (_, clashConfig) => clashConfig.tun.mtu,
+      builder: (_, value, __) {
+        return ListItem.input(
+          title: Text(appLocalizations.mtu),
+          subtitle: Text("$value"),
+          delegate: InputDelegate(
+            title: appLocalizations.mtu,
+            resetValue: "$defaultMtu",
+            value: "$value",
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  final intValue = int.parse(value);
+                  if (intValue < 576 || intValue > 65535) {
+                    throw "Invalid mtu";
+                  }
+                  final clashConfig = globalState.appController.clashConfig;
+                  clashConfig.tun = clashConfig.tun.copyWith(
+                    mtu: intValue,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.mtu,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class UdpTimeoutItem extends StatelessWidget {
+  const UdpTimeoutItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<ClashConfig, int>(
+      selector: (_, clashConfig) => clashConfig.tun.udpTimeout,
+      builder: (_, value, __) {
+        return ListItem.input(
+          title: Text(appLocalizations.udpTimeout),
+          subtitle: Text(
+            value == 0
+                ? appLocalizations.defaultText
+                : "$value ${appLocalizations.seconds}",
+          ),
+          delegate: InputDelegate(
+            title: appLocalizations.udpTimeout,
+            suffixText: appLocalizations.seconds,
+            resetValue: "0",
+            value: "$value",
+            onChanged: (String? value) {
+              if (value != null) {
+                try {
+                  final intValue = int.parse(value);
+                  if (intValue < 0) {
+                    throw "Invalid udpTimeout";
+                  }
+                  final clashConfig = globalState.appController.clashConfig;
+                  clashConfig.tun = clashConfig.tun.copyWith(
+                    udpTimeout: intValue,
+                  );
+                } catch (e) {
+                  globalState.showMessage(
+                    title: appLocalizations.udpTimeout,
+                    message: TextSpan(
+                      text: e.toString(),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class AutoRouteItem extends StatelessWidget {
   const AutoRouteItem({super.key});
 
@@ -562,11 +653,13 @@ final networkItems = [
       if (system.isDesktop) const TUNItem(),
       const TunStackItem(),
       const CongestionControllerItem(),
+      const MtuItem(),
       const AutoRouteItem(),
       const StrictRouteItem(),
       const AutoDetectInterfaceItem(),
       const DisableICMPForwardingItem(),
       const IcmpTimeoutItem(),
+      const UdpTimeoutItem(),
       const RouteModeItem(),
       const RouteAddressItem(),
     ],

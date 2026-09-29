@@ -149,6 +149,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage("禁用 ICMP 转发"),
     "congestionController": MessageLookupByLibrary.simpleMessage("拥塞控制"),
+    "mtu": MessageLookupByLibrary.simpleMessage("TUN MTU"),
+    "udpTimeout": MessageLookupByLibrary.simpleMessage("UDP 超时"),
+    "authorizeFailed": MessageLookupByLibrary.simpleMessage("需要管理员权限"),
+    "authorizeFailedDesc":
+        MessageLookupByLibrary.simpleMessage("TUN 模式需要核心以管理员权限运行。请重新开启并同意系统授权弹窗。"),
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "防止某些情况下的 ICMP 环回问题，ping 将不会显示真实的延迟",
     ),

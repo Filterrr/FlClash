@@ -26,6 +26,9 @@ val FCM_CANDIDATE_PACKAGES = listOf(
     "com.google.android.gsf",
 )
 
+/** Mirrors the core's TUN MTU default when the user has not set one. */
+const val DEFAULT_MTU = 9000
+
 data class VpnOptions(
     val enable: Boolean,
     val port: Int,
@@ -38,6 +41,7 @@ data class VpnOptions(
     val ipv6Address: String,
     val dnsServerAddress: String,
     val fcmKeepAlive: Boolean = false,
+    val mtu: Int = DEFAULT_MTU,
 ) {
     /**
      * Package names to pin into the tunnel when [fcmKeepAlive] is on. Still a

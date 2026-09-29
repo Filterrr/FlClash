@@ -2749,6 +2749,46 @@ class AppLocalizations {
     );
   }
 
+  /// `TUN MTU`
+  String get mtu {
+    return Intl.message(
+      'TUN MTU',
+      name: 'mtu',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `UDP Timeout`
+  String get udpTimeout {
+    return Intl.message(
+      'UDP Timeout',
+      name: 'udpTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Administrator permission required`
+  String get authorizeFailed {
+    return Intl.message(
+      'Administrator permission required',
+      name: 'authorizeFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN mode needs the core to run with administrator privileges. Enable it again and approve the system prompt.`
+  String get authorizeFailedDesc {
+    return Intl.message(
+      'TUN mode needs the core to run with administrator privileges. Enable it again and approve the system prompt.',
+      name: 'authorizeFailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ICMP Timeout`
   String get icmpTimeout {
     return Intl.message(

@@ -66,6 +66,7 @@ class AndroidVpnOptions with _$AndroidVpnOptions {
     required List<String> routeAddress,
     required String dnsServerAddress,
     @JsonKey(name: "fcmKeepAlive") required bool fcmKeepAlive,
+    @Default(defaultMtu) int mtu,
   }) = _AndroidVpnOptions;
 
   factory AndroidVpnOptions.fromJson(Map<String, Object?> json) =>

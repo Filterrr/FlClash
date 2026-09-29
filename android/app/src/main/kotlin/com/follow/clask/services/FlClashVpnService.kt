@@ -67,7 +67,7 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
                 }
             }
             addDnsServer(options.dnsServerAddress)
-            setMtu(9000)
+            setMtu(options.mtu)
             options.accessControl?.let { accessControl ->
                 // The framework rejects unknown package names with
                 // NameNotFoundException, so pin only packages that actually exist.
@@ -116,7 +116,7 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
         }
     }
 
-    fun updateUnderlyingNetworks(networks: Array<Network>) {
+    fun updateUnderlyingNetworks(networks: Array<Network>?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             this.setUnderlyingNetworks(networks)
         }

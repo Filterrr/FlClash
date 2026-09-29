@@ -110,6 +110,14 @@ class GlobalState {
           useClashConfig.tun = useClashConfig.tun.copyWith(
             enable: false,
           );
+          // Elevation was dismissed or failed: TUN cannot start without it,
+          // so explain why the switch turned itself off.
+          showMessage(
+            title: appLocalizations.authorizeFailed,
+            message: TextSpan(
+              text: appLocalizations.authorizeFailedDesc,
+            ),
+          );
       }
     }
     if (config.appSetting.openLogs) {

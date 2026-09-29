@@ -254,6 +254,9 @@ class VPNState with _$VPNState {
   const factory VPNState({
     required AccessControl? accessControl,
     required TunStack stack,
+    required CongestionController congestionController,
+    required int mtu,
+    required int udpTimeout,
     required VpnProps vpnProps,
   }) = _VPNState;
 }
