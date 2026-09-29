@@ -43,6 +43,9 @@ class _VpnContainerState extends State<VpnManager> {
         accessControl: config.accessControl,
         vpnProps: config.vpnProps,
         stack: clashConfig.tun.stack,
+        congestionController: clashConfig.tun.congestionController,
+        mtu: clashConfig.tun.mtu,
+        udpTimeout: clashConfig.tun.udpTimeout,
       ),
       shouldRebuild: (prev, next) {
         if (prev != next) {

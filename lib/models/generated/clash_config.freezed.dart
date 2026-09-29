@@ -38,6 +38,10 @@ mixin _$Tun {
   @JsonKey(name: "congestion-controller")
   CongestionController get congestionController =>
       throw _privateConstructorUsedError;
+  @JsonKey(name: "mtu")
+  int get mtu => throw _privateConstructorUsedError;
+  @JsonKey(name: "udp-timeout")
+  int get udpTimeout => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -60,7 +64,9 @@ abstract class $TunCopyWith<$Res> {
       @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding,
       @JsonKey(name: "icmp-timeout") int icmpTimeout,
       @JsonKey(name: "congestion-controller")
-      CongestionController congestionController});
+      CongestionController congestionController,
+      @JsonKey(name: "mtu") int mtu,
+      @JsonKey(name: "udp-timeout") int udpTimeout});
 }
 
 /// @nodoc
@@ -85,6 +91,8 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
     Object? disableIcmpForwarding = null,
     Object? icmpTimeout = null,
     Object? congestionController = null,
+    Object? mtu = null,
+    Object? udpTimeout = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -127,6 +135,14 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
           ? _value.congestionController
           : congestionController // ignore: cast_nullable_to_non_nullable
               as CongestionController,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
+      udpTimeout: null == udpTimeout
+          ? _value.udpTimeout
+          : udpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -148,7 +164,9 @@ abstract class _$$TunImplCopyWith<$Res> implements $TunCopyWith<$Res> {
       @JsonKey(name: "disable-icmp-forwarding") bool disableIcmpForwarding,
       @JsonKey(name: "icmp-timeout") int icmpTimeout,
       @JsonKey(name: "congestion-controller")
-      CongestionController congestionController});
+      CongestionController congestionController,
+      @JsonKey(name: "mtu") int mtu,
+      @JsonKey(name: "udp-timeout") int udpTimeout});
 }
 
 /// @nodoc
@@ -170,6 +188,8 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
     Object? disableIcmpForwarding = null,
     Object? icmpTimeout = null,
     Object? congestionController = null,
+    Object? mtu = null,
+    Object? udpTimeout = null,
   }) {
     return _then(_$TunImpl(
       enable: null == enable
@@ -212,6 +232,14 @@ class __$$TunImplCopyWithImpl<$Res> extends _$TunCopyWithImpl<$Res, _$TunImpl>
           ? _value.congestionController
           : congestionController // ignore: cast_nullable_to_non_nullable
               as CongestionController,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
+      udpTimeout: null == udpTimeout
+          ? _value.udpTimeout
+          : udpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -232,7 +260,9 @@ class _$TunImpl implements _Tun {
       this.disableIcmpForwarding = false,
       @JsonKey(name: "icmp-timeout") this.icmpTimeout = 0,
       @JsonKey(name: "congestion-controller")
-      this.congestionController = CongestionController.bbr3})
+      this.congestionController = CongestionController.bbr3,
+      @JsonKey(name: "mtu") this.mtu = defaultMtu,
+      @JsonKey(name: "udp-timeout") this.udpTimeout = 0})
       : _dnsHijack = dnsHijack;
 
   factory _$TunImpl.fromJson(Map<String, dynamic> json) =>
@@ -274,10 +304,16 @@ class _$TunImpl implements _Tun {
   @override
   @JsonKey(name: "congestion-controller")
   final CongestionController congestionController;
+  @override
+  @JsonKey(name: "mtu")
+  final int mtu;
+  @override
+  @JsonKey(name: "udp-timeout")
+  final int udpTimeout;
 
   @override
   String toString() {
-    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, autoRoute: $autoRoute, strictRoute: $strictRoute, autoDetectInterface: $autoDetectInterface, disableIcmpForwarding: $disableIcmpForwarding, icmpTimeout: $icmpTimeout, congestionController: $congestionController)';
+    return 'Tun(enable: $enable, device: $device, stack: $stack, dnsHijack: $dnsHijack, autoRoute: $autoRoute, strictRoute: $strictRoute, autoDetectInterface: $autoDetectInterface, disableIcmpForwarding: $disableIcmpForwarding, icmpTimeout: $icmpTimeout, congestionController: $congestionController, mtu: $mtu, udpTimeout: $udpTimeout)';
   }
 
   @override
@@ -301,7 +337,10 @@ class _$TunImpl implements _Tun {
             (identical(other.icmpTimeout, icmpTimeout) ||
                 other.icmpTimeout == icmpTimeout) &&
             (identical(other.congestionController, congestionController) ||
-                other.congestionController == congestionController));
+                other.congestionController == congestionController) &&
+            (identical(other.mtu, mtu) || other.mtu == mtu) &&
+            (identical(other.udpTimeout, udpTimeout) ||
+                other.udpTimeout == udpTimeout));
   }
 
   @JsonKey(ignore: true)
@@ -317,7 +356,9 @@ class _$TunImpl implements _Tun {
       autoDetectInterface,
       disableIcmpForwarding,
       icmpTimeout,
-      congestionController);
+      congestionController,
+      mtu,
+      udpTimeout);
 
   @JsonKey(ignore: true)
   @override
@@ -346,7 +387,9 @@ abstract class _Tun implements Tun {
       final bool disableIcmpForwarding,
       @JsonKey(name: "icmp-timeout") final int icmpTimeout,
       @JsonKey(name: "congestion-controller")
-      final CongestionController congestionController}) = _$TunImpl;
+      final CongestionController congestionController,
+      @JsonKey(name: "mtu") final int mtu,
+      @JsonKey(name: "udp-timeout") final int udpTimeout}) = _$TunImpl;
 
   factory _Tun.fromJson(Map<String, dynamic> json) = _$TunImpl.fromJson;
 
@@ -377,6 +420,12 @@ abstract class _Tun implements Tun {
   @override
   @JsonKey(name: "congestion-controller")
   CongestionController get congestionController;
+  @override
+  @JsonKey(name: "mtu")
+  int get mtu;
+  @override
+  @JsonKey(name: "udp-timeout")
+  int get udpTimeout;
   @override
   @JsonKey(ignore: true)
   _$$TunImplCopyWith<_$TunImpl> get copyWith =>

@@ -234,6 +234,8 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.Tun.CongestionController = patchConfig.Tun.CongestionController
 	targetConfig.Tun.DisableICMPForwarding = patchConfig.Tun.DisableICMPForwarding
 	targetConfig.Tun.ICMPTimeout = patchConfig.Tun.ICMPTimeout
+	targetConfig.Tun.MTU = patchConfig.Tun.MTU
+	targetConfig.Tun.UDPTimeout = patchConfig.Tun.UDPTimeout
 	if configParams.OverrideAutoRoute {
 		targetConfig.Tun.AutoRoute = true
 	}

@@ -50,6 +50,7 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 is FlClashService.LocalBinder -> service.getService()
                 else -> throw Exception("invalid binder")
             }
+            updateUnderlyingNetworks()
             start()
         }
 
@@ -169,6 +170,7 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     val networks = mutableSetOf<Network>()
 
     fun onUpdateNetwork() {
+        updateUnderlyingNetworks()
         val dns = networks.flatMap { network ->
             connectivity?.resolveDns(network) ?: emptyList()
         }.toSet().joinToString(",")
@@ -176,6 +178,20 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             withContext(Dispatchers.Main) {
                 flutterMethodChannel.invokeMethod("dnsChanged", dns)
             }
+        }
+    }
+
+    /**
+     * Keeps the VpnService's underlying networks in sync with connectivity
+     * changes. Without this, network switches (Wi-Fi <-> cellular) are not
+     * reported to the system, which can cause traffic stalls or background
+     * traffic accounting on some devices.
+     */
+    @Synchronized
+    private fun updateUnderlyingNetworks() {
+        val service = flClashService
+        if (service is FlClashVpnService) {
+            service.updateUnderlyingNetworks(networks.toTypedArray())
         }
     }
 

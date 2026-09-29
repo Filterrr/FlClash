@@ -119,6 +119,8 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
       congestionController: $enumDecodeNullable(
               _$CongestionControllerEnumMap, json['congestion-controller']) ??
           CongestionController.bbr3,
+      mtu: (json['mtu'] as num?)?.toInt() ?? defaultMtu,
+      udpTimeout: (json['udp-timeout'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
@@ -133,6 +135,8 @@ Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
       'icmp-timeout': instance.icmpTimeout,
       'congestion-controller':
           _$CongestionControllerEnumMap[instance.congestionController]!,
+      'mtu': instance.mtu,
+      'udp-timeout': instance.udpTimeout,
     };
 
 const _$TunStackEnumMap = {

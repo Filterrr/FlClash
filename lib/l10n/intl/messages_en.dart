@@ -212,6 +212,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "congestionController": MessageLookupByLibrary.simpleMessage(
       "Congestion Controller",
     ),
+    "mtu": MessageLookupByLibrary.simpleMessage("TUN MTU"),
+    "udpTimeout": MessageLookupByLibrary.simpleMessage("UDP Timeout"),
+    "authorizeFailed":
+        MessageLookupByLibrary.simpleMessage("Administrator permission required"),
+    "authorizeFailedDesc": MessageLookupByLibrary.simpleMessage(
+      "TUN mode needs the core to run with administrator privileges. Enable it again and approve the system prompt.",
+    ),
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "Prevent ICMP loopback issues, ping will not show real latency",
     ),

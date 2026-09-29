@@ -4125,6 +4125,10 @@ abstract class _ClashConfigState implements ClashConfigState {
 mixin _$VPNState {
   AccessControl? get accessControl => throw _privateConstructorUsedError;
   TunStack get stack => throw _privateConstructorUsedError;
+  CongestionController get congestionController =>
+      throw _privateConstructorUsedError;
+  int get mtu => throw _privateConstructorUsedError;
+  int get udpTimeout => throw _privateConstructorUsedError;
   VpnProps get vpnProps => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -4137,7 +4141,13 @@ abstract class $VPNStateCopyWith<$Res> {
   factory $VPNStateCopyWith(VPNState value, $Res Function(VPNState) then) =
       _$VPNStateCopyWithImpl<$Res, VPNState>;
   @useResult
-  $Res call({AccessControl? accessControl, TunStack stack, VpnProps vpnProps});
+  $Res call(
+      {AccessControl? accessControl,
+      TunStack stack,
+      CongestionController congestionController,
+      int mtu,
+      int udpTimeout,
+      VpnProps vpnProps});
 
   $AccessControlCopyWith<$Res>? get accessControl;
   $VpnPropsCopyWith<$Res> get vpnProps;
@@ -4158,6 +4168,9 @@ class _$VPNStateCopyWithImpl<$Res, $Val extends VPNState>
   $Res call({
     Object? accessControl = freezed,
     Object? stack = null,
+    Object? congestionController = null,
+    Object? mtu = null,
+    Object? udpTimeout = null,
     Object? vpnProps = null,
   }) {
     return _then(_value.copyWith(
@@ -4169,6 +4182,18 @@ class _$VPNStateCopyWithImpl<$Res, $Val extends VPNState>
           ? _value.stack
           : stack // ignore: cast_nullable_to_non_nullable
               as TunStack,
+      congestionController: null == congestionController
+          ? _value.congestionController
+          : congestionController // ignore: cast_nullable_to_non_nullable
+              as CongestionController,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
+      udpTimeout: null == udpTimeout
+          ? _value.udpTimeout
+          : udpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
       vpnProps: null == vpnProps
           ? _value.vpnProps
           : vpnProps // ignore: cast_nullable_to_non_nullable
@@ -4205,7 +4230,13 @@ abstract class _$$VPNStateImplCopyWith<$Res>
       __$$VPNStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({AccessControl? accessControl, TunStack stack, VpnProps vpnProps});
+  $Res call(
+      {AccessControl? accessControl,
+      TunStack stack,
+      CongestionController congestionController,
+      int mtu,
+      int udpTimeout,
+      VpnProps vpnProps});
 
   @override
   $AccessControlCopyWith<$Res>? get accessControl;
@@ -4226,6 +4257,9 @@ class __$$VPNStateImplCopyWithImpl<$Res>
   $Res call({
     Object? accessControl = freezed,
     Object? stack = null,
+    Object? congestionController = null,
+    Object? mtu = null,
+    Object? udpTimeout = null,
     Object? vpnProps = null,
   }) {
     return _then(_$VPNStateImpl(
@@ -4237,6 +4271,18 @@ class __$$VPNStateImplCopyWithImpl<$Res>
           ? _value.stack
           : stack // ignore: cast_nullable_to_non_nullable
               as TunStack,
+      congestionController: null == congestionController
+          ? _value.congestionController
+          : congestionController // ignore: cast_nullable_to_non_nullable
+              as CongestionController,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
+      udpTimeout: null == udpTimeout
+          ? _value.udpTimeout
+          : udpTimeout // ignore: cast_nullable_to_non_nullable
+              as int,
       vpnProps: null == vpnProps
           ? _value.vpnProps
           : vpnProps // ignore: cast_nullable_to_non_nullable
@@ -4251,6 +4297,9 @@ class _$VPNStateImpl implements _VPNState {
   const _$VPNStateImpl(
       {required this.accessControl,
       required this.stack,
+      required this.congestionController,
+      required this.mtu,
+      required this.udpTimeout,
       required this.vpnProps});
 
   @override
@@ -4258,11 +4307,17 @@ class _$VPNStateImpl implements _VPNState {
   @override
   final TunStack stack;
   @override
+  final CongestionController congestionController;
+  @override
+  final int mtu;
+  @override
+  final int udpTimeout;
+  @override
   final VpnProps vpnProps;
 
   @override
   String toString() {
-    return 'VPNState(accessControl: $accessControl, stack: $stack, vpnProps: $vpnProps)';
+    return 'VPNState(accessControl: $accessControl, stack: $stack, congestionController: $congestionController, mtu: $mtu, udpTimeout: $udpTimeout, vpnProps: $vpnProps)';
   }
 
   @override
@@ -4273,12 +4328,18 @@ class _$VPNStateImpl implements _VPNState {
             (identical(other.accessControl, accessControl) ||
                 other.accessControl == accessControl) &&
             (identical(other.stack, stack) || other.stack == stack) &&
+            (identical(other.congestionController, congestionController) ||
+                other.congestionController == congestionController) &&
+            (identical(other.mtu, mtu) || other.mtu == mtu) &&
+            (identical(other.udpTimeout, udpTimeout) ||
+                other.udpTimeout == udpTimeout) &&
             (identical(other.vpnProps, vpnProps) ||
                 other.vpnProps == vpnProps));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, accessControl, stack, vpnProps);
+  int get hashCode => Object.hash(runtimeType, accessControl, stack,
+      congestionController, mtu, udpTimeout, vpnProps);
 
   @JsonKey(ignore: true)
   @override
@@ -4291,12 +4352,21 @@ abstract class _VPNState implements VPNState {
   const factory _VPNState(
       {required final AccessControl? accessControl,
       required final TunStack stack,
+      required final CongestionController congestionController,
+      required final int mtu,
+      required final int udpTimeout,
       required final VpnProps vpnProps}) = _$VPNStateImpl;
 
   @override
   AccessControl? get accessControl;
   @override
   TunStack get stack;
+  @override
+  CongestionController get congestionController;
+  @override
+  int get mtu;
+  @override
+  int get udpTimeout;
   @override
   VpnProps get vpnProps;
   @override

@@ -457,6 +457,7 @@ mixin _$AndroidVpnOptions {
   String get dnsServerAddress => throw _privateConstructorUsedError;
   @JsonKey(name: "fcmKeepAlive")
   bool get fcmKeepAlive => throw _privateConstructorUsedError;
+  int get mtu => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -481,7 +482,8 @@ abstract class $AndroidVpnOptionsCopyWith<$Res> {
       String ipv6Address,
       List<String> routeAddress,
       String dnsServerAddress,
-      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive,
+      int mtu});
 
   $AccessControlCopyWith<$Res>? get accessControl;
 }
@@ -510,6 +512,7 @@ class _$AndroidVpnOptionsCopyWithImpl<$Res, $Val extends AndroidVpnOptions>
     Object? routeAddress = null,
     Object? dnsServerAddress = null,
     Object? fcmKeepAlive = null,
+    Object? mtu = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -556,6 +559,10 @@ class _$AndroidVpnOptionsCopyWithImpl<$Res, $Val extends AndroidVpnOptions>
           ? _value.fcmKeepAlive
           : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
               as bool,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 
@@ -591,7 +598,8 @@ abstract class _$$AndroidVpnOptionsImplCopyWith<$Res>
       String ipv6Address,
       List<String> routeAddress,
       String dnsServerAddress,
-      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive});
+      @JsonKey(name: "fcmKeepAlive") bool fcmKeepAlive,
+      int mtu});
 
   @override
   $AccessControlCopyWith<$Res>? get accessControl;
@@ -619,6 +627,7 @@ class __$$AndroidVpnOptionsImplCopyWithImpl<$Res>
     Object? routeAddress = null,
     Object? dnsServerAddress = null,
     Object? fcmKeepAlive = null,
+    Object? mtu = null,
   }) {
     return _then(_$AndroidVpnOptionsImpl(
       enable: null == enable
@@ -665,6 +674,10 @@ class __$$AndroidVpnOptionsImplCopyWithImpl<$Res>
           ? _value.fcmKeepAlive
           : fcmKeepAlive // ignore: cast_nullable_to_non_nullable
               as bool,
+      mtu: null == mtu
+          ? _value.mtu
+          : mtu // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -683,7 +696,8 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
       required this.ipv6Address,
       required final List<String> routeAddress,
       required this.dnsServerAddress,
-      @JsonKey(name: "fcmKeepAlive") required this.fcmKeepAlive})
+      @JsonKey(name: "fcmKeepAlive") required this.fcmKeepAlive,
+      this.mtu = defaultMtu})
       : _bypassDomain = bypassDomain,
         _routeAddress = routeAddress;
 
@@ -725,10 +739,13 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
   @override
   @JsonKey(name: "fcmKeepAlive")
   final bool fcmKeepAlive;
+  @override
+  @JsonKey()
+  final int mtu;
 
   @override
   String toString() {
-    return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress, fcmKeepAlive: $fcmKeepAlive)';
+    return 'AndroidVpnOptions(enable: $enable, port: $port, accessControl: $accessControl, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, ipv4Address: $ipv4Address, ipv6Address: $ipv6Address, routeAddress: $routeAddress, dnsServerAddress: $dnsServerAddress, fcmKeepAlive: $fcmKeepAlive, mtu: $mtu)';
   }
 
   @override
@@ -755,7 +772,8 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
             (identical(other.dnsServerAddress, dnsServerAddress) ||
                 other.dnsServerAddress == dnsServerAddress) &&
             (identical(other.fcmKeepAlive, fcmKeepAlive) ||
-                other.fcmKeepAlive == fcmKeepAlive));
+                other.fcmKeepAlive == fcmKeepAlive) &&
+            (identical(other.mtu, mtu) || other.mtu == mtu));
   }
 
   @JsonKey(ignore: true)
@@ -772,7 +790,8 @@ class _$AndroidVpnOptionsImpl implements _AndroidVpnOptions {
       ipv6Address,
       const DeepCollectionEquality().hash(_routeAddress),
       dnsServerAddress,
-      fcmKeepAlive);
+      fcmKeepAlive,
+      mtu);
 
   @JsonKey(ignore: true)
   @override
@@ -801,8 +820,8 @@ abstract class _AndroidVpnOptions implements AndroidVpnOptions {
       required final String ipv6Address,
       required final List<String> routeAddress,
       required final String dnsServerAddress,
-      @JsonKey(name: "fcmKeepAlive") required final bool fcmKeepAlive}) =
-      _$AndroidVpnOptionsImpl;
+      @JsonKey(name: "fcmKeepAlive") required final bool fcmKeepAlive,
+      final int mtu}) = _$AndroidVpnOptionsImpl;
 
   factory _AndroidVpnOptions.fromJson(Map<String, dynamic> json) =
       _$AndroidVpnOptionsImpl.fromJson;
@@ -830,6 +849,8 @@ abstract class _AndroidVpnOptions implements AndroidVpnOptions {
   @override
   @JsonKey(name: "fcmKeepAlive")
   bool get fcmKeepAlive;
+  @override
+  int get mtu;
   @override
   @JsonKey(ignore: true)
   _$$AndroidVpnOptionsImplCopyWith<_$AndroidVpnOptionsImpl> get copyWith =>

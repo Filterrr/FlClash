@@ -24,7 +24,7 @@ type Props struct {
 	Dns6     string `json:"dns6"`
 }
 
-func Start(fd int, device string, stack constant.TUNStack, congestionController string) (*sing_tun.Listener, error) {
+func Start(fd int, device string, stack constant.TUNStack, congestionController string, mtu uint32) (*sing_tun.Listener, error) {
 	var prefix4 []netip.Prefix
 	tempPrefix4, err := netip.ParsePrefix(state.DefaultIpv4Address)
 	if err != nil {
@@ -54,7 +54,7 @@ func Start(fd int, device string, stack constant.TUNStack, congestionController 
 		AutoDetectInterface:   false,
 		Inet4Address:          prefix4,
 		Inet6Address:          prefix6,
-		MTU:                   9000,
+		MTU:                   mtu,
 		FileDescriptor:        fd,
 		DisableICMPForwarding: state.CurrentState.DisableICMPForwarding,
 		ICMPTimeout:           state.CurrentState.IcmpTimeout,

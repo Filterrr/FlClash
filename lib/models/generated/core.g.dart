@@ -66,6 +66,7 @@ _$AndroidVpnOptionsImpl _$$AndroidVpnOptionsImplFromJson(
           .toList(),
       dnsServerAddress: json['dnsServerAddress'] as String,
       fcmKeepAlive: json['fcmKeepAlive'] as bool,
+      mtu: (json['mtu'] as num?)?.toInt() ?? defaultMtu,
     );
 
 Map<String, dynamic> _$$AndroidVpnOptionsImplToJson(
@@ -82,6 +83,7 @@ Map<String, dynamic> _$$AndroidVpnOptionsImplToJson(
       'routeAddress': instance.routeAddress,
       'dnsServerAddress': instance.dnsServerAddress,
       'fcmKeepAlive': instance.fcmKeepAlive,
+      'mtu': instance.mtu,
     };
 
 _$ConfigExtendedParamsImpl _$$ConfigExtendedParamsImplFromJson(

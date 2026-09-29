@@ -10,6 +10,10 @@ import '../enum/enum.dart';
 part 'generated/clash_config.freezed.dart';
 part 'generated/clash_config.g.dart';
 
+/// Mirrors mihomo's TUN MTU default. The Android VpnService sizes the tunnel
+/// interface from [Tun.mtu] so the host and the core agree on the MTU.
+const defaultMtu = 9000;
+
 const defaultTun = Tun();
 
 @freezed
@@ -25,6 +29,8 @@ class Tun with _$Tun {
     @JsonKey(name: "disable-icmp-forwarding") @Default(false) bool disableIcmpForwarding,
     @JsonKey(name: "icmp-timeout") @Default(0) int icmpTimeout,
     @JsonKey(name: "congestion-controller") @Default(CongestionController.bbr3) CongestionController congestionController,
+    @JsonKey(name: "mtu") @Default(defaultMtu) int mtu,
+    @JsonKey(name: "udp-timeout") @Default(0) int udpTimeout,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
