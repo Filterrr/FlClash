@@ -89,7 +89,7 @@ func startTUN(fd C.int, port C.longlong) {
 		tunLock.Lock()
 		defer tunLock.Unlock()
 		f := int(fd)
-		tunListener, _ = t.Start(f, currentConfig.General.Tun.Device, currentConfig.General.Tun.Stack)
+		tunListener, _ = t.Start(f, currentConfig.General.Tun.Device, currentConfig.General.Tun.Stack, currentConfig.General.Tun.CongestionController)
 		if tunListener != nil {
 			log.Infoln("TUN address: %v", tunListener.Address())
 		}

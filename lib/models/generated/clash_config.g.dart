@@ -22,7 +22,7 @@ ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => ClashConfig()
   ..unifiedDelay = json['unified-delay'] as bool? ?? false
   ..tcpConcurrent = json['tcp-concurrent'] as bool? ?? false
   ..udp = json['udp'] as bool? ?? false
-  ..tun = Tun.fromJson(json['tun'] as Map<String, dynamic>)
+  ..tun = Tun.realFromJson(json['tun'] as Map<String, Object?>)
   ..dns = Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>)
   ..sniffer = Sniffer.safeFromJson(json['sniffer'] as Map<String, Object?>?)
   ..rules = (json['rules'] as List<dynamic>).map((e) => e as String).toList()
