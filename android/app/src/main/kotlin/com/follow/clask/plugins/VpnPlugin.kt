@@ -167,12 +167,16 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         flutterMethodChannel.invokeMethod("gc", null)
     }
 
-    val networks = mutableSetOf<Network>()
+    private val networks = mutableSetOf<Network>()
+
+    private val networksLock = Any()
 
     fun onUpdateNetwork() {
         updateUnderlyingNetworks()
-        val dns = networks.flatMap { network ->
-            connectivity?.resolveDns(network) ?: emptyList()
+        val dns = synchronized(networksLock) {
+            networks.flatMap { network ->
+                connectivity?.resolveDns(network) ?: emptyList()
+            }
         }.toSet().joinToString(",")
         scope.launch {
             withContext(Dispatchers.Main) {
@@ -183,26 +187,31 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     /**
      * Keeps the VpnService's underlying networks in sync with connectivity
-     * changes. Without this, network switches (Wi-Fi <-> cellular) are not
-     * reported to the system, which can cause traffic stalls or background
-     * traffic accounting on some devices.
+     * changes. Passing an empty array would tell the system the VPN has no
+     * usable underlying network (a startup race or full connectivity loss
+     * would then blackhole traffic), so an empty snapshot keeps the system's
+     * default tracking by passing null instead.
      */
-    @Synchronized
     private fun updateUnderlyingNetworks() {
         val service = flClashService
         if (service is FlClashVpnService) {
-            service.updateUnderlyingNetworks(networks.toTypedArray())
+            val snapshot = synchronized(networksLock) { networks.toTypedArray() }
+            service.updateUnderlyingNetworks(snapshot.ifEmpty { null })
         }
     }
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            networks.add(network)
+            synchronized(networksLock) {
+                networks.add(network)
+            }
             onUpdateNetwork()
         }
 
         override fun onLost(network: Network) {
-            networks.remove(network)
+            synchronized(networksLock) {
+                networks.remove(network)
+            }
             onUpdateNetwork()
         }
     }
@@ -214,13 +223,17 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }.build()
 
     private fun registerNetworkCallback() {
-        networks.clear()
+        synchronized(networksLock) {
+            networks.clear()
+        }
         connectivity?.registerNetworkCallback(request, callback)
     }
 
     private fun unRegisterNetworkCallback() {
         connectivity?.unregisterNetworkCallback(callback)
-        networks.clear()
+        synchronized(networksLock) {
+            networks.clear()
+        }
         onUpdateNetwork()
     }
 
