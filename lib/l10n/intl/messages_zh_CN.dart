@@ -148,6 +148,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage("禁用 ICMP 转发"),
+    "congestionController": MessageLookupByLibrary.simpleMessage("拥塞控制"),
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "防止某些情况下的 ICMP 环回问题，ping 将不会显示真实的延迟",
     ),

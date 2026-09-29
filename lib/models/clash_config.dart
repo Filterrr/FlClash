@@ -17,13 +17,14 @@ class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
     @Default(appName) String device,
-    @Default(TunStack.gvisor) TunStack stack,
+    @Default(TunStack.mips) TunStack stack,
     @JsonKey(name: "dns-hijack") @Default(["any:53", "tcp://any:53"]) List<String> dnsHijack,
     @JsonKey(name: "auto-route") @Default(false) bool autoRoute,
     @JsonKey(name: "strict-route") @Default(false) bool strictRoute,
     @JsonKey(name: "auto-detect-interface") @Default(false) bool autoDetectInterface,
     @JsonKey(name: "disable-icmp-forwarding") @Default(false) bool disableIcmpForwarding,
     @JsonKey(name: "icmp-timeout") @Default(0) int icmpTimeout,
+    @JsonKey(name: "congestion-controller") @Default(CongestionController.bbr3) CongestionController congestionController,
   }) = _Tun;
 
   factory Tun.fromJson(Map<String, Object?> json) => _$TunFromJson(json);
