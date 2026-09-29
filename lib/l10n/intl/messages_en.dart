@@ -209,6 +209,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "disableIcmpForwarding": MessageLookupByLibrary.simpleMessage(
       "Disable ICMP forwarding",
     ),
+    "congestionController": MessageLookupByLibrary.simpleMessage(
+      "Congestion Controller",
+    ),
     "disableIcmpForwardingDesc": MessageLookupByLibrary.simpleMessage(
       "Prevent ICMP loopback issues, ping will not show real latency",
     ),

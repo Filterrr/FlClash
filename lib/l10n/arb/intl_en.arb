@@ -342,6 +342,7 @@
   "copyEnvVar": "Copying environment variables",
   "disableIcmpForwarding": "Disable ICMP forwarding",
   "disableIcmpForwardingDesc": "Prevent ICMP loopback issues, ping will not show real latency",
+  "congestionController": "Congestion Controller",
   "icmpTimeout": "ICMP Timeout",
   "runtimeConfig": "Runtime Config",
   "runtimeConfigDesc": "View the current running configuration in Clash Meta format",

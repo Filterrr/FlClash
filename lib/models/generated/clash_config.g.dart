@@ -22,7 +22,7 @@ ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => ClashConfig()
   ..unifiedDelay = json['unified-delay'] as bool? ?? false
   ..tcpConcurrent = json['tcp-concurrent'] as bool? ?? false
   ..udp = json['udp'] as bool? ?? false
-  ..tun = Tun.fromJson(json['tun'] as Map<String, dynamic>)
+  ..tun = Tun.realFromJson(json['tun'] as Map<String, Object?>)
   ..dns = Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>)
   ..sniffer = Sniffer.safeFromJson(json['sniffer'] as Map<String, Object?>?)
   ..rules = (json['rules'] as List<dynamic>).map((e) => e as String).toList()
@@ -106,7 +106,7 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
       enable: json['enable'] as bool? ?? false,
       device: json['device'] as String? ?? appName,
       stack: $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ??
-          TunStack.gvisor,
+          TunStack.mips,
       dnsHijack: (json['dns-hijack'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -116,6 +116,9 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
       autoDetectInterface: json['auto-detect-interface'] as bool? ?? false,
       disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
       icmpTimeout: (json['icmp-timeout'] as num?)?.toInt() ?? 0,
+      congestionController: $enumDecodeNullable(
+              _$CongestionControllerEnumMap, json['congestion-controller']) ??
+          CongestionController.bbr3,
     );
 
 Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
@@ -128,6 +131,8 @@ Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
       'auto-detect-interface': instance.autoDetectInterface,
       'disable-icmp-forwarding': instance.disableIcmpForwarding,
       'icmp-timeout': instance.icmpTimeout,
+      'congestion-controller':
+          _$CongestionControllerEnumMap[instance.congestionController]!,
     };
 
 const _$TunStackEnumMap = {
@@ -135,6 +140,13 @@ const _$TunStackEnumMap = {
   TunStack.system: 'system',
   TunStack.mixed: 'mixed',
   TunStack.mips: 'mips',
+};
+
+const _$CongestionControllerEnumMap = {
+  CongestionController.cubic: 'cubic',
+  CongestionController.reno: 'reno',
+  CongestionController.bbr: 'bbr',
+  CongestionController.bbr3: 'bbr3',
 };
 
 _$FallbackFilterImpl _$$FallbackFilterImplFromJson(Map<String, dynamic> json) =>

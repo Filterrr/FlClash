@@ -23,6 +23,7 @@ class TUNButton extends StatelessWidget {
                 items: [
                   if (system.isDesktop) const TUNItem(),
                   const TunStackItem(),
+                  const CongestionControllerItem(),
                 ],
               ));
             },

@@ -2739,6 +2739,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Congestion Controller`
+  String get congestionController {
+    return Intl.message(
+      'Congestion Controller',
+      name: 'congestionController',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `ICMP Timeout`
   String get icmpTimeout {
     return Intl.message(
