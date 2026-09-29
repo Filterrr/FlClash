@@ -84,6 +84,7 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
     Object? autoDetectInterface = null,
     Object? disableIcmpForwarding = null,
     Object? icmpTimeout = null,
+    Object? congestionController = null,
   }) {
     return _then(_value.copyWith(
       enable: null == enable
@@ -122,6 +123,10 @@ class _$TunCopyWithImpl<$Res, $Val extends Tun> implements $TunCopyWith<$Res> {
           ? _value.icmpTimeout
           : icmpTimeout // ignore: cast_nullable_to_non_nullable
               as int,
+      congestionController: null == congestionController
+          ? _value.congestionController
+          : congestionController // ignore: cast_nullable_to_non_nullable
+              as CongestionController,
     ) as $Val);
   }
 }
@@ -217,7 +222,7 @@ class _$TunImpl implements _Tun {
   const _$TunImpl(
       {this.enable = false,
       this.device = appName,
-      this.stack = TunStack.gvisor,
+      this.stack = TunStack.mips,
       @JsonKey(name: "dns-hijack")
       final List<String> dnsHijack = const ["any:53", "tcp://any:53"],
       @JsonKey(name: "auto-route") this.autoRoute = false,
@@ -339,7 +344,9 @@ abstract class _Tun implements Tun {
       @JsonKey(name: "auto-detect-interface") final bool autoDetectInterface,
       @JsonKey(name: "disable-icmp-forwarding")
       final bool disableIcmpForwarding,
-      @JsonKey(name: "icmp-timeout") final int icmpTimeout}) = _$TunImpl;
+      @JsonKey(name: "icmp-timeout") final int icmpTimeout,
+      @JsonKey(name: "congestion-controller")
+      final CongestionController congestionController}) = _$TunImpl;
 
   factory _Tun.fromJson(Map<String, dynamic> json) = _$TunImpl.fromJson;
 
@@ -367,6 +374,9 @@ abstract class _Tun implements Tun {
   @override
   @JsonKey(name: "icmp-timeout")
   int get icmpTimeout;
+  @override
+  @JsonKey(name: "congestion-controller")
+  CongestionController get congestionController;
   @override
   @JsonKey(ignore: true)
   _$$TunImplCopyWith<_$TunImpl> get copyWith =>

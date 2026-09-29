@@ -116,10 +116,9 @@ _$TunImpl _$$TunImplFromJson(Map<String, dynamic> json) => _$TunImpl(
       autoDetectInterface: json['auto-detect-interface'] as bool? ?? false,
       disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
       icmpTimeout: (json['icmp-timeout'] as num?)?.toInt() ?? 0,
-      congestionController:
-          $enumDecodeNullable(_$CongestionControllerEnumMap,
-                  json['congestion-controller']) ??
-              CongestionController.bbr3,
+      congestionController: $enumDecodeNullable(
+              _$CongestionControllerEnumMap, json['congestion-controller']) ??
+          CongestionController.bbr3,
     );
 
 Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
@@ -132,7 +131,8 @@ Map<String, dynamic> _$$TunImplToJson(_$TunImpl instance) => <String, dynamic>{
       'auto-detect-interface': instance.autoDetectInterface,
       'disable-icmp-forwarding': instance.disableIcmpForwarding,
       'icmp-timeout': instance.icmpTimeout,
-      'congestion-controller': _$CongestionControllerEnumMap[instance.congestionController]!,
+      'congestion-controller':
+          _$CongestionControllerEnumMap[instance.congestionController]!,
     };
 
 const _$TunStackEnumMap = {

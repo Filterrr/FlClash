@@ -206,27 +206,35 @@ class CongestionControllerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<ClashConfig, CongestionController>(
-      selector: (_, clashConfig) => clashConfig.tun.congestionController,
-      builder: (_, congestionController, __) {
-        return ListItem.options(
-          title: Text(appLocalizations.congestionController),
-          subtitle: Text(congestionController.name),
-          delegate: OptionsDelegate<CongestionController>(
-            value: congestionController,
-            options: CongestionController.values,
-            textBuilder: (value) => value.name,
-            onChanged: (value) {
-              if (value == null) {
-                return;
-              }
-              final clashConfig = globalState.appController.clashConfig;
-              clashConfig.tun = clashConfig.tun.copyWith(
-                congestionController: value,
-              );
-            },
-            title: appLocalizations.congestionController,
-          ),
+    return Selector<ClashConfig, TunStack>(
+      selector: (_, clashConfig) => clashConfig.tun.stack,
+      builder: (_, stack, __) {
+        if (stack != TunStack.mips) {
+          return const SizedBox.shrink();
+        }
+        return Selector<ClashConfig, CongestionController>(
+          selector: (_, clashConfig) => clashConfig.tun.congestionController,
+          builder: (_, congestionController, __) {
+            return ListItem.options(
+              title: Text(appLocalizations.congestionController),
+              subtitle: Text(congestionController.name),
+              delegate: OptionsDelegate<CongestionController>(
+                value: congestionController,
+                options: CongestionController.values,
+                textBuilder: (value) => value.name,
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  final clashConfig = globalState.appController.clashConfig;
+                  clashConfig.tun = clashConfig.tun.copyWith(
+                    congestionController: value,
+                  );
+                },
+                title: appLocalizations.congestionController,
+              ),
+            );
+          },
         );
       },
     );
@@ -554,6 +562,7 @@ final networkItems = [
     items: [
       if (system.isDesktop) const TUNItem(),
       const TunStackItem(),
+      const CongestionControllerItem(),
       const AutoRouteItem(),
       const StrictRouteItem(),
       const AutoDetectInterfaceItem(),
