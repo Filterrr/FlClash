@@ -327,7 +327,10 @@ class GlobalState {
     final traffic = await clashCore.getTraffic(onlyProxy);
     _lastTraffic = traffic;
     if (Platform.isAndroid && isVpnService == true) {
-      // 后台时大幅降低通知更新频率，避免频繁唤醒系统通知管理器
+      // 后台时大幅降低通知更新频率，避免频繁唤醒系统通知管理器。
+      // 注：服务 isolate 内不消费 AppLifecycleState，isInBackground 在此
+      // 恒为 false；真正的"屏幕熄灭即冻结"由原生侧
+      // FlClashVpnService.startForeground 实现。
       final now = DateTime.now();
       final isInBackground = backgroundMemoryManager.isInBackground;
       final throttle = isInBackground
