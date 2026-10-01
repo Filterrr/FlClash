@@ -18,6 +18,12 @@ class AdaptiveTimer {
   final int deepIdleThreshold;
   final bool Function() callback;
 
+  /// 进入空闲模式时请求一次轻量 GC 的回调。
+  ///
+  /// 默认走 [clashCore.requestGc]；测试可注入空实现，避免在测试环境
+  /// 初始化真实 core（会启动 socket 服务与进程，产生悬挂定时器）。
+  final void Function()? requestGc;
+
   Timer? _timer;
   int _idleTicks = 0;
   bool _isIdleMode = false;
@@ -31,6 +37,7 @@ class AdaptiveTimer {
     this.idleThreshold = 3,
     this.deepIdleThreshold = 10,
     required this.callback,
+    this.requestGc,
   });
 
   bool get isActive => _timer != null && _timer!.isActive;
@@ -41,22 +48,27 @@ class AdaptiveTimer {
     _isIdleMode = false;
     _isDeepIdleMode = false;
     _gcRequested = false;
-    _timer = Timer.periodic(activeInterval, (_) {
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode && !(_isDeepIdleMode ? _reducedDeepIdleTick() : _isIdleMode ? _reducedIdleTick() : _reducedActiveTick())) {
-        return;
-      }
-      final hadChange = callback();
-      _updateIdleState(hadChange);
-    });
+    _timer = Timer.periodic(activeInterval, (_) => _handleTick());
   }
 
-  void stop() {
-    _timer?.cancel();
-    _timer = null;
+  /// 定时器每次触发的统一处理入口。
+  ///
+  /// 注意：reduced 模式下被跳过的 tick 也必须推进 [_idleTicks]，否则
+  /// 跳帧判定 `_idleTicks % N == 0` 会永远命中同一个余数而彻底停摆
+  /// （曾经 start() 与 _restartWithInterval() 各写一份逻辑，start()
+  /// 漏掉了自增导致 reduced 模式下回调只执行一次）。
+  void _handleTick() {
+    if (isLowMemoryMode) return;
+    if (isReducedMemoryMode && !_reducedTickForMode()) {
+      _idleTicks++;
+      return;
+    }
+    _applyCallbackResult();
   }
 
-  void _updateIdleState(bool hadChange) {
+  /// 执行回调并按结果更新状态机（升频 / 降频）。
+  void _applyCallbackResult() {
+    final hadChange = callback();
     if (hadChange) {
       _idleTicks = 0;
       if (_isDeepIdleMode || _isIdleMode) {
@@ -80,39 +92,26 @@ class AdaptiveTimer {
     }
   }
 
-  /// 切换到空闲模式时请求一次轻量 GC
+  void stop() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  /// 切换到空闲模式时请求一次轻量 GC。
+  ///
+  /// 只在触发这一刻才解析 [clashCore]，且调用方可在测试中注入替代实现；
+  /// 生产环境不传 [requestGc] 时行为与旧版一致。
   void _requestIdleGc() {
     if (_gcRequested) return;
     _gcRequested = true;
     try {
-      clashCore.requestGc();
+      (requestGc ?? () => clashCore.requestGc())();
     } catch (_) {}
   }
 
   void _restartWithInterval(Duration interval) {
     _timer?.cancel();
-    _timer = Timer.periodic(interval, (_) {
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode && !_reducedTickForMode()) {
-        _idleTicks++;
-        return;
-      }
-      final hadChange = callback();
-      if (hadChange) {
-        _idleTicks = 0;
-        _isIdleMode = false;
-        _isDeepIdleMode = false;
-        _gcRequested = false;
-        _restartWithInterval(activeInterval);
-      } else {
-        _idleTicks++;
-        // 检查是否需要进一步降频
-        if (_idleTicks >= deepIdleThreshold && !_isDeepIdleMode) {
-          _isDeepIdleMode = true;
-          _restartWithInterval(deepIdleInterval);
-        }
-      }
-    });
+    _timer = Timer.periodic(interval, (_) => _handleTick());
   }
 
   /// Reduced memory mode 下根据当前空闲级别决定跳帧策略
@@ -120,52 +119,5 @@ class AdaptiveTimer {
     if (_isDeepIdleMode) return _idleTicks % 7 == 0;
     if (_isIdleMode) return _idleTicks % 5 == 0;
     return _idleTicks % 3 == 0;
-  }
-
-  // Reduced memory mode: active 时每 3 tick 执行一次
-  bool _reducedActiveTick() => _idleTicks % 3 == 0;
-
-  // Reduced memory mode: idle 时每 5 tick 执行一次
-  bool _reducedIdleTick() => _idleTicks % 5 == 0;
-
-  // Reduced memory mode: deep idle 时每 7 tick 执行一次
-  bool _reducedDeepIdleTick() => _idleTicks % 7 == 0;
-}
-
-/// 页面可见性感知的定时器：页面不可见时自动暂停
-class VisibilityAwareTimer {
-  final Duration interval;
-  final void Function() callback;
-  final bool Function() isVisible;
-
-  Timer? _timer;
-  bool _isRunning = false;
-
-  VisibilityAwareTimer({
-    required this.interval,
-    required this.callback,
-    required this.isVisible,
-  });
-
-  bool get isActive => _isRunning;
-
-  void start() {
-    if (_isRunning) return;
-    _isRunning = true;
-    _timer = Timer.periodic(interval, (_) {
-      if (!isVisible()) return;
-      if (isLowMemoryMode) return;
-      if (isReducedMemoryMode) {
-        // reduced mode 下降低频率
-        if (_timer!.tick % 3 != 0) return;
-      }
-      callback();
-    });
-  }
-
-  void stop() {
-    _timer?.cancel();
-    _timer = null;
-    _isRunning = false;
   }
 }

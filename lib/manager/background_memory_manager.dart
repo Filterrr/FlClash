@@ -5,6 +5,7 @@ import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -83,8 +84,17 @@ class BackgroundMemoryManager extends ChangeNotifier {
   bool _isInBackground = false;
   Timer? _backgroundMaintenanceTimer;
   Timer? _escalationTimer;
-  int _backgroundDuration = 0;
+  DateTime? _backgroundEnteredAt;
   final _PerformanceStats _perfStats = _PerformanceStats();
+
+  /// 已连续处于后台的时长。
+  ///
+  /// 按真实时间计算（而非累加定时器 tick），定时器被 Doze 等延迟时也能对齐。
+  Duration get backgroundDuration {
+    final enteredAt = _backgroundEnteredAt;
+    if (enteredAt == null) return Duration.zero;
+    return DateTime.now().difference(enteredAt);
+  }
 
   /// 后台持续时间阈值：动态调整维护间隔
   static const int _mediumBgThreshold = 180; // 3 分钟后进入中期
@@ -133,7 +143,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
   void _enterBackground() {
     if (_isInBackground) return;
     _isInBackground = true;
-    _backgroundDuration = 0;
+    _backgroundEnteredAt = DateTime.now();
     _perfStats.recordBackgroundStart();
     notifyListeners();
 
@@ -170,7 +180,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
   void _exitBackground() {
     if (!_isInBackground) return;
     _isInBackground = false;
-    _backgroundDuration = 0;
+    _backgroundEnteredAt = null;
     _perfStats.recordBackgroundEnd();
     notifyListeners();
 
@@ -183,6 +193,17 @@ class BackgroundMemoryManager extends ChangeNotifier {
       _transitionToMode(LowMemoryMode.normal);
       _scheduleUiRefresh();
     }
+    _logStatsIfNeeded();
+  }
+
+  /// 性能统计的出口：debug 构建下退出后台时输出一次快照，
+  /// 便于排查后台优化实际执行情况。release 构建下 kDebugMode 为
+  /// false，不产生任何开销。
+  void _logStatsIfNeeded() {
+    if (!kDebugMode) return;
+    // 注意必须调用（带括号）：`$getPerformanceStats` 是 tear-off，
+    // 只会打印闭包对象本身而非统计内容。
+    debugPrint('[BackgroundMemoryManager] ${getPerformanceStats()}');
   }
 
   void _startEscalationTimer() {
@@ -252,14 +273,12 @@ class BackgroundMemoryManager extends ChangeNotifier {
   }
 
   void _stopNonEssentialUpdates() {
-    resourceController.pauseAllNonCriticalTimers();
     resourceController.pauseAllNonCriticalSubscriptions();
     resourceController.forceClearImageCache();
     _perfStats.recordCacheClear();
   }
 
   void _resumeAllUpdates() {
-    resourceController.resumeAllTimers();
     resourceController.resumeAllSubscriptions();
   }
 
@@ -278,47 +297,51 @@ class BackgroundMemoryManager extends ChangeNotifier {
 
   /// 根据后台持续时间计算当前维护间隔
   Duration _currentMaintenanceInterval() {
-    if (_backgroundDuration >= _deepBgThreshold) {
+    final seconds = backgroundDuration.inSeconds;
+    if (seconds >= _deepBgThreshold) {
       return _deepMaintenanceInterval;
     }
-    if (_backgroundDuration >= _longBgThreshold) {
+    if (seconds >= _longBgThreshold) {
       return _longMaintenanceInterval;
     }
-    if (_backgroundDuration >= _mediumBgThreshold) {
+    if (seconds >= _mediumBgThreshold) {
       return _mediumMaintenanceInterval;
     }
     return _initialMaintenanceInterval;
   }
 
-  /// 统一的后台维护定时器：合并了原 GC 定时器和内存监控定时器
-  /// 根据后台持续时间动态调整间隔，减少长时间后台时的 CPU 唤醒
+  /// 后台维护：一次性定时器链。
+  ///
+  /// 每次触发后按当前后台时长重排下一次执行，使 3/10/30 分钟三档阈值
+  /// 真正生效。旧实现用固定周期 Timer.periodic + 触发时判断是否换挡，
+  /// 首次必须等满 10 分钟才会重新评估，阈值形同虚设。
   void _startBackgroundMaintenance() {
     _stopBackgroundMaintenance();
     final interval = _currentMaintenanceInterval();
-    _backgroundMaintenanceTimer = Timer.periodic(interval, (_) {
+    _backgroundMaintenanceTimer = Timer(interval, () {
+      _backgroundMaintenanceTimer = null;
       if (!_isInBackground) return;
 
-      _backgroundDuration += interval.inSeconds;
+      final duration = backgroundDuration;
+      final seconds = duration.inSeconds;
 
       // 仅在长期后台时才执行 GC，避免频繁 GC 导致的 CPU 唤醒
-      if (_backgroundDuration >= _mediumBgThreshold) {
+      if (seconds >= _mediumBgThreshold) {
         _requestGc();
-        _requestDartGc();
+        _releaseDartMemory();
       }
 
       // 仅在深度后台时才清理缓存
-      if (_backgroundDuration >= _longBgThreshold) {
+      if (seconds >= _longBgThreshold) {
         resourceController.forceClearImageCache();
         _perfStats.recordCacheClear();
       }
 
-      if (_backgroundDuration >= _aggressiveGcThreshold) {
+      if (seconds >= _aggressiveGcThreshold) {
         _performAggressiveCleanup();
       }
 
-      // 检查是否需要调整间隔（升级后重启定时器）
-      final newInterval = _currentMaintenanceInterval();
-      if (newInterval != interval) {
+      if (_isInBackground) {
         _startBackgroundMaintenance();
       }
     });
@@ -334,10 +357,18 @@ class BackgroundMemoryManager extends ChangeNotifier {
     _perfStats.recordGc();
   }
 
-  void _requestDartGc() {
-    try {
-      WidgetsBinding.instance.handleMemoryPressure();
-    } catch (_) {}
+  /// 请求 Dart 侧回收内存。
+  ///
+  /// 旧实现调用 [WidgetsBinding.handleMemoryPressure] 来“间接触发 GC”，
+  /// 但那会让框架遍历所有观察者并回调 [didHaveMemoryPressure]，等于向
+  /// 应用广播一次虚假的内存压力告警：AppStateManager 会据此进入 low 模式、
+  /// 强制关闭所有定时器与缓存——在 balanced 级别、用户并未真正遇到内存
+  /// 压力的情况下，这属于自伤行为，故移除。
+  ///
+  /// Dart 侧本身不提供主动 GC 的能力，可行的做法是把缓存压缩到当前
+  /// 低内存模式下限，交由运行时自行回收。
+  void _releaseDartMemory() {
+    resourceController.forceClearAllCaches();
   }
 
   void _emptyWorkingSet() {

@@ -76,9 +76,21 @@ class _AppStateManagerState extends State<AppStateManager>
     super.dispose();
   }
 
+  AppLifecycleState? _lastLifecycleState;
+
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    final last = _lastLifecycleState;
+    _lastLifecycleState = state;
     switch (state) {
+      // Android 上 hidden 是过渡态，下行（inactive → hidden → paused）
+      // 与上行（paused → hidden → inactive）都会出现。仅在下行时提前
+      // 降频，避免刚从后台回来又被误判为进入后台。
+      case AppLifecycleState.hidden:
+        if (last != AppLifecycleState.paused) {
+          globalState.appController.savePreferencesDebounce();
+          backgroundMemoryManager.onAppPaused();
+        }
       case AppLifecycleState.paused:
         globalState.appController.savePreferencesDebounce();
         backgroundMemoryManager.onAppPaused();
@@ -86,7 +98,6 @@ class _AppStateManagerState extends State<AppStateManager>
         backgroundMemoryManager.onAppResumed();
       case AppLifecycleState.inactive:
       case AppLifecycleState.detached:
-      case AppLifecycleState.hidden:
         break;
     }
   }

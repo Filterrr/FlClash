@@ -36,6 +36,10 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var flutterMethodChannel: MethodChannel
     private lateinit var context: Context
     private var flClashService: BaseServiceInterface? = null
+
+    // 是否已成功建立绑定。用于保证 unbindService 与 bindService 严格配对：
+    // 对未绑定的连接调用 unbindService 会抛 IllegalArgumentException。
+    private var isBound = false
     private lateinit var options: VpnOptions
     private lateinit var scope: CoroutineScope
 
@@ -71,6 +75,10 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         unRegisterNetworkCallback()
+        // 注意：这里只释放本实例持有的绑定，绝不能顺带 stopService。
+        // 主 UI 引擎被销毁（用户划掉应用）时本方法同样会被调用，
+        // 而 VPN 服务应当继续在后台运行。
+        unbindServiceSafely()
         flutterMethodChannel.setMethodCallHandler(null)
     }
 
@@ -265,7 +273,56 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             GlobalState.runState.value = RunState.STOP
             flClashService?.stop()
         }
+        unbindServiceSafely()
+        // 显式停止：连同系统（always-on / 粘性重启）自行拉起的实例一并结束。
+        // 仅在此路径执行，避免误停后台仍在工作的服务。
+        stopBackgroundServices()
         GlobalState.destroyServiceEngine()
+    }
+
+    /**
+     * 供系统撤销 VPN 时（FlClashVpnService.onRevoke）回调，仅释放绑定。
+     *
+     * 与 [stop] 的区别：此时隧道已由系统拆除、Flutter 引擎可能已不可用，
+     * 因此不再下发 stop 指令，只清掉本地连接与缓存引用。
+     */
+    fun releaseBinding() {
+        unbindServiceSafely()
+    }
+
+    /**
+     * 释放本实例持有的 ServiceConnection。
+     *
+     * 旧实现只 bindService 从不 unbindService：Service 因绑定而存活，即使
+     * 销毁了 Flutter engine，系统仍会因未释放的连接而重建服务，出现
+     * “App 显示已停止、服务却仍在运行”的幽灵服务，并持续持有资源。
+     */
+    private fun unbindServiceSafely() {
+        if (!isBound) return
+        try {
+            context.unbindService(connection)
+        } catch (_: IllegalArgumentException) {
+            // 已被系统解绑时忽略
+        }
+        isBound = false
+        flClashService = null
+    }
+
+    /**
+     * 停止可能由系统（always-on / 粘性重启）自行拉起、不受本进程绑定
+     * 生命周期约束的服务实例。仅在用户显式停止时调用。
+     */
+    private fun stopBackgroundServices() {
+        listOf(
+            FlClashVpnService::class.java,
+            FlClashService::class.java,
+        ).forEach { serviceClass ->
+            try {
+                context.stopService(Intent(context, serviceClass))
+            } catch (_: Exception) {
+                // 服务未运行时忽略
+            }
+        }
     }
 
     private fun bindService() {
@@ -273,7 +330,7 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             true -> Intent(context, FlClashVpnService::class.java)
             false -> Intent(context, FlClashService::class.java)
         }
-        context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        isBound = context.bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
 }

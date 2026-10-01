@@ -456,7 +456,11 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         grantResults: IntArray
     ): Boolean {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
-            isBlockNotification = true
+            // 仅在用户拒绝时禁止再次请求；已授权时保持可请求状态
+            // （旧实现无条件置位，语义写反）。
+            val granted = grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            isBlockNotification = !granted
         }
         return true
     }

@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -180,19 +179,4 @@ suspend fun <T> MethodChannel.awaitResult(
             }
         })
     }
-}
-
-fun ReentrantLock.safeLock() {
-    if (this.isLocked) {
-        return
-    }
-    this.lock()
-}
-
-fun ReentrantLock.safeUnlock() {
-    if (!this.isLocked) {
-        return
-    }
-
-    this.unlock()
 }

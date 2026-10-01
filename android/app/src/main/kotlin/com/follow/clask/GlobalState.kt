@@ -51,25 +51,40 @@ object GlobalState {
         }
     }
 
+    /**
+     * 进入 START 流程：状态置为 PENDING 后交给 Tile 插件或启动服务引擎。
+     *
+     * 注意：这里必须使用 withLock（配对释放），不能裸 lock()。
+     * 旧实现 lock() 后从不 unlock，导致 runLock 被永久持有，
+     * 其他线程后续的 runLock.withLock 调用（VpnPlugin.start / stop /
+     * startForeground / destroyServiceEngine）会全部阻塞。
+     */
     fun handleStart(context: Context): Boolean {
-        if (runState.value == RunState.STOP) {
+        return runLock.withLock {
+            if (runState.value != RunState.STOP) {
+                return@withLock false
+            }
             runState.value = RunState.PENDING
-            runLock.lock()
             val tilePlugin = getCurrentTilePlugin()
             if (tilePlugin != null) {
                 tilePlugin.handleStart()
             } else {
                 initServiceEngine(context)
             }
-            return true
+            true
         }
-        return false
     }
 
+    /**
+     * 进入 STOP 流程：状态置为 PENDING 后交给 Tile 插件处理。
+     * 同上，必须使用 withLock（配对释放）。
+     */
     fun handleStop() {
-        if (runState.value == RunState.START) {
+        runLock.withLock {
+            if (runState.value != RunState.START) {
+                return@withLock
+            }
             runState.value = RunState.PENDING
-            runLock.lock()
             getCurrentTilePlugin()?.handleStop()
         }
     }

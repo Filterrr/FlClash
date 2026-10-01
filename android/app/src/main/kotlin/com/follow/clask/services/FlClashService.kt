@@ -40,7 +40,9 @@ class FlClashService : Service(), BaseServiceInterface {
 
     private val CHANNEL = "FlClash"
 
-    private val notificationId: Int = 1
+    // 与 FlClashVpnService 的通知 ID 错开：两个服务可能同时存活
+    // （VPN 模式与纯代理模式切换过程中），共用 ID 1 会令两条通知互相覆盖。
+    private val notificationId: Int = 2
 
     private val notificationBuilder: NotificationCompat.Builder by lazy {
         val intent = Intent(this, MainActivity::class.java)
@@ -86,6 +88,23 @@ class FlClashService : Service(), BaseServiceInterface {
     private var lastNotificationTitle: String = ""
     private var lastNotificationContent: String = ""
 
+    private val screenStateWatcher by lazy { ScreenStateWatcher(this) }
+
+    // 首个 startForeground 调用必须放行，否则 Android 12+ 会因服务
+    // 未在时限内进入前台而崩溃。
+    @Volatile
+    private var enteredForeground = false
+
+    override fun onCreate() {
+        super.onCreate()
+        screenStateWatcher.start()
+    }
+
+    override fun onDestroy() {
+        screenStateWatcher.stop()
+        super.onDestroy()
+    }
+
     override fun start(options: VpnOptions) = 0
 
     override fun stop() {
@@ -97,8 +116,17 @@ class FlClashService : Service(), BaseServiceInterface {
 
     @SuppressLint("ForegroundServiceType", "WrongConstant")
     override fun startForeground(title: String, content: String) {
+        val forceRefresh = screenStateWatcher.consumeRefreshRequest()
+        // 屏幕熄灭期间冻结通知刷新（同 FlClashVpnService 的取舍）
+        if (!forceRefresh && enteredForeground && screenStateWatcher.shouldDeferNotification) {
+            return
+        }
         // 跳过内容完全相同的通知更新，减少系统通知管理器的 CPU 唤醒
-        if (title == lastNotificationTitle && content == lastNotificationContent) {
+        if (!forceRefresh &&
+            enteredForeground &&
+            title == lastNotificationTitle &&
+            content == lastNotificationContent
+        ) {
             return
         }
         lastNotificationTitle = title
@@ -120,6 +148,7 @@ class FlClashService : Service(), BaseServiceInterface {
             } else {
                 startForeground(notificationId, notification)
             }
+            enteredForeground = true
         }
     }
 }

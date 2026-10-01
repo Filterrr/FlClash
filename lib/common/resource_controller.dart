@@ -9,99 +9,6 @@ enum ResourcePriority {
   low,
 }
 
-class ThrottledTimer {
-  final Duration normalDuration;
-  final Duration reducedDuration;
-  final Duration lowDuration;
-  final void Function() callback;
-  Timer? _timer;
-  int _tickCount = 0;
-  final int _reducedSkipFactor;
-  final int _lowSkipFactor;
-
-  ThrottledTimer({
-    required this.normalDuration,
-    Duration? reducedDuration,
-    Duration? lowDuration,
-    required this.callback,
-    int reducedSkipFactor = 3,
-    int lowSkipFactor = 5,
-  })  : reducedDuration = reducedDuration ?? normalDuration,
-        lowDuration = lowDuration ?? normalDuration,
-        _reducedSkipFactor = reducedSkipFactor,
-        _lowSkipFactor = lowSkipFactor;
-
-  bool get isActive => _timer != null && _timer!.isActive;
-
-  void start() {
-    cancel();
-    _timer = Timer.periodic(normalDuration, (_) {
-      _tickCount++;
-      final mode = lowMemoryModeNotifier.value;
-      switch (mode) {
-        case LowMemoryMode.normal:
-          callback();
-        case LowMemoryMode.reduced:
-          if (_tickCount % _reducedSkipFactor == 0) {
-            callback();
-          }
-        case LowMemoryMode.low:
-          if (_tickCount % _lowSkipFactor == 0) {
-            callback();
-          }
-      }
-    });
-  }
-
-  void cancel() {
-    _timer?.cancel();
-    _timer = null;
-    _tickCount = 0;
-  }
-}
-
-class PausableTimer {
-  final Duration duration;
-  final void Function() callback;
-  final ResourcePriority priority;
-  Timer? _timer;
-  bool _isPaused = false;
-
-  PausableTimer({
-    required this.duration,
-    required this.callback,
-    this.priority = ResourcePriority.normal,
-  });
-
-  bool get isActive => _timer != null && _timer!.isActive;
-  bool get isPaused => _isPaused;
-
-  void start() {
-    _cancel();
-    _isPaused = false;
-    _timer = Timer.periodic(duration, (_) {
-      if (!_isPaused) callback();
-    });
-  }
-
-  void pause() {
-    _isPaused = true;
-  }
-
-  void resume() {
-    _isPaused = false;
-  }
-
-  void cancel() {
-    _cancel();
-  }
-
-  void _cancel() {
-    _timer?.cancel();
-    _timer = null;
-  }
-}
-
 class PausableSubscription {
   final StreamSubscription subscription;
   final ResourcePriority priority;
@@ -119,8 +26,6 @@ class ResourceController {
   factory ResourceController() => _instance;
   ResourceController._internal();
 
-  final List<PausableTimer> _pausableTimers = [];
-  final List<ThrottledTimer> _throttledTimers = [];
   final List<PausableSubscription> _pausableSubscriptions = [];
   final List<VoidCallback> _onEnterLowMemory = [];
   final List<VoidCallback> _onExitLowMemory = [];
@@ -135,21 +40,6 @@ class ResourceController {
   static const int _normalImageCacheBytes = 100 * 1024 * 1024;
   static const int _reducedImageCacheBytes = 30 * 1024 * 1024;
   static const int _lowImageCacheBytes = 10 * 1024 * 1024;
-
-  static const double _normalCacheExtent = 500;
-  static const double _reducedCacheExtent = 200;
-  static const double _lowCacheExtent = 0;
-
-  double get currentCacheExtent {
-    switch (lowMemoryModeNotifier.value) {
-      case LowMemoryMode.normal:
-        return _normalCacheExtent;
-      case LowMemoryMode.reduced:
-        return _reducedCacheExtent;
-      case LowMemoryMode.low:
-        return _lowCacheExtent;
-    }
-  }
 
   void init() {
     if (_isInitialized) return;
@@ -190,22 +80,6 @@ class ResourceController {
     }
 
     _lastMode = mode;
-  }
-
-  void registerPausableTimer(PausableTimer timer) {
-    _pausableTimers.add(timer);
-  }
-
-  void unregisterPausableTimer(PausableTimer timer) {
-    _pausableTimers.remove(timer);
-  }
-
-  void registerThrottledTimer(ThrottledTimer timer) {
-    _throttledTimers.add(timer);
-  }
-
-  void unregisterThrottledTimer(ThrottledTimer timer) {
-    _throttledTimers.remove(timer);
   }
 
   void registerPausableSubscription(
@@ -255,11 +129,6 @@ class ResourceController {
   }
 
   void _enterReducedMemory() {
-    for (final timer in _pausableTimers) {
-      if (timer.priority == ResourcePriority.low) {
-        timer.pause();
-      }
-    }
     for (final sub in _pausableSubscriptions) {
       if (sub.priority == ResourcePriority.low) {
         sub.subscription.pause();
@@ -273,11 +142,6 @@ class ResourceController {
   }
 
   void _enterLowMemory() {
-    for (final timer in _pausableTimers) {
-      if (timer.priority != ResourcePriority.critical) {
-        timer.pause();
-      }
-    }
     for (final sub in _pausableSubscriptions) {
       if (sub.priority != ResourcePriority.critical) {
         sub.subscription.pause();
@@ -292,9 +156,6 @@ class ResourceController {
   }
 
   void _exitLowMemory() {
-    for (final timer in _pausableTimers) {
-      timer.resume();
-    }
     for (final sub in _pausableSubscriptions) {
       if (sub.subscription.isPaused) {
         sub.subscription.resume();
@@ -334,20 +195,6 @@ class ResourceController {
     _clearListViewCache();
   }
 
-  void pauseAllNonCriticalTimers() {
-    for (final timer in _pausableTimers) {
-      if (timer.priority != ResourcePriority.critical) {
-        timer.pause();
-      }
-    }
-  }
-
-  void resumeAllTimers() {
-    for (final timer in _pausableTimers) {
-      timer.resume();
-    }
-  }
-
   void pauseAllNonCriticalSubscriptions() {
     for (final sub in _pausableSubscriptions) {
       if (sub.priority != ResourcePriority.critical) {
@@ -366,8 +213,6 @@ class ResourceController {
 
   void dispose() {
     lowMemoryModeNotifier.removeListener(_handleModeChange);
-    _pausableTimers.clear();
-    _throttledTimers.clear();
     _pausableSubscriptions.clear();
     _onEnterLowMemory.clear();
     _onExitLowMemory.clear();
