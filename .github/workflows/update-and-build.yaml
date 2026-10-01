@@ -49,6 +49,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          # 浅克隆下 rebase 到 main 会因缺少共同祖先产生假冲突（add/add），
+          # 从非 main 分支触发时必然失败；需要完整历史
+          fetch-depth: 0
 
       - name: Setup Git
         run: |
@@ -188,7 +192,8 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: '1.25.x'
-          cache: false
+          cache: true
+          cache-dependency-path: core/go.sum
 
       - name: Update Go Dependencies
         run: |
@@ -199,19 +204,6 @@ jobs:
         run: |
           cd core
           go mod download
-
-      - name: Debug Go Environment
-        run: |
-          cd core
-          echo "Go version: $(go version)"
-          echo "Go module cache: $(go env GOMODCACHE)"
-          echo "Clash.Meta commit: $(git -C Clash.Meta rev-parse HEAD)"
-          echo "Clash.Meta branch: $(git -C Clash.Meta branch -vv)"
-          echo "statistic/manager.go content:"
-          cat Clash.Meta/tunnel/statistic/manager.go | head -110 | tail -25
-          echo "---"
-          echo "go.mod replace directive:"
-          grep "replace" go.mod || true
 
       - name: Test Build Core
         run: |
@@ -257,12 +249,16 @@ jobs:
             go_version: '1.25.x'
             flutter_channel: 'stable'
             flutter_version: '3.x'
+          # windows-11-arm：原生 ARM64 runner。windows-latest 是 x64，
+          # 除 Go 内核交叉编译外，Flutter 及插件等产物均为 x64 模拟。
+          # stable 通道没有 Windows arm64 的 Flutter 归档，故用 master 通道
+          # 并锁定具体版本，由 SDK 自行拉取宿主 arm64 的 Dart SDK/引擎。
           - platform: windows
-            os: windows-latest
+            os: windows-11-arm
             arch: arm64
             go_version: '1.25.x'
-            flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_channel: 'master'
+            flutter_version: '3.47.5'
 
           # --- macOS 平台 ---
           - platform: macos
@@ -320,11 +316,21 @@ jobs:
           add-to-path: true
           link-to-sdk: true
 
-      - name: Setup Rust
-        if: matrix.platform == 'windows'
+      - name: Setup Rust (x64)
+        if: matrix.platform == 'windows' && matrix.arch == 'amd64'
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: 'x86_64-pc-windows-msvc'
+
+      # windows-11-arm 上 dtolnay action 不适用，直接安装原生 aarch64 工具链
+      - name: Setup Rust (arm64)
+        if: matrix.platform == 'windows' && matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-toolchain stable
+          $cargoPath = "$env:USERPROFILE\.cargo\bin"
+          Add-Content $env:GITHUB_PATH $cargoPath
 
       - name: Setup Golang
         uses: actions/setup-go@v6
@@ -332,17 +338,22 @@ jobs:
           go-version: ${{ matrix.go_version }}
           cache-dependency-path: core/go.sum
 
-      - name: Update Go Dependencies
+      # 仅预下载依赖；构建阶段不改写 go.mod/go.sum，保持与仓库记录一致
+      - name: Download Go Dependencies
         run: |
           cd core
-          go mod tidy
+          go mod download
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter_channel }}
+          # 使用 action 默认缓存键（含 channel/version/arch 与引擎 hash）：
+          # 自定义 cache-key 会把 pubspec.lock 混进 SDK 键导致依赖一变更就重下 SDK，
+          # 且缺少版本维度使 Flutter 升级后命中旧缓存；
+          # pub 依赖缓存的键由 action 自动附加 pubspec.lock 哈希。
           cache: true
-          cache-key: flutter-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('**/pubspec.lock') }}
+          pub-cache: true
           flutter-version: ${{ matrix.flutter_version || '3.x' }}
 
       - name: Prepare Dependencies
@@ -416,7 +427,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Set Release Tag
         run: |
@@ -447,4 +458,6 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: ./dist/*
-          body_path: './release.md'
+          # 仓库中不存在 release.md，body_path 只会静默回退成空白正文；
+          # 改为让 GitHub 基于提交/PR 自动生成发布说明
+          generate_release_notes: true
