@@ -201,7 +201,9 @@ class BackgroundMemoryManager extends ChangeNotifier {
   /// false，不产生任何开销。
   void _logStatsIfNeeded() {
     if (!kDebugMode) return;
-    debugPrint('[BackgroundMemoryManager] $getPerformanceStats');
+    // 注意必须调用（带括号）：`$getPerformanceStats` 是 tear-off，
+    // 只会打印闭包对象本身而非统计内容。
+    debugPrint('[BackgroundMemoryManager] ${getPerformanceStats()}');
   }
 
   void _startEscalationTimer() {

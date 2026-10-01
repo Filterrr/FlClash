@@ -30,6 +30,7 @@ import com.follow.clask.models.VpnOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.concurrent.withLock
 
 
 class FlClashVpnService : VpnService(), BaseServiceInterface {
@@ -289,7 +290,11 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
         } else {
             // 没有可通知的 Flutter 引擎：直接复位运行状态，
             // 避免 runState 停留在 PENDING 导致后续开关失效。
-            GlobalState.runState.value = RunState.STOP
+            // 必须持锁写入：否则可能与 handleStart/handleStop 锁内的
+            // PENDING 写入交错，把状态卡在 PENDING。
+            GlobalState.runLock.withLock {
+                GlobalState.runState.value = RunState.STOP
+            }
         }
         GlobalState.getCurrentVPNPlugin()?.releaseBinding()
     }
