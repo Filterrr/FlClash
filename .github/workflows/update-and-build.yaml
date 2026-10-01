@@ -49,6 +49,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
+        with:
+          # 浅克隆下 rebase 到 main 会因缺少共同祖先产生假冲突（add/add），
+          # 从非 main 分支触发时必然失败；需要完整历史
+          fetch-depth: 0
 
       - name: Setup Git
         run: |
