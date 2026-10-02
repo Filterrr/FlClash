@@ -84,14 +84,14 @@ require (
 	github.com/metacubex/chacha v0.1.5 // indirect
 	github.com/metacubex/chi v0.1.1 // indirect
 	github.com/metacubex/connect-ip-go v0.0.0-20260727083417-67ccdb0cf771 // indirect
-	github.com/metacubex/cpu v0.1.1 // indirect
+	github.com/metacubex/cpu v0.1.2 // indirect
 	github.com/metacubex/edwards25519 v1.2.0 // indirect
 	github.com/metacubex/fswatch v0.1.1 // indirect
 	github.com/metacubex/gopacket v1.1.20-0.20230608035415-7e2f98a3e759 // indirect
 	github.com/metacubex/gvisor v0.0.0-20260922041103-e2cbcd6e7400 // indirect
 	github.com/metacubex/hkdf v0.1.0 // indirect
 	github.com/metacubex/hpke v0.1.0 // indirect
-	github.com/metacubex/http v0.1.7 // indirect
+	github.com/metacubex/http v0.1.8 // indirect
 	github.com/metacubex/kcp-go v0.0.0-20260105040817-550693377604 // indirect
 	github.com/metacubex/mhurl v0.1.0 // indirect
 	github.com/metacubex/mlkem v0.1.0 // indirect
@@ -101,17 +101,17 @@ require (
 	github.com/metacubex/randv2 v0.2.0 // indirect
 	github.com/metacubex/restls-client-go v0.1.9 // indirect
 	github.com/metacubex/sing v0.5.8 // indirect
-	github.com/metacubex/sing-mux v0.3.10 // indirect
+	github.com/metacubex/sing-mux v0.3.12 // indirect
 	github.com/metacubex/sing-quic v0.0.0-20260904234848-1c242664697a // indirect
 	github.com/metacubex/sing-shadowsocks v0.2.13 // indirect
 	github.com/metacubex/sing-shadowsocks2 v0.2.8 // indirect
 	github.com/metacubex/sing-tun v0.4.27 // indirect
 	github.com/metacubex/sing-vmess v0.2.5 // indirect
-	github.com/metacubex/sing-wireguard v0.0.0-20260826105301-c3ae17d19f9e // indirect
+	github.com/metacubex/sing-wireguard v0.0.0-20261002050126-e5fa1a607406 // indirect
 	github.com/metacubex/smux v0.0.0-20260105030934-d0c8756d3141 // indirect
 	github.com/metacubex/tfo-go v0.0.0-20260623020846-376a77860b8c // indirect
 	github.com/metacubex/tls v0.1.8 // indirect
-	github.com/metacubex/utls v1.8.7 // indirect
+	github.com/metacubex/utls v1.8.8 // indirect
 	github.com/metacubex/wireguard-go v0.0.0-20250820062549-a6cecdd7f57f // indirect
 	github.com/metacubex/yamux v0.0.0-20250918083631-dd5f17c0be49 // indirect
 	github.com/miekg/dns v1.1.63 // indirect
