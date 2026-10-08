@@ -10,6 +10,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.content.getSystemService
 import com.follow.clask.BaseServiceInterface
 import com.follow.clask.GlobalState
@@ -257,14 +258,62 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             bindService()
             return
         }
+        var startFailed = false
         GlobalState.runLock.withLock {
             if (GlobalState.runState.value == RunState.START) return
             GlobalState.runState.value = RunState.START
-            val fd = flClashService?.start(options)
-            flutterMethodChannel.invokeMethod(
-                "started", fd
-            )
+            val fd = try {
+                flClashService?.start(options)
+            } catch (e: Exception) {
+                // VPN 建立失败：绝不能停留在 START。残留的 START 会让
+                // 快速设置磁贴显示“已连接”，而实际没有任何隧道在保护
+                // 流量——用户以为代理生效时，全部流量都在直连。
+                Log.w("VpnPlugin", "VPN start failed", e)
+                null
+            }
+            if (fd == null) {
+                startFailed = true
+            } else {
+                flutterMethodChannel.invokeMethod(
+                    "started", fd
+                )
+            }
         }
+        if (startFailed) {
+            abortStart()
+        }
+    }
+
+    /**
+     * 启动未完成（隧道建立失败、系统授权被拒等）时的兜底清理：
+     * 复位运行状态、释放绑定、停掉服务实例，并通知界面复位。
+     * 让用户随后可以重新发起启动。
+     *
+     * 引擎销毁投递到主线程，避免在方法通道回调栈内销毁引擎自身；
+     * 执行前复查状态：若用户已重新发起启动（状态离开 STOP），
+     * 则保留引擎供重试复用，不做销毁。
+     */
+    fun abortStart() {
+        GlobalState.runLock.withLock {
+            GlobalState.runState.value = RunState.STOP
+        }
+        unbindServiceSafely()
+        stopBackgroundServices()
+        // 仅在存在前台 UI 引擎时通知界面复位（走与「用户主动停止」相同的
+        // 链路，复位按钮与流量统计）。无 UI 引擎时不发：该通道的接收者
+        // 是服务引擎自己，其 onStop 会执行 exit(0) 强杀进程——那是
+        // 用户主动停止的语义，不适用于一次失败的启动。
+        if (GlobalState.flutterEngine != null) {
+            GlobalState.getCurrentTilePlugin()?.handleStop()
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            GlobalState.runLock.withLock {
+                if (GlobalState.runState.value == RunState.STOP) {
+                    GlobalState.destroyServiceEngine()
+                }
+            }
+        }
+        Log.w("VpnPlugin", "aborted an incomplete VPN start")
     }
 
     fun stop() {
