@@ -60,34 +60,62 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
             if (options.ipv4Address.isNotEmpty()) {
                 val cidr = options.ipv4Address.toCIDR()
                 addAddress(cidr.address, cidr.prefixLength)
-                val routeAddress = options.getIpv4RouteAddress()
-                if (routeAddress.isNotEmpty()) {
-                    routeAddress.forEach { i ->
-                        Log.d("addRoute4", "address: ${i.address} prefixLength:${i.prefixLength}")
-                        addRoute(i.address, i.prefixLength)
+                // 单条路由非法（配置里手写的 CIDR 等）不应让整个隧道起不来，
+                // 也不应只装上一半路由：失败时收敛到全量路由，宁可多走隧道，
+                // 也不能把流量漏到隧道外。
+                try {
+                    val routeAddress = options.getIpv4RouteAddress()
+                    if (routeAddress.isNotEmpty()) {
+                        routeAddress.forEach { i ->
+                            Log.d("addRoute4", "address: ${i.address} prefixLength:${i.prefixLength}")
+                            addRoute(i.address, i.prefixLength)
+                        }
+                    } else {
+                        addRoute("0.0.0.0", 0)
                     }
-                } else {
+                } catch (e: Exception) {
+                    Log.w("addRoute4", "invalid IPv4 routes, falling back to 0.0.0.0/0", e)
                     addRoute("0.0.0.0", 0)
                 }
             }
             if (options.ipv6Address.isNotEmpty()) {
-                val cidr = options.ipv6Address.toCIDR()
-                addAddress(cidr.address, cidr.prefixLength)
-                val routeAddress = options.getIpv6RouteAddress()
-                if (routeAddress.isNotEmpty()) {
-                    routeAddress.forEach { i ->
-                        Log.d("addRoute6", "address: ${i.address} prefixLength:${i.prefixLength}")
-                        addRoute(i.address, i.prefixLength)
+                // IPv6 做失败隔离：地址或路由任一环节失败都不能静默半配置。
+                // 只加了地址而没加路由时，该地址族会被系统视为“已允许”，
+                // 其默认路由仍指向底层网络 —— IPv6 整体旁路隧道；相反，
+                // 地址没加上时地址族保持封锁，最差是无 v6 连通，不漏流量。
+                val addressAdded = try {
+                    val cidr = options.ipv6Address.toCIDR()
+                    addAddress(cidr.address, cidr.prefixLength)
+                    true
+                } catch (e: Exception) {
+                    Log.w("addAddress6", "IPv6 unsupported, keeping IPv6 blocked", e)
+                    false
+                }
+                if (addressAdded) {
+                    try {
+                        val routeAddress = options.getIpv6RouteAddress()
+                        if (routeAddress.isNotEmpty()) {
+                            routeAddress.forEach { i ->
+                                Log.d("addRoute6", "address: ${i.address} prefixLength:${i.prefixLength}")
+                                addRoute(i.address, i.prefixLength)
+                            }
+                        } else {
+                            addRoute("::", 0)
+                        }
+                    } catch (e: Exception) {
+                        Log.w("addRoute6", "invalid IPv6 routes, falling back to ::/0", e)
+                        addRoute("::", 0)
                     }
-                } else {
-                    addRoute("::", 0)
                 }
             }
             addDnsServer(options.dnsServerAddress)
             setMtu(options.mtu)
             options.accessControl?.let { accessControl ->
-                // Builder 对未安装的包名会抛 NameNotFoundException，
-                // 因此仅对候选包做（少量）存在性检查，避免整表扫描。
+                // Builder 对未安装的包名会抛 NameNotFoundException。
+                // 一个已卸载的应用（访问控制名单是在它安装时选入的）
+                // 不能让 establish() 失败：VPN 起不来的话用户以为在保护中，
+                // 实际全部流量直连——这是最严重的一类漏流量。
+                // 因此逐包申请，跳过（并记录）已卸载的应用。
                 val fcmPackages = if (options.fcmKeepAlive) {
                     options.fcmKeepAlivePackages.filter { isPackageInstalled(it) }
                 } else {
@@ -97,14 +125,14 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
                     AccessControlMode.acceptSelected -> {
                         val allowed = accessControl.acceptList + packageName + fcmPackages
                         allowed.distinct().forEach {
-                            addAllowedApplication(it)
+                            addInstalledAllowedApplication(it)
                         }
                     }
 
                     AccessControlMode.rejectSelected -> {
                         val disallowed = accessControl.rejectList - packageName - fcmPackages.toSet()
                         disallowed.forEach {
-                            addDisallowedApplication(it)
+                            addInstalledDisallowedApplication(it)
                         }
                     }
                 }
@@ -150,6 +178,30 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
             true
         } catch (_: Exception) {
             false
+        }
+    }
+
+    /**
+     * 逐包申请「允许的应用」。未安装的包名只跳过、不抛异常，
+     * 否则一个失效条目会让整个 VPN 建立失败（全流量直连）。
+     */
+    private fun Builder.addInstalledAllowedApplication(packageName: String) {
+        try {
+            addAllowedApplication(packageName)
+        } catch (e: Exception) {
+            Log.w("accessControl", "skip uninstalled package: $packageName", e)
+        }
+    }
+
+    /**
+     * 逐包申请「排除的应用」。同 [addInstalledAllowedApplication]：
+     * 未安装的包名只跳过、不抛异常。
+     */
+    private fun Builder.addInstalledDisallowedApplication(packageName: String) {
+        try {
+            addDisallowedApplication(packageName)
+        } catch (e: Exception) {
+            Log.w("accessControl", "skip uninstalled package: $packageName", e)
         }
     }
 

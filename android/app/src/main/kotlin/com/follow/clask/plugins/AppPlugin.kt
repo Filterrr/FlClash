@@ -21,6 +21,7 @@ import androidx.core.graphics.drawable.IconCompat
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile
 import com.follow.clask.GlobalState
 import com.follow.clask.R
+import com.follow.clask.RunState
 import com.follow.clask.extensions.awaitResult
 import com.follow.clask.extensions.getActionIntent
 import com.follow.clask.extensions.getBase64
@@ -41,6 +42,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.zip.ZipFile
+import kotlin.concurrent.withLock
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -322,10 +324,35 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         vpnCallBack = callBack
         val intent = VpnService.prepare(context)
         if (intent != null) {
-            activity?.startActivityForResult(intent, VPN_PERMISSION_REQUEST_CODE)
+            val currentActivity = activity
+            if (currentActivity == null) {
+                // 没有前台 Activity 时无法弹出系统授权框。若静默返回，
+                // runState 会永久停在 PENDING：磁贴停在不可用态，之后
+                // 所有启动/停止请求都会被状态机拒绝，而用户以为正在连接。
+                abortIncompleteStart()
+                return
+            }
+            currentActivity.startActivityForResult(intent, VPN_PERMISSION_REQUEST_CODE)
             return
         }
         vpnCallBack?.invoke()
+    }
+
+    /**
+     * 启动流程无法完成（授权被拒、无法弹出授权框等）时的统一中止：
+     * 交由服务侧 VPN 插件复位状态并拆除半成品；服务引擎不可用时至少
+     * 复位运行状态，避免 PENDING 把状态机锁死。
+     */
+    private fun abortIncompleteStart() {
+        vpnCallBack = null
+        val vpnPlugin = GlobalState.getCurrentVPNPlugin()
+        if (vpnPlugin != null) {
+            vpnPlugin.abortStart()
+        } else {
+            GlobalState.runLock.withLock {
+                GlobalState.runState.value = RunState.STOP
+            }
+        }
     }
 
     fun requestNotificationsPermission(context: Context) {
@@ -445,6 +472,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             if (resultCode == FlutterActivity.RESULT_OK) {
                 GlobalState.initServiceEngine(context)
                 vpnCallBack?.invoke()
+            } else {
+                // 用户在系统授权框中点了「取消」：同样必须中止启动，
+                // 否则磁贴卡住且后续启动请求全部被拒，而 VPN 从未建立。
+                abortIncompleteStart()
             }
         }
         return true

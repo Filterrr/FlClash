@@ -272,9 +272,17 @@ func setState(s *C.char) {
 //export updateDns
 func updateDns(s *C.char) {
 	dnsList := C.GoString(s)
+	// 首选网络未上报 DNS 服务器时 Android 侧会传空串。
+	// strings.Split("", ",") 得到 [""]，mihomo 会把它构建成 "udp://:"，
+	// 于是 system 解析器被当作已配置、永不回落到默认 nameserver，
+	// 解析全部失败（上游 e55f6d10 修复的同一缺陷）。
+	var addr []string
+	if dnsList != "" {
+		addr = strings.Split(dnsList, ",")
+	}
 	go func() {
 		log.Infoln("[DNS] updateDns %s", dnsList)
-		dns.UpdateSystemDNS(strings.Split(dnsList, ","))
+		dns.UpdateSystemDNS(addr)
 		dns.FlushCacheWithDefaultResolver()
 	}()
 }
