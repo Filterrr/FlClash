@@ -52,7 +52,11 @@ void main() {
       (tester) async {
     await tester.pumpWidget(buildCard());
 
-    final openContainers = find.byType(OpenContainer);
+    // OpenContainer 带泛型参数，byType 会因实例化类型不同而匹配不到，
+    // 这里用谓词匹配。
+    final openContainers = find.byWidgetPredicate(
+      (widget) => widget is OpenContainer,
+    );
     expect(openContainers, findsOneWidget);
 
     final rowMaterials = tester.widgetList<Material>(
@@ -74,20 +78,21 @@ void main() {
   testWidgets('card background is painted once behind its rows', (tester) async {
     await tester.pumpWidget(buildCard());
 
-    // 卡片外层由 Material 承载底色与水波纹裁剪。
-    final card = find.ancestor(
-      of: find.text('主题'),
-      matching: find.byType(Material),
-    );
-    final colors = tester
-        .widgetList<Material>(card)
-        .map((item) => item.color)
-        .whereType<Color>()
+    // 卡片外层由带圆角的 Material 承载底色；行内的 Material 必须透明。
+    final cardMaterials = tester
+        .widgetList<Material>(
+          find.ancestor(
+            of: find.text('主题'),
+            matching: find.byType(Material),
+          ),
+        )
+        .where((material) => material.shape is RoundedRectangleBorder)
         .toList();
+    expect(cardMaterials, isNotEmpty, reason: '分组卡片必须由 Material 承载');
     expect(
-      colors.any((color) => color.a > 0),
-      isTrue,
-      reason: '卡片必须有不透明底色',
+      cardMaterials.first.color?.a,
+      greaterThan(0.5),
+      reason: '卡片底色必须不透明',
     );
   });
 }
