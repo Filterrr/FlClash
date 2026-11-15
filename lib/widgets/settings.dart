@@ -490,36 +490,37 @@ class SettingsNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    // 图标用 RichText 的 WidgetSpan 内联到首行，这样换行后每一行都从同一
+    // 左边界开始；用 Row(Icon + Text) 会让第二行缩进到文字起点，看起来错位。
+    final textTheme = context.textTheme;
+    final style = textTheme.bodySmall?.copyWith(
+      color: colorScheme.outline,
+      height: 1.5,
+    );
     return Padding(
       padding: const EdgeInsets.only(
         left: 22,
         right: 22,
         top: 8,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 1.5),
-            child: Icon(
-              Icons.info_outline,
-              size: 13,
-              color: colorScheme.outline,
-            ),
-          ),
-          const SizedBox(
-            width: 8,
-          ),
-          Expanded(
-            child: Text(
-              text,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.outline,
-                height: 1.5,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(
+                  Icons.info_outline,
+                  size: 13,
+                  color: colorScheme.outline,
+                ),
               ),
             ),
-          ),
-        ],
+            TextSpan(text: text),
+          ],
+        ),
+        style: style,
       ),
     );
   }

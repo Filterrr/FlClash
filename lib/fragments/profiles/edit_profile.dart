@@ -155,7 +155,7 @@ class _EditProfileState extends State<EditProfile> {
               label: appLocalizations.basicInfo,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                   child: TextFormField(
                     controller: labelController,
                     decoration: InputDecoration(
@@ -172,7 +172,7 @@ class _EditProfileState extends State<EditProfile> {
                 ),
                 if (isUrlProfile)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
                     child: TextFormField(
                       controller: urlController,
                       maxLines: 5,
@@ -210,7 +210,7 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                   if (autoUpdate)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
                       child: TextFormField(
                         controller: autoUpdateDurationController,
                         keyboardType: TextInputType.number,

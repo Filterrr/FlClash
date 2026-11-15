@@ -225,8 +225,6 @@ class _CurrentProfileSummary extends StatelessWidget {
         : null;
     return Padding(
       padding: const EdgeInsets.only(
-        left: 16,
-        right: 16,
         top: 4,
         bottom: 4,
       ),
@@ -264,7 +262,7 @@ class _CurrentProfileSummary extends StatelessWidget {
                   width: 7,
                 ),
                 Text(
-                  appLocalizations.profiles,
+                  appLocalizations.currentProfile,
                   style: textTheme.labelMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -559,11 +557,13 @@ class ProfileItem extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SettingsIconTile(
-                    iconData: profile.type == ProfileType.url
-                        ? Icons.cloud_outlined
-                        : Icons.description_outlined,
-                    isNeutral: !isCurrent,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: SettingsIconTile(
+                      iconData: profile.type == ProfileType.url
+                          ? Icons.cloud_outlined
+                          : Icons.description_outlined,
+                    ),
                   ),
                   const SizedBox(
                     width: 11,
@@ -579,10 +579,11 @@ class ProfileItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: context.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            height: 1.35,
                           ),
                         ),
                         const SizedBox(
-                          height: 2,
+                          height: 3,
                         ),
                         Text(
                           _buildSubtitle(),
@@ -590,6 +591,7 @@ class ProfileItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: context.textTheme.labelSmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
+                            height: 1.4,
                           ),
                         ),
                       ],
