@@ -417,5 +417,13 @@
   "recoveryScopeTip": "Recovery always asks for a scope first: profiles only, or all data.",
   "overrideScopeTip": "Overrides only affect the local core config, never the subscription file.",
   "test": "Test",
-  "advanced": "Advanced"
+  "advanced": "Advanced",
+  "currentProfile": "Current",
+  "profileItemTip": "Tap a card to switch profiles; long-press opens the runtime config; the menu on the right can edit, update or delete.",
+  "profileEmptyDesc": "Import a subscription by link, QR code or local file to get started.",
+  "importMethod": "Import",
+  "addProfileTip": "On desktop, QR code import opens an image picker instead of the camera.",
+  "basicInfo": "Basic",
+  "updateSection": "Update",
+  "autoUpdateDesc": "Fetch the latest subscription on a fixed interval"
 }

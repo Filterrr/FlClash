@@ -132,119 +132,8 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      ListItem(
-        title: TextFormField(
-          controller: labelController,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            labelText: appLocalizations.name,
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return appLocalizations.profileNameNullValidationDesc;
-            }
-            return null;
-          },
-        ),
-      ),
-      if (widget.profile.type == ProfileType.url) ...[
-        ListItem(
-          title: TextFormField(
-            controller: urlController,
-            maxLines: 5,
-            minLines: 1,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: appLocalizations.url,
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return appLocalizations.profileUrlNullValidationDesc;
-              }
-              if (!value.isUrl) {
-                return appLocalizations.profileUrlInvalidValidationDesc;
-              }
-              return null;
-            },
-          ),
-        ),
-        ListItem.switchItem(
-          title: Text(appLocalizations.autoUpdate),
-          delegate: SwitchDelegate<bool>(
-            value: autoUpdate,
-            onChanged: _setAutoUpdate,
-          ),
-        ),
-        if (autoUpdate)
-          ListItem(
-            title: TextFormField(
-              controller: autoUpdateDurationController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.autoUpdateInterval,
-              ),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalNullValidationDesc;
-                }
-                try {
-                  int.parse(value);
-                } catch (_) {
-                  return appLocalizations
-                      .profileAutoUpdateIntervalInvalidValidationDesc;
-                }
-                return null;
-              },
-            ),
-          ),
-      ],
-      ValueListenableBuilder<FileInfo?>(
-        valueListenable: fileInfoNotifier,
-        builder: (_, fileInfo, __) {
-          return FadeBox(
-            child: fileInfo == null
-                ? Container()
-                : ListItem(
-                    title: Text(
-                      appLocalizations.profile,
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        Text(
-                          fileInfo.desc,
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Wrap(
-                          runSpacing: 6,
-                          spacing: 12,
-                          children: [
-                            CommonChip(
-                              avatar: const Icon(Icons.edit),
-                              label: appLocalizations.edit,
-                              onPressed: _editProfileFile,
-                            ),
-                            CommonChip(
-                              avatar: const Icon(Icons.upload),
-                              label: appLocalizations.upload,
-                              onPressed: _uploadProfileFile,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-          );
-        },
-      ),
-    ];
+    final colorScheme = context.colorScheme;
+    final isUrlProfile = widget.profile.type == ProfileType.url;
     return FloatLayout(
       floatingWidget: FloatWrapper(
         child: FloatingActionButton.extended(
@@ -256,24 +145,135 @@ class _EditProfileState extends State<EditProfile> {
       ),
       child: Form(
         key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 16,
+        child: ListView(
+          padding: const EdgeInsets.only(
+            top: 8,
+            bottom: 96,
           ),
-          child: ListView.separated(
-            padding: kMaterialListPadding.copyWith(
-              bottom: 72,
+          children: [
+            SettingsSection(
+              label: appLocalizations.basicInfo,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                  child: TextFormField(
+                    controller: labelController,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: appLocalizations.name,
+                    ),
+                    validator: (String? value) {
+                      if (value == null || value.isEmpty) {
+                        return appLocalizations.profileNameNullValidationDesc;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                if (isUrlProfile)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+                    child: TextFormField(
+                      controller: urlController,
+                      maxLines: 5,
+                      minLines: 1,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: appLocalizations.url,
+                      ),
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return appLocalizations.profileUrlNullValidationDesc;
+                        }
+                        if (!value.isUrl) {
+                          return appLocalizations
+                              .profileUrlInvalidValidationDesc;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+              ],
             ),
-            itemBuilder: (_, index) {
-              return items[index];
-            },
-            separatorBuilder: (_, __) {
-              return const SizedBox(
-                height: 24,
-              );
-            },
-            itemCount: items.length,
-          ),
+            if (isUrlProfile)
+              SettingsSection(
+                label: appLocalizations.updateSection,
+                children: [
+                  ListItem.switchItem(
+                    isSettings: true,
+                    title: Text(appLocalizations.autoUpdate),
+                    subtitle: Text(appLocalizations.autoUpdateDesc),
+                    delegate: SwitchDelegate<bool>(
+                      value: autoUpdate,
+                      onChanged: _setAutoUpdate,
+                    ),
+                  ),
+                  if (autoUpdate)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
+                      child: TextFormField(
+                        controller: autoUpdateDurationController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          labelText: appLocalizations.autoUpdateInterval,
+                        ),
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return appLocalizations
+                                .profileAutoUpdateIntervalNullValidationDesc;
+                          }
+                          try {
+                            int.parse(value);
+                          } catch (_) {
+                            return appLocalizations
+                                .profileAutoUpdateIntervalInvalidValidationDesc;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ValueListenableBuilder<FileInfo?>(
+              valueListenable: fileInfoNotifier,
+              builder: (_, fileInfo, __) {
+                return FadeBox(
+                  child: fileInfo == null
+                      ? const SizedBox()
+                      : SettingsSection(
+                          label: appLocalizations.file,
+                          children: [
+                            ListItem(
+                              isSettings: true,
+                              iconData: Icons.description_outlined,
+                              title: Text(appLocalizations.profile),
+                              subtitle: Text(fileInfo.desc),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: appLocalizations.edit,
+                                    onPressed: _editProfileFile,
+                                    icon: const Icon(Icons.edit_outlined),
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  IconButton(
+                                    tooltip: appLocalizations.upload,
+                                    onPressed: _uploadProfileFile,
+                                    icon: const Icon(Icons.upload_outlined),
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                );
+              },
+            ),
+            const SettingsBottomSpace(),
+          ],
         ),
       ),
     );

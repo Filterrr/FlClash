@@ -48,25 +48,39 @@ class AddProfile extends StatelessWidget {
   @override
   Widget build(context) {
     return ListView(
+      padding: const EdgeInsets.only(top: 8),
       children: [
-        ListItem(
-          leading: const Icon(Icons.qr_code),
-          title: Text(appLocalizations.qrcode),
-          subtitle: Text(appLocalizations.qrcodeDesc),
-          onTap: _toScan,
+        SettingsSection(
+          label: appLocalizations.importMethod,
+          dividerIndentWithIcon: true,
+          children: [
+            ListItem(
+              iconData: Icons.qr_code_2,
+              title: Text(appLocalizations.qrcode),
+              subtitle: Text(appLocalizations.qrcodeDesc),
+              showArrow: true,
+              onTap: _toScan,
+            ),
+            ListItem(
+              iconData: Icons.upload_file_outlined,
+              title: Text(appLocalizations.file),
+              subtitle: Text(appLocalizations.fileDesc),
+              showArrow: true,
+              onTap: _handleAddProfileFormFile,
+            ),
+            ListItem(
+              iconData: Icons.cloud_download_outlined,
+              title: Text(appLocalizations.url),
+              subtitle: Text(appLocalizations.urlDesc),
+              showArrow: true,
+              onTap: _toAdd,
+            ),
+          ],
         ),
-        ListItem(
-          leading: const Icon(Icons.upload_file),
-          title: Text(appLocalizations.file),
-          subtitle: Text(appLocalizations.fileDesc),
-          onTap: _handleAddProfileFormFile,
+        SettingsNote(
+          text: appLocalizations.addProfileTip,
         ),
-        ListItem(
-          leading: const Icon(Icons.cloud_download),
-          title: Text(appLocalizations.url),
-          subtitle: Text(appLocalizations.urlDesc),
-          onTap: _toAdd,
-        )
+        const SettingsBottomSpace(),
       ],
     );
   }
@@ -89,19 +103,27 @@ class _URLFormDialogState extends State<URLFormDialog> {
   }
 
   @override
+  void dispose() {
+    urlController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(appLocalizations.importFromURL),
       content: SizedBox(
-        width: 300,
+        width: dialogCommonWidth,
         child: Wrap(
           runSpacing: 16,
           children: [
             TextField(
+              autofocus: true,
               maxLines: 5,
               minLines: 1,
               controller: urlController,
               decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.link),
                 border: const OutlineInputBorder(),
                 labelText: appLocalizations.url,
               ),

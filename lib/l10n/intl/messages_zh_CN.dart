@@ -506,5 +506,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideScopeTip": MessageLookupByLibrary.simpleMessage("覆写只影响本机内核配置，不修改订阅下发的原始文件。"),
     "test": MessageLookupByLibrary.simpleMessage("测试"),
     "advanced": MessageLookupByLibrary.simpleMessage("进阶"),
+    "currentProfile": MessageLookupByLibrary.simpleMessage("当前"),
+    "profileItemTip": MessageLookupByLibrary.simpleMessage("点击卡片切换配置；长按进入运行时配置；右侧菜单可编辑 / 更新 / 删除。"),
+    "profileEmptyDesc": MessageLookupByLibrary.simpleMessage("通过链接、二维码或本地文件导入一份订阅，即可开始使用。"),
+    "importMethod": MessageLookupByLibrary.simpleMessage("导入方式"),
+    "addProfileTip": MessageLookupByLibrary.simpleMessage("桌面端「二维码」改为从图片识别，行为与现版本一致。"),
+    "basicInfo": MessageLookupByLibrary.simpleMessage("基本信息"),
+    "updateSection": MessageLookupByLibrary.simpleMessage("更新"),
+    "autoUpdateDesc": MessageLookupByLibrary.simpleMessage("按固定间隔拉取最新订阅"),
   };
 }

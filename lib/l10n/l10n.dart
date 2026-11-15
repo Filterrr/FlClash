@@ -3332,6 +3332,46 @@ class AppLocalizations {
     return Intl.message('Advanced', name: 'advanced', desc: '', args: []);
   }
 
+  /// `Current`
+  String get currentProfile {
+    return Intl.message('Current', name: 'currentProfile', desc: '', args: []);
+  }
+
+  /// `Tap a card to switch profiles; long-press opens the runtime config; the menu on the right can edit, update or delete.`
+  String get profileItemTip {
+    return Intl.message('Tap a card to switch profiles; long-press opens the runtime config; the menu on the right can edit, update or delete.', name: 'profileItemTip', desc: '', args: []);
+  }
+
+  /// `Import a subscription by link, QR code or local file to get started.`
+  String get profileEmptyDesc {
+    return Intl.message('Import a subscription by link, QR code or local file to get started.', name: 'profileEmptyDesc', desc: '', args: []);
+  }
+
+  /// `Import`
+  String get importMethod {
+    return Intl.message('Import', name: 'importMethod', desc: '', args: []);
+  }
+
+  /// `On desktop, QR code import opens an image picker instead of the camera.`
+  String get addProfileTip {
+    return Intl.message('On desktop, QR code import opens an image picker instead of the camera.', name: 'addProfileTip', desc: '', args: []);
+  }
+
+  /// `Basic`
+  String get basicInfo {
+    return Intl.message('Basic', name: 'basicInfo', desc: '', args: []);
+  }
+
+  /// `Update`
+  String get updateSection {
+    return Intl.message('Update', name: 'updateSection', desc: '', args: []);
+  }
+
+  /// `Fetch the latest subscription on a fixed interval`
+  String get autoUpdateDesc {
+    return Intl.message('Fetch the latest subscription on a fixed interval', name: 'autoUpdateDesc', desc: '', args: []);
+  }
+
   /// `Release notes`
   String get releaseNotes {
     return Intl.message(

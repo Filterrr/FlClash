@@ -753,5 +753,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideScopeTip": MessageLookupByLibrary.simpleMessage("Overrides only affect the local core config, never the subscription file."),
     "test": MessageLookupByLibrary.simpleMessage("Test"),
     "advanced": MessageLookupByLibrary.simpleMessage("Advanced"),
+    "currentProfile": MessageLookupByLibrary.simpleMessage("Current"),
+    "profileItemTip": MessageLookupByLibrary.simpleMessage("Tap a card to switch profiles; long-press opens the runtime config; the menu on the right can edit, update or delete."),
+    "profileEmptyDesc": MessageLookupByLibrary.simpleMessage("Import a subscription by link, QR code or local file to get started."),
+    "importMethod": MessageLookupByLibrary.simpleMessage("Import"),
+    "addProfileTip": MessageLookupByLibrary.simpleMessage("On desktop, QR code import opens an image picker instead of the camera."),
+    "basicInfo": MessageLookupByLibrary.simpleMessage("Basic"),
+    "updateSection": MessageLookupByLibrary.simpleMessage("Update"),
+    "autoUpdateDesc": MessageLookupByLibrary.simpleMessage("Fetch the latest subscription on a fixed interval"),
   };
 }
