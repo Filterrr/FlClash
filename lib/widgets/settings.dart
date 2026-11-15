@@ -12,11 +12,13 @@ const settingsCardMargin = EdgeInsets.symmetric(horizontal: 16);
 class SettingsSectionHeader extends StatelessWidget {
   final String label;
   final String? value;
+  final EdgeInsets? padding;
 
   const SettingsSectionHeader({
     super.key,
     required this.label,
     this.value,
+    this.padding,
   });
 
   @override
@@ -24,12 +26,13 @@ class SettingsSectionHeader extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 22,
-        right: 22,
-        top: 18,
-        bottom: 7,
-      ),
+      padding: padding ??
+          const EdgeInsets.only(
+            left: 22,
+            right: 22,
+            top: 18,
+            bottom: 7,
+          ),
       child: Row(
         children: [
           Expanded(
@@ -481,10 +484,12 @@ class SettingsSubBlock extends StatelessWidget {
 /// 底部说明文字。
 class SettingsNote extends StatelessWidget {
   final String text;
+  final EdgeInsets? padding;
 
   const SettingsNote({
     super.key,
     required this.text,
+    this.padding,
   });
 
   @override
@@ -498,11 +503,12 @@ class SettingsNote extends StatelessWidget {
       height: 1.5,
     );
     return Padding(
-      padding: const EdgeInsets.only(
-        left: 22,
-        right: 22,
-        top: 8,
-      ),
+      padding: padding ??
+          const EdgeInsets.only(
+            left: 22,
+            right: 22,
+            top: 8,
+          ),
       child: Text.rich(
         TextSpan(
           children: [

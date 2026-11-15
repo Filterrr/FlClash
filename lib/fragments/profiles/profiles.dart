@@ -179,6 +179,12 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
                   SettingsSectionHeader(
                     label: appLocalizations.profiles,
                     value: "${state.profiles.length}",
+                    padding: const EdgeInsets.only(
+                      left: 6,
+                      right: 6,
+                      top: 16,
+                      bottom: 7,
+                    ),
                   ),
                   Grid(
                     mainAxisSpacing: 10,
@@ -198,6 +204,11 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
                   ),
                   SettingsNote(
                     text: appLocalizations.profileItemTip,
+                    padding: const EdgeInsets.only(
+                      left: 6,
+                      right: 6,
+                      top: 8,
+                    ),
                   ),
                 ],
               ),
