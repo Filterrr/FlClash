@@ -297,125 +297,75 @@ class SettingsSegmented<T> extends StatelessWidget {
     this.iconBuilder,
   });
 
-  static const _duration = Duration(milliseconds: 220);
-  static const _curve = Curves.easeOutCubic;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
-    final count = options.length;
-    final index = options.indexOf(value).clamp(0, count - 1);
-    // 选中态用一个滑块左右移动，而不是每段各自淡入底色。
-    final thumbColor = Theme.of(context).brightness == Brightness.dark
-        ? colorScheme.surfaceContainerHigh
-        : colorScheme.surfaceContainerLowest;
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.opacity60,
         borderRadius: BorderRadius.circular(settingsControlRadius),
       ),
-      child: SizedBox(
-        height: 32,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final segmentWidth = constraints.maxWidth / count;
-            return Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: _duration,
-                  curve: _curve,
-                  left: segmentWidth * index,
-                  top: 0,
-                  bottom: 0,
-                  width: segmentWidth,
-                  child: DecoratedBox(
+      child: Row(
+        children: [
+          for (final option in options)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    onChanged(option);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: const EdgeInsets.symmetric(vertical: 7),
                     decoration: BoxDecoration(
-                      color: thumbColor,
+                      color: option == value
+                          ? colorScheme.surfaceContainerLow
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(9.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (iconBuilder?.call(option) != null) ...[
+                          Icon(
+                            iconBuilder!.call(option),
+                            size: 14,
+                            color: option == value
+                                ? colorScheme.onSurface
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                        ],
+                        Flexible(
+                          child: Text(
+                            labelBuilder(option),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: textTheme.bodySmall?.copyWith(
+                              fontWeight: option == value
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: option == value
+                                  ? colorScheme.onSurface
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    for (final option in options)
-                      Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            onChanged(option);
-                          },
-                          child: _buildLabel(
-                            context,
-                            option,
-                            isSelected: option == value,
-                            textTheme: textTheme,
-                            colorScheme: colorScheme,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(
-    BuildContext context,
-    T option, {
-    required bool isSelected,
-    required TextTheme textTheme,
-    required ColorScheme colorScheme,
-  }) {
-    return AnimatedDefaultTextStyle(
-      duration: _duration,
-      curve: _curve,
-      style: (textTheme.bodySmall ?? const TextStyle()).copyWith(
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-        color:
-            isSelected ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (iconBuilder?.call(option) != null) ...[
-            TweenAnimationBuilder<Color?>(
-              tween: ColorTween(
-                end: isSelected
-                    ? colorScheme.onSurface
-                    : colorScheme.onSurfaceVariant,
-              ),
-              duration: _duration,
-              curve: _curve,
-              builder: (_, color, __) => Icon(
-                iconBuilder!.call(option),
-                size: 14,
-                color: color,
               ),
             ),
-            const SizedBox(width: 5),
-          ],
-          Flexible(
-            child: Text(
-              labelBuilder(option),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
     );
