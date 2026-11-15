@@ -12,6 +12,14 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - lib/clash/generated/**
+  errors:
+    # Flutter 3.47+ deprecates `package:flutter/material.dart` in favour of the
+    # new material_ui package. Flutter 3.50 additionally enforces a Gradle
+    # >= 9.3.1 minimum for Android builds. Both are SDK-level migrations that
+    # affect the whole repository, so keep `flutter analyze` focused on real
+    # problems until the migration lands.
+    deprecated_member_use: ignore
+    deprecated_member_use_from_same_package: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
