@@ -1,4 +1,5 @@
 import 'package:fl_clash/fragments/profiles/profiles.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/settings.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// 回归：配置卡片必须是一整块不透明卡片，且当前配置有独立标记。
 void main() {
+  // ProfileItem 通过 appLocalizations 取文案，测试里需要先加载本地化实例。
+  setUpAll(() async {
+    await AppLocalizations.load(const Locale('en'));
+  });
+
   const profile = Profile(
     id: 'p1',
     label: 'Airport Pro',
@@ -41,7 +47,10 @@ void main() {
 
     final card = tester
         .widgetList<Material>(
-          find.byType(Material),
+          find.ancestor(
+            of: find.byType(SettingsIconTile),
+            matching: find.byType(Material),
+          ),
         )
         .where((item) => item.shape is RoundedRectangleBorder)
         .toList();
