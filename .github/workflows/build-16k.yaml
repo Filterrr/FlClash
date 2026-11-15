@@ -13,6 +13,10 @@ on:
       - 'v*'
 
 env:
+  # NOTE: the build matrix pins Flutter to 3.47.5 on every platform. Flutter 3.50
+  # requires Gradle >= 9.3.1, but android/gradle/wrapper is still on 8.14 (AGP
+  # 8.11), so an unpinned "3.x" breaks the Android build. Bump the matrix
+  # versions together with a Gradle/AGP upgrade, never on their own.
   RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || inputs.tag_name }}
   IS_STABLE: ${{ (startsWith(github.ref, 'refs/tags/') && !contains(github.ref, '-')) || (inputs.tag_name != '' && !contains(inputs.tag_name, '-')) }}
 
@@ -35,6 +39,7 @@ jobs:
             is_android: true
             go_version: '1.25.x'
             flutter_channel: 'stable'
+            flutter_version: '3.47.5'
 
           # --- Windows 平台 ---
           - platform: windows
@@ -42,13 +47,13 @@ jobs:
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
           - platform: windows
             os: windows-latest
             arch: arm64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
 
           # --- macOS 平台 ---
           - platform: macos
@@ -56,13 +61,13 @@ jobs:
             arch: arm64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
           - platform: macos
             os: macos-latest
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
 
     steps:
       - name: Checkout
@@ -111,7 +116,7 @@ jobs:
           channel: ${{ matrix.flutter_channel }}
           cache: true
           cache-key: flutter-${{ matrix.platform }}-${{ matrix.arch }}-${{ hashFiles('**/pubspec.lock') }}
-          flutter-version: ${{ matrix.flutter_version || '3.x' }}
+          flutter-version: ${{ matrix.flutter_version }}
 
       - name: Prepare Dependencies
         run: |
