@@ -21,6 +21,7 @@ export 'open_container.dart';
 export 'popup_menu.dart';
 export 'scaffold.dart';
 export 'setting.dart';
+export 'settings.dart';
 export 'sheet.dart';
 export 'side_sheet.dart';
 export 'subscription_info_view.dart';

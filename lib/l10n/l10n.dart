@@ -3262,6 +3262,76 @@ class AppLocalizations {
     return Intl.message('Cancel', name: 'cancelUpdate', desc: '', args: []);
   }
 
+  /// `Appearance`
+  String get appearance {
+    return Intl.message('Appearance', name: 'appearance', desc: '', args: []);
+  }
+
+  /// `Connection`
+  String get connectionSection {
+    return Intl.message('Connection', name: 'connectionSection', desc: '', args: []);
+  }
+
+  /// `Data`
+  String get dataSection {
+    return Intl.message('Data', name: 'dataSection', desc: '', args: []);
+  }
+
+  /// `System`
+  String get systemSection {
+    return Intl.message('System', name: 'systemSection', desc: '', args: []);
+  }
+
+  /// `Startup`
+  String get startupSection {
+    return Intl.message('Startup', name: 'startupSection', desc: '', args: []);
+  }
+
+  /// `Background`
+  String get backgroundSection {
+    return Intl.message('Background', name: 'backgroundSection', desc: '', args: []);
+  }
+
+  /// `Interface`
+  String get interfaceSection {
+    return Intl.message('Interface', name: 'interfaceSection', desc: '', args: []);
+  }
+
+  /// `Behavior`
+  String get behaviorSection {
+    return Intl.message('Behavior', name: 'behaviorSection', desc: '', args: []);
+  }
+
+  /// `Only takes effect in dark mode`
+  String get prueBlackModeDesc {
+    return Intl.message('Only takes effect in dark mode', name: 'prueBlackModeDesc', desc: '', args: []);
+  }
+
+  /// `Startup and silent launch are desktop only; hide from recents and tab animation are Android only.`
+  String get settingsPlatformTip {
+    return Intl.message('Startup and silent launch are desktop only; hide from recents and tab animation are Android only.', name: 'settingsPlatformTip', desc: '', args: []);
+  }
+
+  /// `Recovery always asks for a scope first: profiles only, or all data.`
+  String get recoveryScopeTip {
+    return Intl.message('Recovery always asks for a scope first: profiles only, or all data.', name: 'recoveryScopeTip', desc: '', args: []);
+  }
+
+  /// `Overrides only affect the local core config, never the subscription file.`
+  String get overrideScopeTip {
+    return Intl.message('Overrides only affect the local core config, never the subscription file.', name: 'overrideScopeTip', desc: '', args: []);
+  }
+
+  /// `Test`
+  String get test {
+    return Intl.message('Test', name: 'test', desc: '', args: []);
+  }
+
+  /// `Advanced`
+  String get advanced {
+    return Intl.message('Advanced', name: 'advanced', desc: '', args: []);
+  }
+
   /// `Release notes`
   String get releaseNotes {
     return Intl.message(

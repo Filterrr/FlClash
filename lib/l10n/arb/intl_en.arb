@@ -403,5 +403,19 @@
   "updateCompleted": "Update completed",
   "restartNow": "Restart Now",
   "cancelUpdate": "Cancel",
-  "releaseNotes": "Release notes"
+  "releaseNotes": "Release notes",
+  "appearance": "Appearance",
+  "connectionSection": "Connection",
+  "dataSection": "Data",
+  "systemSection": "System",
+  "startupSection": "Startup",
+  "backgroundSection": "Background",
+  "interfaceSection": "Interface",
+  "behaviorSection": "Behavior",
+  "prueBlackModeDesc": "Only takes effect in dark mode",
+  "settingsPlatformTip": "Startup and silent launch are desktop only; hide from recents and tab animation are Android only.",
+  "recoveryScopeTip": "Recovery always asks for a scope first: profiles only, or all data.",
+  "overrideScopeTip": "Overrides only affect the local core config, never the subscription file.",
+  "test": "Test",
+  "advanced": "Advanced"
 }

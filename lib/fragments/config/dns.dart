@@ -225,7 +225,7 @@ class FakeIpFilterItem extends StatelessWidget {
               title: appLocalizations.fakeipFilter,
               items: fakeIpFilter,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -260,7 +260,7 @@ class DefaultNameserverItem extends StatelessWidget {
               title: appLocalizations.defaultNameserver,
               items: defaultNameserver,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -295,7 +295,7 @@ class NameserverItem extends StatelessWidget {
               title: "域名服务器",
               items: nameserver,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -384,7 +384,7 @@ class NameserverPolicyItem extends StatelessWidget {
               items: nameserverPolicy.entries,
               titleBuilder: (item) => Text(item.key),
               subtitleBuilder: (item) => Text(item.value),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -446,7 +446,7 @@ class ProxyServerNameserverItem extends StatelessWidget {
               title: appLocalizations.proxyNameserver,
               items: proxyServerNameserver,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -481,7 +481,7 @@ class FallbackItem extends StatelessWidget {
               title: appLocalizations.fallback,
               items: fallback,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -582,7 +582,7 @@ class GeositeItem extends StatelessWidget {
               title: "Geosite",
               items: geosite,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -618,7 +618,7 @@ class IpcidrItem extends StatelessWidget {
               title: appLocalizations.ipcidr,
               items: ipcidr,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -654,7 +654,7 @@ class DomainItem extends StatelessWidget {
               title: appLocalizations.domain,
               items: domain,
               titleBuilder: (item) => Text(item),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 final dns = clashConfig.dns;
                 clashConfig.dns = dns.copyWith(
@@ -722,10 +722,15 @@ class FallbackFilterOptions extends StatelessWidget {
   }
 }
 
-const dnsItems = <Widget>[
-  OverrideItem(),
-  DnsOptions(),
-  FallbackFilterOptions(),
+final dnsItems = <Widget>[
+  ...generateSection(
+    items: [
+      const OverrideItem(),
+    ],
+  ),
+  const DnsOptions(),
+  const FallbackFilterOptions(),
+  const SettingsBottomSpace(),
 ];
 
 class DnsListView extends StatelessWidget {

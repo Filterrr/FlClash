@@ -307,7 +307,7 @@ class HostsItem extends StatelessWidget {
               items: entries,
               titleBuilder: (item) => Text(item.key),
               subtitleBuilder: (item) => Text(item.value),
-              onChange: (items){
+              onChange: (items) {
                 final clashConfig = globalState.appController.clashConfig;
                 clashConfig.hosts = Map.fromEntries(items);
               },
@@ -546,10 +546,47 @@ final generalItems = const [
   UdpItem(),
   GeodataLoaderItem(),
   ExternalControllerItem(),
-]
-    .separated(
-      const Divider(
-        height: 0,
-      ),
-    )
-    .toList();
+];
+
+/// 覆写 · 基础页的分组呈现：内核 / 测试 / 端口与网络 / 进阶。
+List<Widget> generalGroupedItems() {
+  return [
+    SettingsSection(
+      label: appLocalizations.core,
+      children: const [
+        LogLevelItem(),
+        UaItem(),
+        KeepAliveIntervalItem(),
+      ],
+    ),
+    SettingsSection(
+      label: appLocalizations.test,
+      children: const [
+        TestUrlItem(),
+        SpeedTestUrlItem(),
+        TestConcurrencyItem(),
+      ],
+    ),
+    SettingsSection(
+      label: appLocalizations.options,
+      children: const [
+        MixedPortItem(),
+        HostsItem(),
+        Ipv6Item(),
+        AllowLanItem(),
+        UnifiedDelayItem(),
+      ],
+    ),
+    SettingsSection(
+      label: appLocalizations.advanced,
+      children: const [
+        FindProcessItem(),
+        TcpConcurrentItem(),
+        UdpItem(),
+        GeodataLoaderItem(),
+        ExternalControllerItem(),
+      ],
+    ),
+    const SettingsBottomSpace(),
+  ];
+}

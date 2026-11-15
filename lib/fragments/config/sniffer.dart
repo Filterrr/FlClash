@@ -193,12 +193,11 @@ class SniffHttpOverrideDestinationItem extends StatelessWidget {
             value: overrideDest ?? false,
             onChanged: (bool value) async {
               final clashConfig = globalState.appController.clashConfig;
-              final sniff = Map<String, SniffProtocol>.from(
-                  clashConfig.sniffer.sniff);
+              final sniff =
+                  Map<String, SniffProtocol>.from(clashConfig.sniffer.sniff);
               sniff["HTTP"] = (sniff["HTTP"] ?? const SniffProtocol())
                   .copyWith(overrideDestination: value);
-              clashConfig.sniffer =
-                  clashConfig.sniffer.copyWith(sniff: sniff);
+              clashConfig.sniffer = clashConfig.sniffer.copyWith(sniff: sniff);
             },
           ),
         );
@@ -267,12 +266,11 @@ class SniffTlsOverrideDestinationItem extends StatelessWidget {
             value: overrideDest ?? false,
             onChanged: (bool value) async {
               final clashConfig = globalState.appController.clashConfig;
-              final sniff = Map<String, SniffProtocol>.from(
-                  clashConfig.sniffer.sniff);
+              final sniff =
+                  Map<String, SniffProtocol>.from(clashConfig.sniffer.sniff);
               sniff["TLS"] = (sniff["TLS"] ?? const SniffProtocol())
                   .copyWith(overrideDestination: value);
-              clashConfig.sniffer =
-                  clashConfig.sniffer.copyWith(sniff: sniff);
+              clashConfig.sniffer = clashConfig.sniffer.copyWith(sniff: sniff);
             },
           ),
         );
@@ -341,12 +339,11 @@ class SniffQuicOverrideDestinationItem extends StatelessWidget {
             value: overrideDest ?? false,
             onChanged: (bool value) async {
               final clashConfig = globalState.appController.clashConfig;
-              final sniff = Map<String, SniffProtocol>.from(
-                  clashConfig.sniffer.sniff);
+              final sniff =
+                  Map<String, SniffProtocol>.from(clashConfig.sniffer.sniff);
               sniff["QUIC"] = (sniff["QUIC"] ?? const SniffProtocol())
                   .copyWith(overrideDestination: value);
-              clashConfig.sniffer =
-                  clashConfig.sniffer.copyWith(sniff: sniff);
+              clashConfig.sniffer = clashConfig.sniffer.copyWith(sniff: sniff);
             },
           ),
         );
@@ -550,11 +547,16 @@ class SnifferFilterOptions extends StatelessWidget {
   }
 }
 
-const snifferItems = <Widget>[
-  SnifferOverrideItem(),
-  SnifferOptions(),
-  SniffProtocolsOptions(),
-  SnifferFilterOptions(),
+final snifferItems = <Widget>[
+  ...generateSection(
+    items: [
+      const SnifferOverrideItem(),
+    ],
+  ),
+  const SnifferOptions(),
+  const SniffProtocolsOptions(),
+  const SnifferFilterOptions(),
+  const SettingsBottomSpace(),
 ];
 
 class SnifferListView extends StatelessWidget {

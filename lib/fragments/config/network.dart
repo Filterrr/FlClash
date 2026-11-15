@@ -240,6 +240,7 @@ class CongestionControllerItem extends StatelessWidget {
     );
   }
 }
+
 class DisableICMPForwardingItem extends StatelessWidget {
   const DisableICMPForwardingItem({super.key});
 
@@ -629,7 +630,12 @@ class RouteAddressItem extends StatelessWidget {
 }
 
 final networkItems = [
-  if (Platform.isAndroid) const VPNItem(),
+  if (Platform.isAndroid)
+    ...generateSection(
+      items: [
+        const VPNItem(),
+      ],
+    ),
   if (Platform.isAndroid)
     ...generateSection(
       title: "VPN",

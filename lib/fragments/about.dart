@@ -2,6 +2,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/widgets/settings.dart';
 import 'package:flutter/material.dart';
 
 @immutable
@@ -34,45 +35,92 @@ class AboutFragment extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMoreSection(BuildContext context) {
-    return generateSection(
-      separated: false,
-      title: appLocalizations.more,
-      items: [
-        ListItem(
-          title: Text(appLocalizations.checkUpdate),
-          onTap: () {
-            _checkUpdate(context);
-          },
+  Widget _buildHeader(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(settingsCardRadius),
+          border: Border.all(
+            color: colorScheme.outlineVariant.opacity60,
+          ),
         ),
-        ListItem(
-          title: const Text("Telegram"),
-          onTap: () {
-            globalState.openUrl(
-              "https://t.me/FlClash",
-            );
-          },
-          trailing: const Icon(Icons.launch),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(17),
+                  child: Image.asset(
+                    'assets/images/icon.png',
+                    width: 58,
+                    height: 58,
+                  ),
+                ),
+                const SizedBox(
+                  width: 14,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        appName,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 3,
+                      ),
+                      Text(
+                        globalState.packageInfo.version,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 14,
+            ),
+            Text(
+              appLocalizations.desc,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            SizedBox(
+              height: 42,
+              child: FilledButton(
+                onPressed: () {
+                  _checkUpdate(context);
+                },
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                ),
+                child: Text(appLocalizations.checkUpdate),
+              ),
+            ),
+          ],
         ),
-        ListItem(
-          title: Text(appLocalizations.project),
-          onTap: () {
-            globalState.openUrl(
-              "https://github.com/$repository",
-            );
-          },
-          trailing: const Icon(Icons.launch),
-        ),
-        ListItem(
-          title: Text(appLocalizations.core),
-          onTap: () {
-            globalState.openUrl(
-              "https://github.com/Filterrr/Clash.Meta/tree/Alpha",
-            );
-          },
-          trailing: const Icon(Icons.launch),
-        ),
-      ],
+      ),
     );
   }
 
@@ -89,125 +137,84 @@ class AboutFragment extends StatelessWidget {
         link: "https://t.me/xrcm6868",
       ),
     ];
-    return generateSection(
-      separated: false,
-      title: appLocalizations.otherContributors,
-      items: [
-        ListItem(
-          title: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Wrap(
-              spacing: 24,
-              children: [
-                for (final contributor in contributors)
-                  Avatar(
-                    contributor: contributor,
-                  ),
-              ],
+    return [
+      SettingsSection(
+        label: appLocalizations.otherContributors,
+        dividerIndentWithIcon: true,
+        children: [
+          for (final contributor in contributors)
+            ListItem(
+              leading: CircleAvatar(
+                radius: 17,
+                foregroundImage: AssetImage(contributor.avatar),
+              ),
+              title: Text(contributor.name),
+              subtitle: Text(contributor.link.replaceFirst("https://", "")),
+              onTap: () {
+                globalState.openUrl(contributor.link);
+              },
             ),
+        ],
+      )
+    ];
+  }
+
+  List<Widget> _buildMoreSection(BuildContext context) {
+    return [
+      SettingsSection(
+        label: appLocalizations.more,
+        dividerIndentWithIcon: true,
+        children: [
+          ListItem(
+            iconData: Icons.telegram,
+            title: const Text("Telegram"),
+            subtitle: const Text("t.me/FlClash"),
+            showArrow: true,
+            onTap: () {
+              globalState.openUrl(
+                "https://t.me/FlClash",
+              );
+            },
           ),
-        )
-      ],
-    );
+          ListItem(
+            iconData: Icons.code,
+            title: Text(appLocalizations.project),
+            subtitle: const Text("github.com/Filterrr/FlClash"),
+            showArrow: true,
+            onTap: () {
+              globalState.openUrl(
+                "https://github.com/$repository",
+              );
+            },
+          ),
+          ListItem(
+            iconData: Icons.memory,
+            title: Text(appLocalizations.core),
+            subtitle: const Text("Clash.Meta · Alpha"),
+            showArrow: true,
+            onTap: () {
+              globalState.openUrl(
+                "https://github.com/Filterrr/Clash.Meta/tree/Alpha",
+              );
+            },
+          ),
+        ],
+      )
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      ListTile(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 16,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset(
-                    'assets/images/icon.png',
-                    width: 64,
-                    height: 64,
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      appName,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Text(
-                      globalState.packageInfo.version,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    )
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-            Text(
-              appLocalizations.desc,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(
-        height: 12,
-      ),
+      _buildHeader(context),
       ..._buildContributorsSection(),
       ..._buildMoreSection(context),
+      const SettingsBottomSpace(),
     ];
-    return Padding(
-      padding: kMaterialListPadding.copyWith(
-        top: 16,
-        bottom: 16,
-      ),
-      child: generateListView(items),
-    );
-  }
-}
-
-class Avatar extends StatelessWidget {
-  final Contributor contributor;
-
-  const Avatar({
-    super.key,
-    required this.contributor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      child: Column(
-        children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: CircleAvatar(
-              foregroundImage: AssetImage(
-                contributor.avatar,
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 4,
-          ),
-          Text(
-            contributor.name,
-            style: context.textTheme.bodySmall,
-          )
-        ],
-      ),
-      onTap: () {
-        globalState.openUrl(contributor.link);
-      },
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 4, bottom: 16),
+      itemCount: items.length,
+      itemBuilder: (_, index) => items[index],
     );
   }
 }
