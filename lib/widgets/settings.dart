@@ -113,22 +113,20 @@ class SettingsCard extends StatelessWidget {
     }
     return Padding(
       padding: settingsCardMargin,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
+      child: Material(
+        color: colorScheme.surfaceContainerLow,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(settingsCardRadius),
-          border: Border.all(
+          side: BorderSide(
             color: colorScheme.outlineVariant.opacity60,
           ),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(settingsCardRadius),
-          child: SettingsSectionScope(
-            isCard: true,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: rows,
-            ),
+        child: SettingsSectionScope(
+          isCard: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: rows,
           ),
         ),
       ),
@@ -154,20 +152,18 @@ class SettingsCardSurface extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return Padding(
       padding: margin,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
+      child: Material(
+        color: colorScheme.surfaceContainerLow,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(settingsCardRadius),
-          border: Border.all(
+          side: BorderSide(
             color: colorScheme.outlineVariant.opacity60,
           ),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(settingsCardRadius),
-          child: SettingsSectionScope(
-            isCard: true,
-            child: child,
-          ),
+        child: SettingsSectionScope(
+          isCard: true,
+          child: child,
         ),
       ),
     );

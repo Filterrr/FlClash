@@ -254,7 +254,7 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
   List<Widget> _getOtherSection() {
     return [
       SettingsSection(
-        label: appLocalizations.about,
+        label: appLocalizations.other,
         dividerIndentWithIcon: true,
         children: [
           ListItem.open(
