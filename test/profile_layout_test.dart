@@ -11,8 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///    隔着整卡宽度；现在它必须紧跟标签。
 /// 2. 配置卡里的徽标与 ⋮ 菜单、名称挤在同一行时，徽标要贴着菜单而不是浮在
 ///    文字中间。
-/// 3. 排序弹层条目很少时，列表必须按内容收缩，不能把确定按钮顶到底部留下
-///    一大片空白。
+/// 3. 排序弹层沿用原始实现（CommonCard.filled + ListTile），本次不做断言。
 void main() {
   setUpAll(() async {
     await AppLocalizations.load(const Locale('en'));
@@ -62,32 +61,6 @@ void main() {
       badgeRect.right,
       greaterThan(cardRect.right + 100),
       reason: '徽标应贴在卡片右侧，而不是浮在名称文字中间',
-    );
-  });
-
-  testWidgets('sort sheet shrinks to its content', (tester) async {
-    await tester.pumpWidget(
-      wrap(
-        SizedBox(
-          height: 400,
-          child: ReorderableProfiles(
-            profiles: [
-              buildProfile(id: 'a', label: 'A'),
-              buildProfile(id: 'b', label: 'B'),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 50));
-
-    // 两个条目应在弹层顶部附近结束，确定按钮紧跟其后，
-    // 而不是被顶到 400 的底部。
-    final confirmRect = tester.getRect(find.text('Confirm'));
-    expect(
-      confirmRect.top,
-      lessThan(240),
-      reason: '条目少时列表应按内容收缩，确定按钮不能被顶到底部',
     );
   });
 

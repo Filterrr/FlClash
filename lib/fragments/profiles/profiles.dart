@@ -742,123 +742,84 @@ class _ReorderableProfilesState extends State<ReorderableProfiles> {
       child: Container(
         key: Key(profile.id),
         padding: const EdgeInsets.symmetric(vertical: 4),
-        child: _buildRow(profile, index, isProxy: true),
-      ),
-    );
-  }
-
-  Widget _buildRow(
-    Profile profile,
-    int index, {
-    bool isProxy = false,
-  }) {
-    final colorScheme = context.colorScheme;
-    return Material(
-      color: colorScheme.surfaceContainerLow,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.opacity60,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 4, 8, 4),
-        child: Row(
-          children: [
-            SettingsIconTile(
-              iconData: profile.type == ProfileType.url
-                  ? Icons.cloud_outlined
-                  : Icons.description_outlined,
-              isNeutral: true,
+        child: CommonCard(
+          type: CommonCardType.filled,
+          child: ListTile(
+            contentPadding: const EdgeInsets.only(
+              right: 44,
+              left: 16,
             ),
-            const SizedBox(
-              width: 11,
-            ),
-            Expanded(
-              child: Text(
-                profile.label ?? profile.id,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (!isProxy)
-              ReorderableDragStartListener(
-                index: index,
-                child: Icon(
-                  Icons.drag_handle,
-                  color: colorScheme.outline,
-                ),
-              ),
-          ],
+            title: Text(profile.label ?? profile.id),
+          ),
         ),
       ),
     );
   }
-
-  static const _rowExtent = 62.0;
 
   @override
   Widget build(BuildContext context) {
-    final itemCount = profiles.length;
-    // 弹层高度由调用方给了固定 400；列表按实际条目高度收缩，
-    // 只剩少量条目时不会把按钮顶到弹层最底、中间空出一大片。
-    final listExtent = _rowExtent * itemCount;
-    final isScrollable = listExtent > 320;
-    final list = ReorderableListView.builder(
-      buildDefaultDragHandles: false,
-      shrinkWrap: !isScrollable,
-      physics: isScrollable
-          ? const ClampingScrollPhysics()
-          : const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      proxyDecorator: proxyDecorator,
-      // onReorderItem 已经为「移除后插入」修正过 newIndex，
-      // 这里不要再自己 -1，否则顺序会错位。
-      onReorderItem: (oldIndex, newIndex) {
-        setState(() {
-          final profile = profiles.removeAt(oldIndex);
-          profiles.insert(newIndex, profile);
-        });
-      },
-      itemBuilder: (_, index) {
-        return Container(
-          key: Key(profiles[index].id),
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: _buildRow(profiles[index], index),
-        );
-      },
-      itemCount: itemCount,
-    );
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Flexible(
-          child: isScrollable
-              ? list
-              : SizedBox(
-                  height: listExtent,
-                  child: list,
+        Expanded(
+          flex: 1,
+          child: ReorderableListView.builder(
+            buildDefaultDragHandles: false,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            proxyDecorator: proxyDecorator,
+            onReorderItem: (oldIndex, newIndex) {
+              setState(() {
+                final profile = profiles.removeAt(oldIndex);
+                profiles.insert(newIndex, profile);
+              });
+            },
+            itemBuilder: (_, index) {
+              final profile = profiles[index];
+              return Container(
+                key: Key(profile.id),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: CommonCard(
+                  type: CommonCardType.filled,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.only(
+                      right: 16,
+                      left: 16,
+                    ),
+                    title: Text(profile.label ?? profile.id),
+                    trailing: ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
+                  ),
                 ),
+              );
+            },
+            itemCount: profiles.length,
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-          child: FilledButton(
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 24,
+          ),
+          child: FilledButton.tonal(
             onPressed: () {
               Navigator.of(context).pop();
               globalState.appController.config.profiles = profiles;
             },
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(44),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
+            style: ButtonStyle(
+              padding: WidgetStateProperty.all(
+                const EdgeInsets.symmetric(vertical: 8),
               ),
             ),
-            child: Text(appLocalizations.confirm),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  appLocalizations.confirm,
+                ),
+              ],
+            ),
           ),
         ),
       ],
