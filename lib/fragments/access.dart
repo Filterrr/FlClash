@@ -52,8 +52,8 @@ class _AccessFragmentState extends State<AccessFragment> {
             rejectList: rejectList,
           ),
         ).then((_) => setState(() {
-          _updateInitList();
-        }));
+              _updateInitList();
+            }));
       },
       icon: const Icon(Icons.search),
     );
@@ -123,23 +123,49 @@ class _AccessFragmentState extends State<AccessFragment> {
         return Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Flexible(
-              flex: 0,
-              child: ListItem.switchItem(
-                title: Text(appLocalizations.appAccessControl),
-                delegate: SwitchDelegate(
-                  value: isAccessControl,
-                  onChanged: (isAccessControl) {
-                    final config = context.read<Config>();
-                    config.isAccessControl = isAccessControl;
-                  },
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(
-                height: 12,
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SettingsSection(
+                label: appLocalizations.appAccessControl,
+                children: [
+                  ListItem.switchItem(
+                    isSettings: true,
+                    title: Text(appLocalizations.appAccessControl),
+                    subtitle: Text(appLocalizations.accessControlDesc),
+                    delegate: SwitchDelegate(
+                      value: isAccessControl,
+                      onChanged: (isAccessControl) {
+                        final config = context.read<Config>();
+                        config.isAccessControl = isAccessControl;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 14,
+                    ),
+                    child: Selector<Config, AccessControlMode>(
+                      selector: (_, config) => config.accessControl.mode,
+                      builder: (_, accessControlMode, __) {
+                        return SettingsSegmented<AccessControlMode>(
+                          options: AccessControlMode.values,
+                          value: accessControlMode,
+                          labelBuilder: (mode) =>
+                              mode == AccessControlMode.acceptSelected
+                                  ? appLocalizations.whitelistMode
+                                  : appLocalizations.blacklistMode,
+                          onChanged: (mode) {
+                            final config = globalState.appController.config;
+                            config.accessControl =
+                                config.accessControl.copyWith(mode: mode);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Flexible(
@@ -182,10 +208,10 @@ class _AccessFragmentState extends State<AccessFragment> {
                       absorbing: !isAccessControl,
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          top: 4,
-                          bottom: 4,
-                          left: 16,
-                          right: 8,
+                          top: 10,
+                          bottom: 6,
+                          left: 22,
+                          right: 14,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,44 +224,28 @@ class _AccessFragmentState extends State<AccessFragment> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              appLocalizations.selected,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge
-                                                  ?.copyWith(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                  ),
+                                      child: Text(
+                                        "${appLocalizations.selected}  ${valueList.length}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              fontWeight: FontWeight.w600,
                                             ),
-                                          ),
-                                          const Flexible(
-                                            child: SizedBox(
-                                              width: 8,
-                                            ),
-                                          ),
-                                          Flexible(
-                                            child: Text(
-                                              "${valueList.length}",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelLarge
-                                                  ?.copyWith(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                  ),
-                                            ),
-                                          ),
-                                        ],
                                       ),
                                     ),
                                     Flexible(
-                                      child: Text(describe),
+                                      child: Text(
+                                        describe,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
                                     )
                                   ],
                                 ),
@@ -270,39 +280,55 @@ class _AccessFragmentState extends State<AccessFragment> {
                           ? const Center(
                               child: CircularProgressIndicator(),
                             )
-                          : ListView.builder(
-                              itemCount: packages.length,
-                              itemBuilder: (_, index) {
-                                final package = packages[index];
-                                return PackageListItem(
-                                  key: Key(package.packageName),
-                                  package: package,
-                                  value:
-                                      valueList.contains(package.packageName),
-                                  isActive: isAccessControl,
-                                  onChanged: (value) {
-                                    if (value == true) {
-                                      valueList.add(package.packageName);
-                                    } else {
-                                      valueList.remove(package.packageName);
-                                    }
-                                    final config =
-                                        globalState.appController.config;
-                                    if (accessControlMode ==
-                                        AccessControlMode.acceptSelected) {
-                                      config.accessControl =
-                                          config.accessControl.copyWith(
-                                        acceptList: valueList,
-                                      );
-                                    } else {
-                                      config.accessControl =
-                                          config.accessControl.copyWith(
-                                        rejectList: valueList,
-                                      );
-                                    }
-                                  },
-                                );
-                              },
+                          : SettingsCardSurface(
+                              margin: const EdgeInsets.fromLTRB(
+                                16,
+                                4,
+                                16,
+                                12,
+                              ),
+                              child: ListView.separated(
+                                itemCount: packages.length,
+                                separatorBuilder: (_, __) => Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  indent: 62,
+                                  endIndent: 16,
+                                  color: context
+                                      .colorScheme.outlineVariant.opacity60,
+                                ),
+                                itemBuilder: (_, index) {
+                                  final package = packages[index];
+                                  return PackageListItem(
+                                    key: Key(package.packageName),
+                                    package: package,
+                                    value:
+                                        valueList.contains(package.packageName),
+                                    isActive: isAccessControl,
+                                    onChanged: (value) {
+                                      if (value == true) {
+                                        valueList.add(package.packageName);
+                                      } else {
+                                        valueList.remove(package.packageName);
+                                      }
+                                      final config =
+                                          globalState.appController.config;
+                                      if (accessControlMode ==
+                                          AccessControlMode.acceptSelected) {
+                                        config.accessControl =
+                                            config.accessControl.copyWith(
+                                          acceptList: valueList,
+                                        );
+                                      } else {
+                                        config.accessControl =
+                                            config.accessControl.copyWith(
+                                          rejectList: valueList,
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
                             ),
                     ),
                   ],
@@ -334,24 +360,28 @@ class PackageListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return AbsorbPointer(
       absorbing: !isActive,
-      child: ListItem.checkbox(
+      child: ListItem.switchItem(
+        isSettings: true,
         leading: SizedBox(
-          width: 48,
-          height: 48,
-          child: FutureBuilder<ImageProvider?>(
-            future: app?.getPackageIcon(package.packageName),
-            builder: (_, snapshot) {
-              if (!snapshot.hasData && snapshot.data == null) {
-                return Container();
-              } else {
-                return Image(
-                  image: snapshot.data!,
-                  gaplessPlayback: true,
-                  width: 48,
-                  height: 48,
-                );
-              }
-            },
+          width: 34,
+          height: 34,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: FutureBuilder<ImageProvider?>(
+              future: app?.getPackageIcon(package.packageName),
+              builder: (_, snapshot) {
+                if (!snapshot.hasData && snapshot.data == null) {
+                  return Container();
+                } else {
+                  return Image(
+                    image: snapshot.data!,
+                    gaplessPlayback: true,
+                    width: 34,
+                    height: 34,
+                  );
+                }
+              },
+            ),
           ),
         ),
         title: Text(
@@ -368,9 +398,11 @@ class PackageListItem extends StatelessWidget {
           ),
           maxLines: 1,
         ),
-        delegate: CheckboxDelegate(
+        delegate: SwitchDelegate(
           value: value,
-          onChanged: onChanged,
+          onChanged: (value) {
+            onChanged(value);
+          },
         ),
       ),
     );
@@ -519,14 +551,6 @@ class AccessControlWidget extends StatelessWidget {
     };
   }
 
-  IconData _getIconWithProxiesSortType(AccessSortType type) {
-    return switch (type) {
-      AccessSortType.none => Icons.sort,
-      AccessSortType.name => Icons.sort_by_alpha,
-      AccessSortType.time => Icons.timeline,
-    };
-  }
-
   String _getTextWithIsFilterSystemApp(bool isFilterSystemApp) {
     return switch (isFilterSystemApp) {
       true => appLocalizations.onlyOtherApps,
@@ -534,61 +558,59 @@ class AccessControlWidget extends StatelessWidget {
     };
   }
 
-  List<Widget> _buildModeSetting() {
-    return generateSection(
-      title: appLocalizations.mode,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Selector<Config, AccessControlMode>(
-            selector: (_, config) => config.accessControl.mode,
-            builder: (_, accessControlMode, __) {
-              return Wrap(
-                spacing: 16,
-                children: [
-                  for (final item in AccessControlMode.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessControlMode(item),
-                        iconData: _getIconWithAccessControlMode(item),
-                      ),
-                      isSelected: accessControlMode == item,
-                      onPressed: () {
-                        final config = globalState.appController.config;
-                        config.accessControl = config.accessControl.copyWith(
-                          mode: item,
-                        );
-                      },
-                    )
-                ],
-              );
-            },
-          ),
-        )
-      ],
+  Widget _buildModeSetting() {
+    return Selector<Config, AccessControlMode>(
+      selector: (_, config) => config.accessControl.mode,
+      builder: (_, accessControlMode, __) {
+        return SettingsSection(
+          label: appLocalizations.mode,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 2,
+                bottom: 14,
+              ),
+              child: SettingsSegmented<AccessControlMode>(
+                options: AccessControlMode.values,
+                value: accessControlMode,
+                labelBuilder: _getTextWithAccessControlMode,
+                iconBuilder: _getIconWithAccessControlMode,
+                onChanged: (item) {
+                  final config = globalState.appController.config;
+                  config.accessControl = config.accessControl.copyWith(
+                    mode: item,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  List<Widget> _buildSortSetting() {
-    return generateSection(
-      title: appLocalizations.sort,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Selector<Config, AccessSortType>(
-            selector: (_, config) => config.accessControl.sort,
-            builder: (_, accessSortType, __) {
-              return Wrap(
-                spacing: 16,
+  Widget _buildSortSetting() {
+    return Selector<Config, AccessSortType>(
+      selector: (_, config) => config.accessControl.sort,
+      builder: (_, accessSortType, __) {
+        return SettingsSection(
+          label: appLocalizations.sort,
+          value: _getTextWithAccessSortType(accessSortType),
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 2,
+                bottom: 14,
+              ),
+              child: SettingsChips(
                 children: [
                   for (final item in AccessSortType.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessSortType(item),
-                        iconData: _getIconWithProxiesSortType(item),
-                      ),
+                    SettingsChoiceChip(
+                      label: _getTextWithAccessSortType(item),
                       isSelected: accessSortType == item,
                       onPressed: () {
                         final config = globalState.appController.config;
@@ -598,30 +620,34 @@ class AccessControlWidget extends StatelessWidget {
                       },
                     ),
                 ],
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  List<Widget> _buildSourceSetting() {
-    return generateSection(
-      title: appLocalizations.source,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Selector<Config, bool>(
-            selector: (_, config) => config.accessControl.isFilterSystemApp,
-            builder: (_, isFilterSystemApp, __) {
-              return Wrap(
-                spacing: 16,
+  Widget _buildSourceSetting() {
+    return Selector<Config, bool>(
+      selector: (_, config) => config.accessControl.isFilterSystemApp,
+      builder: (_, isFilterSystemApp, __) {
+        return SettingsSection(
+          label: appLocalizations.source,
+          value: _getTextWithIsFilterSystemApp(isFilterSystemApp),
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 2,
+                bottom: 14,
+              ),
+              child: SettingsChips(
                 children: [
                   for (final item in [false, true])
-                    SettingTextCard(
-                      _getTextWithIsFilterSystemApp(item),
+                    SettingsChoiceChip(
+                      label: _getTextWithIsFilterSystemApp(item),
                       isSelected: isFilterSystemApp == item,
                       onPressed: () {
                         final config = globalState.appController.config;
@@ -629,13 +655,13 @@ class AccessControlWidget extends StatelessWidget {
                           isFilterSystemApp: item,
                         );
                       },
-                    )
+                    ),
                 ],
-              );
-            },
-          ),
-        )
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -699,54 +725,49 @@ class AccessControlWidget extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  List<Widget> _buildActionSetting() {
-    return generateSection(
-      title: appLocalizations.action,
-      items: [
+  Widget _buildActionSetting() {
+    return SettingsSection(
+      label: appLocalizations.action,
+      children: [
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 2,
+            bottom: 14,
           ),
-          child: Wrap(
-            runSpacing: 16,
-            spacing: 16,
+          child: SettingsChips(
             children: [
-              CommonChip(
-                avatar: const Icon(Icons.auto_awesome),
+              SettingsChoiceChip(
                 label: appLocalizations.intelligentSelected,
                 onPressed: _intelligentSelected,
               ),
-              CommonChip(
-                avatar: const Icon(Icons.paste),
+              SettingsChoiceChip(
                 label: appLocalizations.clipboardImport,
                 onPressed: _pasteToClipboard,
               ),
-              CommonChip(
-                avatar: const Icon(Icons.content_copy),
+              SettingsChoiceChip(
                 label: appLocalizations.clipboardExport,
                 onPressed: _copyToClipboard,
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ..._buildModeSetting(),
-          ..._buildSortSetting(),
-          ..._buildSourceSetting(),
-          ..._buildActionSetting(),
-        ],
-      ),
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        _buildModeSetting(),
+        _buildSortSetting(),
+        _buildSourceSetting(),
+        _buildActionSetting(),
+        const SettingsBottomSpace(),
+      ],
     );
   }
 }

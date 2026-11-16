@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/fragments/about.dart';
@@ -40,16 +41,11 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
   }
 
   Widget _buildNavigationMenu(List<NavigationItem> navigationItems) {
-    return Column(
+    return SettingsCard(
+      dividerIndentWithIcon: true,
       children: [
-        for (final navigationItem in navigationItems) ...[
+        for (final navigationItem in navigationItems)
           _buildNavigationMenuItem(navigationItem),
-          navigationItems.last != navigationItem
-              ? const Divider(
-                  height: 0,
-                )
-              : Container(),
-        ]
       ],
     );
   }
@@ -59,132 +55,231 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
     return Intl.message(locale.toString());
   }
 
-  List<Widget> _getOtherList() {
-    return generateSection(
-      title: appLocalizations.other,
-      items: [
-        ListItem(
-          leading: const Icon(Icons.gavel),
-          title: Text(appLocalizations.disclaimer),
-          onTap: () async {
-            final isDisclaimerAccepted =
-                await globalState.appController.showDisclaimer();
-            if (!isDisclaimerAccepted) {
-              globalState.appController.handleExit();
-            }
-          },
-        ),
-        ListItem.open(
-          leading: const Icon(Icons.info),
-          title: Text(appLocalizations.about),
-          delegate: OpenDelegate(
-            title: appLocalizations.about,
-            widget: const AboutFragment(),
-          ),
-        ),
-      ],
-    );
+  String _getLocaleSubtitle(String? localeString) {
+    return Intl.message(localeString ?? appLocalizations.defaultText);
   }
 
-  List<Widget> _getSettingList() {
-    return generateSection(
-      title: appLocalizations.settings,
-      items: [
-        Selector<Config, String?>(
-          selector: (_, config) => config.appSetting.locale,
-          builder: (_, localeString, __) {
-            final subTitle = localeString ?? appLocalizations.defaultText;
-            final currentLocale = other.getLocaleForString(localeString);
-            return ListItem<Locale?>.options(
-              leading: const Icon(Icons.language_outlined),
-              title: Text(appLocalizations.language),
-              subtitle: Text(Intl.message(subTitle)),
-              delegate: OptionsDelegate(
-                title: appLocalizations.language,
-                options: [null, ...AppLocalizations.delegate.supportedLocales],
-                onChanged: (Locale? value) {
-                  final config = globalState.appController.config;
-                  config.appSetting = config.appSetting.copyWith(
-                    locale: value?.toString(),
-                  );
-                },
-                textBuilder: (locale) => _getLocaleString(locale),
-                value: currentLocale,
-              ),
-            );
-          },
-        ),
-        ListItem.open(
-          leading: const Icon(Icons.style),
+  Widget _buildThemeItem() {
+    return Selector<Config, ThemeMode>(
+      selector: (_, config) => config.themeProps.themeMode,
+      builder: (_, themeMode, __) {
+        final themeModeText = switch (themeMode) {
+          ThemeMode.system => appLocalizations.auto,
+          ThemeMode.light => appLocalizations.light,
+          ThemeMode.dark => appLocalizations.dark,
+        };
+        return ListItem.open(
+          iconData: Icons.palette_outlined,
           title: Text(appLocalizations.theme),
           subtitle: Text(appLocalizations.themeDesc),
+          valueText: themeModeText,
           delegate: OpenDelegate(
             title: appLocalizations.theme,
             widget: const ThemeFragment(),
             extendPageWidth: 360,
           ),
-        ),
-        ListItem.open(
-          leading: const Icon(Icons.cloud_sync),
+        );
+      },
+    );
+  }
+
+  Widget _buildBackupItem() {
+    return Selector<Config, String>(
+      selector: (_, config) =>
+          config.dav?.fileName ?? appLocalizations.pleaseBindWebDAV,
+      builder: (_, value, __) {
+        return ListItem.open(
+          iconData: Icons.cloud_sync_outlined,
           title: Text(appLocalizations.backupAndRecovery),
           subtitle: Text(appLocalizations.backupAndRecoveryDesc),
+          valueText: value,
           delegate: OpenDelegate(
             title: appLocalizations.backupAndRecovery,
             widget: const BackupAndRecovery(),
           ),
-        ),
-        if (system.isDesktop)
-          ListItem.open(
-            leading: const Icon(Icons.keyboard),
-            title: Text(appLocalizations.hotkeyManagement),
-            subtitle: Text(appLocalizations.hotkeyManagementDesc),
-            delegate: OpenDelegate(
-              title: appLocalizations.hotkeyManagement,
-              widget: const HotKeyFragment(),
-            ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAccessItem() {
+    return Selector<Config, AccessControlMode>(
+      selector: (_, config) => config.accessControl.mode,
+      builder: (_, mode, __) {
+        return ListItem.open(
+          iconData: Icons.shield_outlined,
+          title: Text(appLocalizations.accessControl),
+          subtitle: Text(appLocalizations.accessControlDesc),
+          valueText: mode == AccessControlMode.acceptSelected
+              ? appLocalizations.whitelistMode
+              : appLocalizations.blacklistMode,
+          delegate: OpenDelegate(
+            title: appLocalizations.appAccessControl,
+            widget: const AccessFragment(),
           ),
-        if (Platform.isWindows)
-          ListItem(
-            leading: const Icon(Icons.lock),
-            title: Text(appLocalizations.loopback),
-            subtitle: Text(appLocalizations.loopbackDesc),
-            onTap: () {
-              windows?.runas(
-                '"${join(dirname(Platform.resolvedExecutable), "EnableLoopback.exe")}"',
-                "",
+        );
+      },
+    );
+  }
+
+  List<Widget> _getAppearanceSection() {
+    return [
+      SettingsSection(
+        label: appLocalizations.appearance,
+        dividerIndentWithIcon: true,
+        children: [
+          _buildThemeItem(),
+          Selector<Config, String?>(
+            selector: (_, config) => config.appSetting.locale,
+            builder: (_, localeString, __) {
+              final currentLocale = other.getLocaleForString(localeString);
+              return ListItem<Locale?>.options(
+                iconData: Icons.language_outlined,
+                title: Text(appLocalizations.language),
+                subtitle: Text(_getLocaleSubtitle(localeString)),
+                valueText: _getLocaleSubtitle(localeString),
+                delegate: OptionsDelegate(
+                  title: appLocalizations.language,
+                  options: [
+                    null,
+                    ...AppLocalizations.delegate.supportedLocales
+                  ],
+                  onChanged: (Locale? value) {
+                    final config = globalState.appController.config;
+                    config.appSetting = config.appSetting.copyWith(
+                      locale: value?.toString(),
+                    );
+                  },
+                  textBuilder: (locale) => _getLocaleString(locale),
+                  value: currentLocale,
+                ),
               );
             },
           ),
-        if (Platform.isAndroid)
+        ],
+      )
+    ];
+  }
+
+  List<Widget> _getConnectionSection() {
+    return [
+      SettingsSection(
+        label: appLocalizations.connectionSection,
+        dividerIndentWithIcon: true,
+        children: [
           ListItem.open(
-            leading: const Icon(Icons.view_list),
-            title: Text(appLocalizations.accessControl),
-            subtitle: Text(appLocalizations.accessControlDesc),
+            iconData: Icons.tune,
+            title: Text(appLocalizations.override),
+            subtitle: Text(appLocalizations.overrideDesc),
             delegate: OpenDelegate(
-              title: appLocalizations.appAccessControl,
-              widget: const AccessFragment(),
+              title: appLocalizations.override,
+              widget: const ConfigFragment(),
             ),
           ),
+          if (Platform.isAndroid) _buildAccessItem(),
+        ],
+      )
+    ];
+  }
+
+  List<Widget> _getSystemSection() {
+    final items = <Widget>[
+      Selector<Config, BackgroundOptimizationLevel>(
+        selector: (_, config) => config.appSetting.backgroundOptimizationLevel,
+        builder: (_, level, __) {
+          final levelText = switch (level) {
+            BackgroundOptimizationLevel.disabled =>
+              appLocalizations.backgroundOptimizationLevel_disabled,
+            BackgroundOptimizationLevel.light =>
+              appLocalizations.backgroundOptimizationLevel_light,
+            BackgroundOptimizationLevel.balanced =>
+              appLocalizations.backgroundOptimizationLevel_balanced,
+            BackgroundOptimizationLevel.aggressive =>
+              appLocalizations.backgroundOptimizationLevel_aggressive,
+          };
+          return ListItem.open(
+            iconData: Icons.settings_outlined,
+            title: Text(appLocalizations.application),
+            subtitle: Text(appLocalizations.applicationDesc),
+            valueText: levelText,
+            delegate: OpenDelegate(
+              title: appLocalizations.application,
+              widget: const ApplicationSettingFragment(),
+            ),
+          );
+        },
+      ),
+      if (system.isDesktop)
         ListItem.open(
-          leading: const Icon(Icons.edit),
-          title: Text(appLocalizations.override),
-          subtitle: Text(appLocalizations.overrideDesc),
+          iconData: Icons.keyboard_outlined,
+          title: Text(appLocalizations.hotkeyManagement),
+          subtitle: Text(appLocalizations.hotkeyManagementDesc),
           delegate: OpenDelegate(
-            title: appLocalizations.override,
-            widget: const ConfigFragment(),
+            title: appLocalizations.hotkeyManagement,
+            widget: const HotKeyFragment(),
           ),
         ),
-        ListItem.open(
-          leading: const Icon(Icons.settings),
-          title: Text(appLocalizations.application),
-          subtitle: Text(appLocalizations.applicationDesc),
-          delegate: OpenDelegate(
-            title: appLocalizations.application,
-            widget: const ApplicationSettingFragment(),
-          ),
+      if (Platform.isWindows)
+        ListItem(
+          iconData: Icons.lock_outline,
+          title: Text(appLocalizations.loopback),
+          subtitle: Text(appLocalizations.loopbackDesc),
+          onTap: () {
+            windows?.runas(
+              '"${join(dirname(Platform.resolvedExecutable), "EnableLoopback.exe")}"',
+              "",
+            );
+          },
         ),
-      ],
-    );
+    ];
+    return [
+      SettingsSection(
+        label: appLocalizations.systemSection,
+        dividerIndentWithIcon: true,
+        children: items,
+      )
+    ];
+  }
+
+  List<Widget> _getDataSection() {
+    return [
+      SettingsSection(
+        label: appLocalizations.dataSection,
+        dividerIndentWithIcon: true,
+        children: [_buildBackupItem()],
+      )
+    ];
+  }
+
+  List<Widget> _getOtherSection() {
+    return [
+      SettingsSection(
+        label: appLocalizations.other,
+        dividerIndentWithIcon: true,
+        children: [
+          ListItem.open(
+            iconData: Icons.info_outline,
+            title: Text(appLocalizations.about),
+            valueText: globalState.packageInfo.version,
+            delegate: OpenDelegate(
+              title: appLocalizations.about,
+              widget: const AboutFragment(),
+            ),
+          ),
+          ListItem(
+            iconData: Icons.gavel_outlined,
+            title: Text(appLocalizations.disclaimer),
+            onTap: () async {
+              final isDisclaimerAccepted =
+                  await globalState.appController.showDisclaimer();
+              if (!isDisclaimerAccepted) {
+                globalState.appController.handleExit();
+              }
+            },
+          ),
+        ],
+      )
+    ];
   }
 
   @override
@@ -192,6 +287,10 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
     return LocaleBuilder(
       builder: (_) {
         final items = [
+          ..._getAppearanceSection(),
+          ..._getConnectionSection(),
+          ..._getSystemSection(),
+          ..._getDataSection(),
           Selector<AppState, MoreToolsSelectorState>(
             selector: (_, appState) {
               return MoreToolsSelectorState(
@@ -210,15 +309,17 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
                 return Container();
               }
               return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ListHeader(title: appLocalizations.more),
-                  _buildNavigationMenu(state.navigationItems)
+                  SettingsSectionHeader(label: appLocalizations.more),
+                  _buildNavigationMenu(state.navigationItems),
                 ],
               );
             },
           ),
-          ..._getSettingList(),
-          ..._getOtherList(),
+          ..._getOtherSection(),
+          const SettingsBottomSpace(),
         ];
         return ValueListenableBuilder<double>(
           valueListenable: globalState.bottomBarHeightNotifier,
@@ -228,6 +329,7 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
             // Extra scroll headroom equal to the floating bottom bar height
             // (mobile only) so the last item can scroll fully above it.
             padding: EdgeInsets.only(
+              top: 4,
               bottom: 20 +
                   (MediaQuery.sizeOf(context).width <= maxMobileWidth
                       ? bottomBarHeight

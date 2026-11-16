@@ -29,319 +29,342 @@ class FontFamilyItem {
   });
 }
 
+ThemeModeItem _getThemeModeItem(ThemeMode themeMode) {
+  return switch (themeMode) {
+    ThemeMode.system => ThemeModeItem(
+        themeMode: ThemeMode.system,
+        iconData: Icons.brightness_auto_outlined,
+        label: appLocalizations.auto,
+      ),
+    ThemeMode.light => ThemeModeItem(
+        themeMode: ThemeMode.light,
+        iconData: Icons.light_mode_outlined,
+        label: appLocalizations.light,
+      ),
+    ThemeMode.dark => ThemeModeItem(
+        themeMode: ThemeMode.dark,
+        iconData: Icons.dark_mode_outlined,
+        label: appLocalizations.dark,
+      ),
+  };
+}
+
+/// 主题预览：用当前主题色渲染的迷你界面。
+class ThemePreview extends StatelessWidget {
+  const ThemePreview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settingsCardRadius),
+          border: Border.all(
+            color: colorScheme.outlineVariant.opacity60,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primaryContainer.opacity60,
+              colorScheme.surfaceContainerLow,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    appName,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.opacity12,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    appLocalizations.preview,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 14,
+            ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.opacity60,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          appLocalizations.status,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.opacity12,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          appLocalizations.proxies,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: 0.62,
+                      minHeight: 6,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          appLocalizations.download,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        appLocalizations.upload,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      appLocalizations.status,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ThemeFragment extends StatelessWidget {
   const ThemeFragment({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final previewCard = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: CommonCard(
-        onPressed: () {},
-        info: Info(
-          label: appLocalizations.preview,
-          iconData: Icons.looks,
-        ),
-        child: Container(
-          height: 200,
-        ),
-      ),
-    );
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          previewCard,
-          const ThemeColorsBox(),
-        ],
-      ),
-    );
-  }
-}
-
-class ItemCard extends StatelessWidget {
-  final Widget child;
-  final Info info;
-
-  const ItemCard({
-    super.key,
-    required this.info,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 16,
-      ),
-      child: Wrap(
-        runSpacing: 16,
-        children: [
-          InfoHeader(
-            info: info,
-          ),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class ThemeColorsBox extends StatefulWidget {
-  const ThemeColorsBox({super.key});
-
-  @override
-  State<ThemeColorsBox> createState() => _ThemeColorsBoxState();
-}
-
-class _ThemeColorsBoxState extends State<ThemeColorsBox> {
-  Widget _themeModeCheckBox({
-    bool? isSelected,
-    required ThemeModeItem themeModeItem,
-  }) {
-    return CommonCard(
-      isSelected: isSelected,
-      onPressed: () {
-        final appController = globalState.appController;
-        appController.config.themeProps =
-            appController.config.themeProps.copyWith(
-          themeMode: themeModeItem.themeMode,
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Icon(themeModeItem.iconData),
-            ),
-            const SizedBox(
-              width: 8,
-            ),
-            Flexible(
-              child: Text(
-                themeModeItem.label,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _primaryColorCheckBox({
-    bool? isSelected,
-    Color? color,
-  }) {
-    return ColorSchemeBox(
-      isSelected: isSelected,
-      primaryColor: color,
-      onPressed: () {
-        final appController = globalState.appController;
-        appController.config.themeProps =
-            appController.config.themeProps.copyWith(
-          primaryColor: color?.toARGB32(),
-        );
-      },
-    );
-  }
-
-  Widget _fontFamilyCheckBox({
-    bool? isSelected,
-    required FontFamilyItem fontFamilyItem,
-  }) {
-    return CommonCard(
-      isSelected: isSelected,
-      onPressed: () {
-        final appController = globalState.appController;
-        appController.config.themeProps =
-            appController.config.themeProps.copyWith(
-          fontFamily: fontFamilyItem.fontFamily,
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                fontFamilyItem.label,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<ThemeModeItem> themeModeItems = [
-      ThemeModeItem(
-        iconData: Icons.auto_mode,
-        label: appLocalizations.auto,
-        themeMode: ThemeMode.system,
-      ),
-      ThemeModeItem(
-        iconData: Icons.light_mode,
-        label: appLocalizations.light,
-        themeMode: ThemeMode.light,
-      ),
-      ThemeModeItem(
-        iconData: Icons.dark_mode,
-        label: appLocalizations.dark,
-        themeMode: ThemeMode.dark,
-      ),
-    ];
-    List<Color?> primaryColors = [
-      null,
-      ...defaultPrimaryColors.map((c) => Color(c)),
-    ];
-    List<FontFamilyItem> fontFamilyItems = [
-      FontFamilyItem(
-        label: appLocalizations.systemFont,
-        fontFamily: FontFamily.system,
-      ),
-      const FontFamilyItem(
-        label: "MiSans",
-        fontFamily: FontFamily.miSans,
-      ),
-    ];
-    return Column(
+    return ListView(
+      padding: const EdgeInsets.only(top: 8),
       children: [
-        ItemCard(
-          info: Info(
-            label: appLocalizations.fontFamily,
-            iconData: Icons.text_fields,
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(
-              left: 16,
-              right: 16,
+        const ThemePreview(),
+        SettingsSectionHeader(label: appLocalizations.themeMode),
+        SettingsCard(
+          children: [
+            Selector<Config, ThemeMode>(
+              selector: (_, config) => config.themeProps.themeMode,
+              builder: (_, themeMode, __) {
+                return SettingsSubBlock(
+                  caption: appLocalizations.themeMode,
+                  captionValue: _getThemeModeItem(themeMode).label,
+                  child: SettingsSegmented<ThemeMode>(
+                    options: ThemeMode.values,
+                    value: themeMode,
+                    labelBuilder: (mode) => _getThemeModeItem(mode).label,
+                    iconBuilder: (mode) => _getThemeModeItem(mode).iconData,
+                    onChanged: (mode) {
+                      final appController = globalState.appController;
+                      appController.config.themeProps =
+                          appController.config.themeProps.copyWith(
+                        themeMode: mode,
+                      );
+                    },
+                  ),
+                );
+              },
             ),
-            height: 48,
-            child: Selector<Config, FontFamily>(
+          ],
+        ),
+        Selector<Config, int?>(
+          selector: (_, config) => config.themeProps.primaryColor,
+          builder: (_, currentPrimaryColor, __) {
+            final brightness = Theme.of(context).brightness;
+            final systemSeed = globalState
+                .appController.appState.systemColorSchemes
+                .getSystemColorSchemeForBrightness(brightness)
+                .primary;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SettingsSectionHeader(
+                  label: appLocalizations.themeColor,
+                  value: currentPrimaryColor == null
+                      ? appLocalizations.auto
+                      : null,
+                ),
+                SettingsCard(
+                  children: [
+                    SettingsSubBlock(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          SettingsColorSwatch(
+                            seedColor: systemSeed,
+                            isSelected: currentPrimaryColor == null,
+                            overlayIcon: const Icon(Icons.colorize),
+                            onPressed: () {
+                              final appController = globalState.appController;
+                              appController.config.themeProps =
+                                  appController.config.themeProps.copyWith(
+                                primaryColor: null,
+                              );
+                            },
+                          ),
+                          for (final color in defaultPrimaryColors)
+                            SettingsColorSwatch(
+                              seedColor: Color(color),
+                              isSelected: currentPrimaryColor == color,
+                              onPressed: () {
+                                final appController = globalState.appController;
+                                appController.config.themeProps =
+                                    appController.config.themeProps.copyWith(
+                                  primaryColor: color,
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+        SettingsSectionHeader(label: appLocalizations.fontFamily),
+        SettingsCard(
+          children: [
+            Selector<Config, FontFamily>(
               selector: (_, config) => config.themeProps.fontFamily,
               builder: (_, fontFamily, __) {
-                return ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (_, index) {
-                    final fontFamilyItem = fontFamilyItems[index];
-                    return _fontFamilyCheckBox(
-                      isSelected: fontFamily == fontFamilyItem.fontFamily,
-                      fontFamilyItem: fontFamilyItem,
-                    );
-                  },
-                  separatorBuilder: (_, __) {
-                    return const SizedBox(
-                      width: 16,
-                    );
-                  },
-                  itemCount: fontFamilyItems.length,
+                final fontFamilyItems = [
+                  FontFamilyItem(
+                    label: appLocalizations.systemFont,
+                    fontFamily: FontFamily.system,
+                  ),
+                  const FontFamilyItem(
+                    label: "MiSans",
+                    fontFamily: FontFamily.miSans,
+                  ),
+                ];
+                return SettingsSubBlock(
+                  child: SettingsChips(
+                    children: [
+                      for (final item in fontFamilyItems)
+                        SettingsChoiceChip(
+                          label: item.label,
+                          isSelected: fontFamily == item.fontFamily,
+                          onPressed: () {
+                            final appController = globalState.appController;
+                            appController.config.themeProps =
+                                appController.config.themeProps.copyWith(
+                              fontFamily: item.fontFamily,
+                            );
+                          },
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
-          ),
+          ],
         ),
-        ItemCard(
-          info: Info(
-            label: appLocalizations.themeMode,
-            iconData: Icons.brightness_high,
-          ),
-          child: Selector<Config, ThemeMode>(
-            selector: (_, config) => config.themeProps.themeMode,
-            builder: (_, themeMode, __) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 64,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: themeModeItems.length,
-                  itemBuilder: (_, index) {
-                    final themeModeItem = themeModeItems[index];
-                    return _themeModeCheckBox(
-                      isSelected: themeMode == themeModeItem.themeMode,
-                      themeModeItem: themeModeItem,
-                    );
-                  },
-                  separatorBuilder: (_, __) {
-                    return const SizedBox(
-                      width: 16,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        ItemCard(
-          info: Info(
-            label: appLocalizations.themeColor,
-            iconData: Icons.palette,
-          ),
-          child: Container(
-            margin: const EdgeInsets.only(
-              left: 16,
-              right: 16,
-              bottom: 16,
-            ),
-            height: 88,
-            child: Selector<Config, int?>(
-              selector: (_, config) => config.themeProps.primaryColor,
-              builder: (_, currentPrimaryColor, __) {
-                return ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (_, index) {
-                    final primaryColor = primaryColors[index];
-                    return _primaryColorCheckBox(
-                      isSelected: currentPrimaryColor == primaryColor?.toARGB32(),
-                      color: primaryColor,
-                    );
-                  },
-                  separatorBuilder: (_, __) {
-                    return const SizedBox(
-                      width: 16,
-                    );
-                  },
-                  itemCount: primaryColors.length,
+        SettingsSectionHeader(label: appLocalizations.interfaceSection),
+        SettingsCard(
+          children: [
+            Selector<Config, bool>(
+              selector: (_, config) => config.themeProps.prueBlack,
+              builder: (_, value, ___) {
+                return ListItem.switchItem(
+                  isSettings: true,
+                  title: Text(appLocalizations.prueBlackMode),
+                  subtitle: Text(appLocalizations.prueBlackModeDesc),
+                  delegate: SwitchDelegate(
+                    value: value,
+                    onChanged: (value) {
+                      final appController = globalState.appController;
+                      appController.config.themeProps =
+                          appController.config.themeProps.copyWith(
+                        prueBlack: value,
+                      );
+                    },
+                  ),
                 );
               },
             ),
-          ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Selector<Config, bool>(
-            selector: (_, config) => config.themeProps.prueBlack,
-            builder: (_, value, ___) {
-              return ListItem.switchItem(
-                leading: Icon(
-                  Icons.contrast,
-                  color: context.colorScheme.primary,
-                ),
-                title: Text(appLocalizations.prueBlackMode),
-                delegate: SwitchDelegate(
-                  value: value,
-                  onChanged: (value) {
-                    final appController = globalState.appController;
-                    appController.config.themeProps =
-                        appController.config.themeProps.copyWith(
-                      prueBlack: value,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(
-          height: 64,
-        ),
+        const SettingsBottomSpace(),
       ],
     );
   }

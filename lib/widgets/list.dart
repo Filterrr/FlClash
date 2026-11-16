@@ -4,9 +4,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/open_container.dart';
 import 'package:flutter/material.dart';
 
-import 'card.dart';
 import 'input.dart';
 import 'scaffold.dart';
+import 'settings.dart';
 import 'sheet.dart';
 
 class Delegate {
@@ -117,6 +117,12 @@ class ListItem<T> extends StatelessWidget {
   final double? horizontalTitleGap;
   final void Function()? onTap;
 
+  /// 设置页样式：图标底托 + 右值 + 箭头，取代 ListTile 的默认排版。
+  final IconData? iconData;
+  final String? valueText;
+  final bool showArrow;
+  final bool isSettings;
+
   const ListItem({
     super.key,
     required this.title,
@@ -128,6 +134,10 @@ class ListItem<T> extends StatelessWidget {
     this.prue,
     this.onTap,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   }) : delegate = const Delegate();
 
   const ListItem.open({
@@ -141,6 +151,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   }) : onTap = null;
 
   const ListItem.options({
@@ -154,6 +168,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   }) : onTap = null;
 
   const ListItem.input({
@@ -167,6 +185,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   }) : onTap = null;
 
   const ListItem.next({
@@ -180,6 +202,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   }) : onTap = null;
 
   const ListItem.checkbox({
@@ -192,6 +218,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   })  : trailing = null,
         onTap = null;
 
@@ -205,6 +235,10 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   })  : trailing = null,
         onTap = null;
 
@@ -218,14 +252,158 @@ class ListItem<T> extends StatelessWidget {
     this.horizontalTitleGap = 8,
     this.prue,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.iconData,
+    this.valueText,
+    this.showArrow = false,
+    this.isSettings = false,
   })  : leading = null,
         onTap = null;
 
-  _buildListTile({
+  bool _isSettingsRow(BuildContext context) =>
+      isSettings ||
+      iconData != null ||
+      valueText != null ||
+      showArrow ||
+      SettingsSectionScope.of(context);
+
+  Widget _buildSettingsTile({
+    required BuildContext context,
     void Function()? onTap,
     Widget? trailing,
     Widget? leading,
   }) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final effectiveLeading = leading ?? this.leading;
+    // build() 里的普通行只传 onTap，声明的 trailing 必须在这里回退，
+    // 否则「编辑 / 上传 / 绑定」这类行尾按钮会被整个丢掉。
+    final effectiveTrailing = trailing ?? this.trailing;
+    final leadingIcon = effectiveLeading;
+    final tileIcon =
+        iconData ?? (leadingIcon is Icon ? leadingIcon.icon : null);
+    // 输入 / 选项行的 subtitle 是「当前值」，改为右侧回显。
+    final isValueRow = delegate is InputDelegate || delegate is OptionsDelegate;
+    final rowValue = valueText ??
+        (isValueRow && subtitle is Text ? (subtitle as Text).data : null);
+    final Widget? rowSubtitle = isValueRow ? null : subtitle;
+    return InkWell(
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: padding.vertical > 0 ? padding.vertical : 13,
+          ),
+          child: Row(
+            children: [
+              if (tileIcon != null) ...[
+                SettingsIconTile(iconData: tileIcon),
+                const SizedBox(
+                  width: 12,
+                ),
+              ] else if (effectiveLeading != null) ...[
+                IconTheme.merge(
+                  data: IconThemeData(
+                    size: 20,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  child: effectiveLeading,
+                ),
+                const SizedBox(
+                  width: 12,
+                ),
+              ],
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _styledText(
+                      title,
+                      textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                    ),
+                    if (rowSubtitle != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: _styledText(
+                          rowSubtitle,
+                          textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.38,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (rowValue != null ||
+                  showArrow ||
+                  _cardDefaultArrow(context)) ...[
+                const SizedBox(
+                  width: 10,
+                ),
+                SettingsTrailing(
+                  value: rowValue,
+                  showChevron:
+                      isValueRow || showArrow || _cardDefaultArrow(context),
+                ),
+              ],
+              if (effectiveTrailing != null) ...[
+                const SizedBox(
+                  width: 10,
+                ),
+                effectiveTrailing,
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 卡片内的导航类行默认带箭头（开关、复选、单选行除外）。
+  bool _cardDefaultArrow(BuildContext context) {
+    if (!SettingsSectionScope.of(context)) return false;
+    return delegate is OpenDelegate ||
+        delegate is OptionsDelegate ||
+        delegate is InputDelegate ||
+        delegate is NextDelegate;
+  }
+
+  /// 仅对纯文本套用排版样式，其它 widget 原样返回。
+  Widget _styledText(Widget widget, TextStyle? style) {
+    if (widget is Text) {
+      return Text(
+        widget.data ?? widget.textSpan?.toPlainText() ?? "",
+        maxLines: widget.maxLines,
+        overflow: widget.overflow,
+        textAlign: widget.textAlign,
+        softWrap: widget.softWrap,
+        style: (widget.style ?? const TextStyle()).merge(style),
+      );
+    }
+    return widget;
+  }
+
+  _buildListTile({
+    required BuildContext context,
+    void Function()? onTap,
+    Widget? trailing,
+    Widget? leading,
+  }) {
+    if (_isSettingsRow(context) && prue != true) {
+      return _buildSettingsTile(
+        context: context,
+        onTap: onTap,
+        trailing: trailing,
+        leading: leading,
+      );
+    }
     if (prue == true) {
       final List<Widget> children = [];
       if (leading != null) {
@@ -299,6 +477,7 @@ class ListItem<T> extends StatelessWidget {
           }
 
           return _buildListTile(
+            context: context,
             onTap: openAction,
           );
         },
@@ -315,6 +494,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is OptionsDelegate) {
       final optionsDelegate = delegate as OptionsDelegate<T>;
       return _buildListTile(
+        context: context,
         onTap: () async {
           final value = await globalState.showCommonDialog<T>(
             child: OptionsDialog<T>(
@@ -331,6 +511,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is InputDelegate) {
       final inputDelegate = delegate as InputDelegate;
       return _buildListTile(
+        context: context,
         onTap: () async {
           final value = await globalState.showCommonDialog<String>(
             child: InputDialog(
@@ -347,6 +528,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is NextDelegate) {
       final nextDelegate = delegate as NextDelegate;
       return _buildListTile(
+        context: context,
         onTap: () {
           final isMobile =
               globalState.appController.appState.viewMode == ViewMode.mobile;
@@ -373,6 +555,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is CheckboxDelegate) {
       final checkboxDelegate = delegate as CheckboxDelegate;
       return _buildListTile(
+        context: context,
         onTap: () {
           if (checkboxDelegate.onChanged != null) {
             checkboxDelegate.onChanged!(!checkboxDelegate.value);
@@ -387,6 +570,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is SwitchDelegate) {
       final switchDelegate = delegate as SwitchDelegate;
       return _buildListTile(
+        context: context,
         onTap: () {
           if (switchDelegate.onChanged != null) {
             switchDelegate.onChanged!(!switchDelegate.value);
@@ -401,6 +585,7 @@ class ListItem<T> extends StatelessWidget {
     if (delegate is RadioDelegate) {
       final radioDelegate = delegate as RadioDelegate<T>;
       return _buildListTile(
+        context: context,
         onTap: () {
           if (radioDelegate.onChanged != null) {
             radioDelegate.onChanged!(radioDelegate.value);
@@ -423,6 +608,7 @@ class ListItem<T> extends StatelessWidget {
     }
 
     return _buildListTile(
+      context: context,
       onTap: onTap,
     );
   }
@@ -491,43 +677,37 @@ List<Widget> generateSection({
   List<Widget>? actions,
   bool separated = true,
 }) {
-  final genItems = separated
-      ? items.separated(
-          const Divider(
-            height: 0,
-          ),
-        )
-      : items;
-  return [
-    if (items.isNotEmpty && title != null)
-      ListHeader(
-        title: title,
-        actions: actions,
+  if (items.isEmpty) return [];
+  final genItems = items.toList();
+  if (actions != null) {
+    final separatedItems = separated
+        ? genItems.separated(
+            const Divider(
+              height: 0,
+            ),
+          )
+        : genItems;
+    return [
+      if (title != null)
+        ListHeader(
+          title: title,
+          actions: actions,
+        ),
+      ...separatedItems,
+    ];
+  }
+  if (title == null) {
+    return [
+      SettingsCard(
+        children: genItems,
       ),
-    ...genItems,
-  ];
-}
-
-List<Widget> generateInfoSection({
-  required Info info,
-  required Iterable<Widget> items,
-  List<Widget>? actions,
-  bool separated = true,
-}) {
-  final genItems = separated
-      ? items.separated(
-          const Divider(
-            height: 0,
-          ),
-        )
-      : items;
+    ];
+  }
   return [
-    if (items.isNotEmpty)
-      InfoHeader(
-        info: info,
-        actions: actions,
-      ),
-    ...genItems,
+    SettingsSection(
+      label: title,
+      children: genItems,
+    ),
   ];
 }
 
@@ -536,6 +716,7 @@ Widget generateListView(List<Widget> items) {
     itemCount: items.length,
     itemBuilder: (_, index) => items[index],
     padding: const EdgeInsets.only(
+      top: 4,
       bottom: 16,
     ),
   );

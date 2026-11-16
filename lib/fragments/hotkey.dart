@@ -4,6 +4,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/card.dart';
 import 'package:fl_clash/widgets/list.dart';
+import 'package:fl_clash/widgets/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -17,46 +18,45 @@ extension IntlExt on Intl {
 class HotKeyFragment extends StatelessWidget {
   const HotKeyFragment({super.key});
 
-  String getSubtitle(HotKeyAction hotKeyAction) {
-    final key = hotKeyAction.key;
-    if (key == null) {
-      return appLocalizations.noHotKey;
-    }
-    final modifierLabels =
-        hotKeyAction.modifiers.map((item) => item.physicalKeys.first.label);
-    var text = "";
-    if (modifierLabels.isNotEmpty) {
-      text += "${modifierLabels.join(" ")}+";
-    }
-    text += PhysicalKeyboardKey(key).label;
-    return text;
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: HotAction.values.length,
+      padding: const EdgeInsets.only(top: 4),
+      itemCount: HotAction.values.length + 1,
       itemBuilder: (_, index) {
-        final hotAction = HotAction.values[index];
-        return Selector<Config, HotKeyAction>(
-          selector: (_, config) {
-            final index = config.hotKeyActions.indexWhere(
-              (item) => item.action == hotAction,
-            );
-            return index != -1
-                ? config.hotKeyActions[index]
-                : HotKeyAction(
-                    action: hotAction,
-                  );
-          },
-          builder: (_, value, __) {
+        if (index == 0) {
+          return SettingsSection(
+            label: appLocalizations.hotkeyManagement,
+            children: [
+              for (final hotAction in HotAction.values)
+                _buildHotKeyItem(hotAction),
+            ],
+          );
+        }
+        return const SettingsBottomSpace();
+      },
+    );
+  }
+
+  Widget _buildHotKeyItem(HotAction hotAction) {
+    return Selector<Config, HotKeyAction>(
+      selector: (_, config) {
+        final index = config.hotKeyActions.indexWhere(
+          (item) => item.action == hotAction,
+        );
+        return index != -1
+            ? config.hotKeyActions[index]
+            : HotKeyAction(
+                action: hotAction,
+              );
+      },
+      builder: (_, value, __) {
+        return Builder(
+          builder: (context) {
+            final colorScheme = context.colorScheme;
+            final keys = _getKeyWidgets(context, value);
             return ListItem(
               title: Text(IntlExt.actionMessage(hotAction.name)),
-              subtitle: Text(
-                getSubtitle(value),
-                style: context.textTheme.bodyMedium
-                    ?.copyWith(color: context.colorScheme.primary),
-              ),
               onTap: () {
                 globalState.showCommonDialog(
                   child: HotKeyRecorder(
@@ -64,11 +64,68 @@ class HotKeyFragment extends StatelessWidget {
                   ),
                 );
               },
+              trailing: keys.isEmpty
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          appLocalizations.noHotKey,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: keys,
+                    ),
             );
           },
         );
       },
     );
+  }
+
+  List<Widget> _getKeyWidgets(BuildContext context, HotKeyAction hotKeyAction) {
+    final key = hotKeyAction.key;
+    if (key == null) return [];
+    final colorScheme = context.colorScheme;
+    final labels = <String>[
+      ...hotKeyAction.modifiers.map((item) => item.physicalKeys.first.label),
+      PhysicalKeyboardKey(key).label,
+    ];
+    return [
+      for (var index = 0; index < labels.length; index++) ...[
+        if (index > 0)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              "+",
+              style: context.textTheme.bodySmall?.copyWith(
+                color: colorScheme.outline,
+              ),
+            ),
+          ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.opacity60,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: colorScheme.outlineVariant.opacity60,
+            ),
+          ),
+          child: Text(
+            labels[index],
+            style: context.textTheme.bodySmall?.copyWith(
+              fontFamily: 'monospace',
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    ];
   }
 }
 

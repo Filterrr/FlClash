@@ -6,7 +6,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CloseConnectionsSwitch extends StatelessWidget {
@@ -18,6 +17,7 @@ class CloseConnectionsSwitch extends StatelessWidget {
       selector: (_, config) => config.appSetting.closeConnections,
       builder: (_, closeConnections, __) {
         return ListItem.switchItem(
+          isSettings: true,
           title: Text(appLocalizations.autoCloseConnections),
           subtitle: Text(appLocalizations.autoCloseConnectionsDesc),
           delegate: SwitchDelegate(
@@ -44,6 +44,7 @@ class UsageSwitch extends StatelessWidget {
       selector: (_, config) => config.appSetting.onlyProxy,
       builder: (_, onlyProxy, __) {
         return ListItem.switchItem(
+          isSettings: true,
           title: Text(appLocalizations.onlyStatisticsProxy),
           subtitle: Text(appLocalizations.onlyStatisticsProxyDesc),
           delegate: SwitchDelegate(
@@ -64,233 +65,238 @@ class UsageSwitch extends StatelessWidget {
 class ApplicationSettingFragment extends StatelessWidget {
   const ApplicationSettingFragment({super.key});
 
-  String getLocaleString(Locale? locale) {
-    if (locale == null) return appLocalizations.defaultText;
-    return Intl.message(locale.toString());
+  Widget _buildSwitchItem({
+    required Widget title,
+    required Widget subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return ListItem.switchItem(
+      isSettings: true,
+      title: title,
+      subtitle: subtitle,
+      delegate: SwitchDelegate(
+        value: value,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildBackgroundOptimization() {
+    return Selector<Config,
+        ({bool enabled, BackgroundOptimizationLevel level})>(
+      selector: (_, config) => (
+        enabled: config.appSetting.backgroundOptimization,
+        level: config.appSetting.backgroundOptimizationLevel,
+      ),
+      builder: (_, state, __) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListItem.switchItem(
+              isSettings: true,
+              title: Text(appLocalizations.backgroundOptimization),
+              subtitle: Text(appLocalizations.backgroundOptimizationDesc),
+              delegate: SwitchDelegate(
+                value: state.enabled,
+                onChanged: (bool value) {
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    backgroundOptimization: value,
+                    backgroundOptimizationLevel: value
+                        ? BackgroundOptimizationLevel.balanced
+                        : BackgroundOptimizationLevel.disabled,
+                  );
+                },
+              ),
+            ),
+            SettingsSubBlock(
+              caption: appLocalizations.backgroundOptimizationLevelDesc,
+              child: SettingsSegmented<BackgroundOptimizationLevel>(
+                options: BackgroundOptimizationLevel.values,
+                value: state.enabled
+                    ? state.level
+                    : BackgroundOptimizationLevel.disabled,
+                labelBuilder: (level) => switch (level) {
+                  BackgroundOptimizationLevel.disabled =>
+                    appLocalizations.backgroundOptimizationLevel_disabled,
+                  BackgroundOptimizationLevel.light =>
+                    appLocalizations.backgroundOptimizationLevel_light,
+                  BackgroundOptimizationLevel.balanced =>
+                    appLocalizations.backgroundOptimizationLevel_balanced,
+                  BackgroundOptimizationLevel.aggressive =>
+                    appLocalizations.backgroundOptimizationLevel_aggressive,
+                },
+                onChanged: (BackgroundOptimizationLevel value) {
+                  final config = globalState.appController.config;
+                  config.appSetting = config.appSetting.copyWith(
+                    backgroundOptimizationLevel: value,
+                    backgroundOptimization:
+                        value != BackgroundOptimizationLevel.disabled,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = [
-      Selector<Config, bool>(
-        selector: (_, config) => config.appSetting.minimizeOnExit,
-        builder: (_, isMinimizeOnExit, child) {
-          return ListItem.switchItem(
-            title: Text(appLocalizations.minimizeOnExit),
-            subtitle: Text(appLocalizations.minimizeOnExitDesc),
-            delegate: SwitchDelegate(
-              value: isMinimizeOnExit,
-              onChanged: (bool value) {
-                final config = context.read<Config>();
-                config.appSetting = config.appSetting.copyWith(
-                  minimizeOnExit: value,
-                );
-              },
-            ),
-          );
-        },
-      ),
-      if (system.isDesktop)
-        Selector<Config, bool>(
-          selector: (_, config) => config.appSetting.autoLaunch,
-          builder: (_, autoLaunch, child) {
-            return ListItem.switchItem(
-              title: Text(appLocalizations.autoLaunch),
-              subtitle: Text(appLocalizations.autoLaunchDesc),
-              delegate: SwitchDelegate(
-                value: autoLaunch,
+    return ListView(
+      padding: const EdgeInsets.only(top: 4),
+      children: [
+        SettingsSection(
+          label: appLocalizations.startupSection,
+          children: [
+            Selector<Config, bool>(
+              selector: (_, config) => config.appSetting.autoRun,
+              builder: (_, autoRun, __) => _buildSwitchItem(
+                title: Text(appLocalizations.autoRun),
+                subtitle: Text(appLocalizations.autoRunDesc),
+                value: autoRun,
                 onChanged: (bool value) {
                   final config = globalState.appController.config;
                   config.appSetting = config.appSetting.copyWith(
-                    autoLaunch: value,
+                    autoRun: value,
                   );
                 },
               ),
-            );
-          },
+            ),
+            Selector<Config, bool>(
+              selector: (_, config) => config.appSetting.minimizeOnExit,
+              builder: (_, minimizeOnExit, __) => _buildSwitchItem(
+                title: Text(appLocalizations.minimizeOnExit),
+                subtitle: Text(appLocalizations.minimizeOnExitDesc),
+                value: minimizeOnExit,
+                onChanged: (bool value) {
+                  final config = context.read<Config>();
+                  config.appSetting = config.appSetting.copyWith(
+                    minimizeOnExit: value,
+                  );
+                },
+              ),
+            ),
+            if (system.isDesktop)
+              Selector<Config, bool>(
+                selector: (_, config) => config.appSetting.autoLaunch,
+                builder: (_, autoLaunch, __) => _buildSwitchItem(
+                  title: Text(appLocalizations.autoLaunch),
+                  subtitle: Text(appLocalizations.autoLaunchDesc),
+                  value: autoLaunch,
+                  onChanged: (bool value) {
+                    final config = globalState.appController.config;
+                    config.appSetting = config.appSetting.copyWith(
+                      autoLaunch: value,
+                    );
+                  },
+                ),
+              ),
+            if (system.isDesktop)
+              Selector<Config, bool>(
+                selector: (_, config) => config.appSetting.silentLaunch,
+                builder: (_, silentLaunch, __) => _buildSwitchItem(
+                  title: Text(appLocalizations.silentLaunch),
+                  subtitle: Text(appLocalizations.silentLaunchDesc),
+                  value: silentLaunch,
+                  onChanged: (bool value) {
+                    final config = globalState.appController.config;
+                    config.appSetting = config.appSetting.copyWith(
+                      silentLaunch: value,
+                    );
+                  },
+                ),
+              ),
+          ],
         ),
-      if (system.isDesktop)
-        Selector<Config, bool>(
-          selector: (_, config) => config.appSetting.silentLaunch,
-          builder: (_, silentLaunch, child) {
-            return ListItem.switchItem(
-              title: Text(appLocalizations.silentLaunch),
-              subtitle: Text(appLocalizations.silentLaunchDesc),
-              delegate: SwitchDelegate(
-                value: silentLaunch,
+        SettingsSection(
+          label: appLocalizations.backgroundSection,
+          children: [
+            _buildBackgroundOptimization(),
+            if (Platform.isAndroid)
+              Selector<Config, bool>(
+                selector: (_, config) => config.appSetting.hidden,
+                builder: (_, isExclude, __) => _buildSwitchItem(
+                  title: Text(appLocalizations.exclude),
+                  subtitle: Text(appLocalizations.excludeDesc),
+                  value: isExclude,
+                  onChanged: (value) {
+                    final config = globalState.appController.config;
+                    config.appSetting = config.appSetting.copyWith(
+                      hidden: value,
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+        SettingsSection(
+          label: appLocalizations.interfaceSection,
+          children: [
+            if (Platform.isAndroid)
+              Selector<Config, bool>(
+                selector: (_, config) => config.appSetting.isAnimateToPage,
+                builder: (_, isAnimateToPage, __) => _buildSwitchItem(
+                  title: Text(appLocalizations.tabAnimation),
+                  subtitle: Text(appLocalizations.tabAnimationDesc),
+                  value: isAnimateToPage,
+                  onChanged: (value) {
+                    final config = globalState.appController.config;
+                    config.appSetting = config.appSetting.copyWith(
+                      isAnimateToPage: value,
+                    );
+                  },
+                ),
+              ),
+            Selector<Config, bool>(
+              selector: (_, config) => config.appSetting.openLogs,
+              builder: (_, openLogs, __) => _buildSwitchItem(
+                title: Text(appLocalizations.logcat),
+                subtitle: Text(appLocalizations.logcatDesc),
+                value: openLogs,
                 onChanged: (bool value) {
                   final config = globalState.appController.config;
                   config.appSetting = config.appSetting.copyWith(
-                    silentLaunch: value,
+                    openLogs: value,
                   );
                 },
               ),
-            );
-          },
-        ),
-      Selector<Config, bool>(
-        selector: (_, config) => config.appSetting.autoRun,
-        builder: (_, autoRun, child) {
-          return ListItem.switchItem(
-            title: Text(appLocalizations.autoRun),
-            subtitle: Text(appLocalizations.autoRunDesc),
-            delegate: SwitchDelegate(
-              value: autoRun,
-              onChanged: (bool value) {
-                final config = globalState.appController.config;
-                config.appSetting = config.appSetting.copyWith(
-                  autoRun: value,
-                );
-              },
             ),
-          );
-        },
-      ),
-      if (Platform.isAndroid)
-        Selector<Config, bool>(
-          selector: (_, config) => config.appSetting.hidden,
-          builder: (_, isExclude, child) {
-            return ListItem.switchItem(
-              title: Text(appLocalizations.exclude),
-              subtitle: Text(appLocalizations.excludeDesc),
-              delegate: SwitchDelegate(
-                value: isExclude,
-                onChanged: (value) {
+          ],
+        ),
+        SettingsSection(
+          label: appLocalizations.behaviorSection,
+          children: [
+            const CloseConnectionsSwitch(),
+            const UsageSwitch(),
+          ],
+        ),
+        SettingsSection(
+          label: appLocalizations.update,
+          children: [
+            Selector<Config, bool>(
+              selector: (_, config) => config.appSetting.autoCheckUpdate,
+              builder: (_, autoCheckUpdate, __) => _buildSwitchItem(
+                title: Text(appLocalizations.autoCheckUpdate),
+                subtitle: Text(appLocalizations.autoCheckUpdateDesc),
+                value: autoCheckUpdate,
+                onChanged: (bool value) {
                   final config = globalState.appController.config;
                   config.appSetting = config.appSetting.copyWith(
-                    hidden: value,
+                    autoCheckUpdate: value,
                   );
                 },
               ),
-            );
-          },
+            ),
+          ],
         ),
-      if (Platform.isAndroid)
-        Selector<Config, bool>(
-          selector: (_, config) => config.appSetting.isAnimateToPage,
-          builder: (_, isAnimateToPage, child) {
-            return ListItem.switchItem(
-              title: Text(appLocalizations.tabAnimation),
-              subtitle: Text(appLocalizations.tabAnimationDesc),
-              delegate: SwitchDelegate(
-                value: isAnimateToPage,
-                onChanged: (value) {
-                  final config = globalState.appController.config;
-                  config.appSetting = config.appSetting.copyWith(
-                    isAnimateToPage: value,
-                  );
-                },
-              ),
-            );
-          },
+        SettingsNote(
+          text: appLocalizations.settingsPlatformTip,
         ),
-      Selector<Config, bool>(
-        selector: (_, config) => config.appSetting.openLogs,
-        builder: (_, openLogs, child) {
-          return ListItem.switchItem(
-            title: Text(appLocalizations.logcat),
-            subtitle: Text(appLocalizations.logcatDesc),
-            delegate: SwitchDelegate(
-              value: openLogs,
-              onChanged: (bool value) {
-                final config = globalState.appController.config;
-                config.appSetting = config.appSetting.copyWith(
-                  openLogs: value,
-                );
-              },
-            ),
-          );
-        },
-      ),
-      const CloseConnectionsSwitch(),
-      const UsageSwitch(),
-      Selector<Config, bool>(
-        selector: (_, config) => config.appSetting.backgroundOptimization,
-        builder: (_, backgroundOptimization, child) {
-          return ListItem.switchItem(
-            title: Text(appLocalizations.backgroundOptimization),
-            subtitle: Text(appLocalizations.backgroundOptimizationDesc),
-            delegate: SwitchDelegate(
-              value: backgroundOptimization,
-              onChanged: (bool value) {
-                final config = globalState.appController.config;
-                config.appSetting = config.appSetting.copyWith(
-                  backgroundOptimization: value,
-                  backgroundOptimizationLevel: value
-                      ? BackgroundOptimizationLevel.balanced
-                      : BackgroundOptimizationLevel.disabled,
-                );
-              },
-            ),
-          );
-        },
-      ),
-      Selector<Config, ({bool enabled, BackgroundOptimizationLevel level})>(
-        selector: (_, config) => (
-          enabled: config.appSetting.backgroundOptimization,
-          level: config.appSetting.backgroundOptimizationLevel,
-        ),
-        builder: (_, state, child) {
-          return ListItem.options(
-            title: Text(appLocalizations.backgroundOptimizationLevel),
-            subtitle: Text(appLocalizations.backgroundOptimizationLevelDesc),
-            delegate: OptionsDelegate<BackgroundOptimizationLevel>(
-              title: appLocalizations.backgroundOptimizationLevel,
-              options: BackgroundOptimizationLevel.values,
-              value: state.enabled ? state.level : BackgroundOptimizationLevel.disabled,
-              textBuilder: (level) => switch (level) {
-                BackgroundOptimizationLevel.disabled =>
-                  appLocalizations.backgroundOptimizationLevel_disabled,
-                BackgroundOptimizationLevel.light =>
-                  appLocalizations.backgroundOptimizationLevel_light,
-                BackgroundOptimizationLevel.balanced =>
-                  appLocalizations.backgroundOptimizationLevel_balanced,
-                BackgroundOptimizationLevel.aggressive =>
-                  appLocalizations.backgroundOptimizationLevel_aggressive,
-              },
-              onChanged: (BackgroundOptimizationLevel? value) {
-                if (value != null) {
-                  final config = globalState.appController.config;
-                  config.appSetting = config.appSetting.copyWith(
-                    backgroundOptimizationLevel: value,
-                    backgroundOptimization: value != BackgroundOptimizationLevel.disabled,
-                  );
-                }
-              },
-            ),
-          );
-        },
-      ),
-      Selector<Config, bool>(
-        selector: (_, config) => config.appSetting.autoCheckUpdate,
-        builder: (_, autoCheckUpdate, child) {
-          return ListItem.switchItem(
-            title: Text(appLocalizations.autoCheckUpdate),
-            subtitle: Text(appLocalizations.autoCheckUpdateDesc),
-            delegate: SwitchDelegate(
-              value: autoCheckUpdate,
-              onChanged: (bool value) {
-                final config = globalState.appController.config;
-                config.appSetting = config.appSetting.copyWith(
-                  autoCheckUpdate: value,
-                );
-              },
-            ),
-          );
-        },
-      ),
-    ];
-    return ListView.separated(
-      itemBuilder: (_, index) {
-        final item = items[index];
-        return item;
-      },
-      separatorBuilder: (_, __) {
-        return const Divider(
-          height: 0,
-        );
-      },
-      itemCount: items.length,
+        const SettingsBottomSpace(),
+      ],
     );
   }
 }

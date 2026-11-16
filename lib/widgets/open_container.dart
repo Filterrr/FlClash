@@ -84,7 +84,11 @@ class _OpenContainerState<T> extends State<OpenContainer<T?>> {
       key: _hideableKey,
       child: GestureDetector(
         onTap: widget.tappable ? openContainer : null,
+        // 关闭态必须是透明材质：这个包裹层位于每一行之上，若沿用 Material
+        // 的默认底色（canvasColor，不透明），会把外层卡片的分组底色整块盖住，
+        // 导致同一个卡片里出现两种底色、圆角看起来错位。
         child: Material(
+          color: Colors.transparent,
           clipBehavior: widget.clipBehavior,
           child: Builder(
             key: _closedBuilderKey,

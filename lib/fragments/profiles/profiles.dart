@@ -14,11 +14,7 @@ import 'add_profile.dart';
 
 enum PopupMenuItemEnum { delete, edit }
 
-enum ProfileActions {
-  edit,
-  update,
-  delete,
-}
+enum ProfileActions { edit, update, delete }
 
 class ProfilesFragment extends StatefulWidget {
   const ProfilesFragment({super.key});
@@ -89,6 +85,7 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             context.findAncestorStateOfType<CommonScaffoldState>();
         commonScaffoldState?.actions = [
           IconButton(
+            tooltip: appLocalizations.update,
             onPressed: () {
               _updateProfiles();
             },
@@ -98,8 +95,11 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             width: 8,
           ),
           IconButton(
+            tooltip: appLocalizations.profilesSort,
             onPressed: () {
               final profiles = globalState.appController.config.profiles;
+              // 高度只作为上限：条目少时由内部按内容收缩，
+              // 条目多时才在 400 以内滚动。
               showSheet(
                 title: appLocalizations.profilesSort,
                 context: context,
@@ -144,36 +144,264 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
           if (state.profiles.isEmpty) {
             return NullStatus(
               label: appLocalizations.nullProfileDesc,
+              iconData: Icons.folder_open,
+              desc: appLocalizations.profileEmptyDesc,
+              action: FilledButton.tonal(
+                onPressed: _handleShowAddExtendPage,
+                child: Text(
+                  "${appLocalizations.add}${appLocalizations.profile}",
+                ),
+              ),
             );
           }
+          final currentIndex = state.profiles.indexWhere(
+            (item) => item.id == state.currentProfileId,
+          );
+          final currentProfile =
+              currentIndex == -1 ? null : state.profiles[currentIndex];
           return Align(
             alignment: Alignment.topCenter,
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(
                 left: 16,
                 right: 16,
-                top: 16,
+                top: 8,
                 bottom: 88,
               ),
-              child: Grid(
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                crossAxisCount: state.columns,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (int i = 0; i < state.profiles.length; i++)
-                    GridItem(
-                      child: ProfileItem(
-                        key: Key(state.profiles[i].id),
-                        profile: state.profiles[i],
-                        groupValue: state.currentProfileId,
-                        onChanged: globalState.appController.changeProfile,
-                      ),
+                  if (currentProfile != null)
+                    _CurrentProfileSummary(profile: currentProfile),
+                  if (currentProfile != null)
+                    const SizedBox(
+                      height: 4,
                     ),
+                  SettingsSectionHeader(
+                    label: appLocalizations.profiles,
+                    value: "${state.profiles.length}",
+                    padding: const EdgeInsets.only(
+                      left: 6,
+                      right: 6,
+                      top: 16,
+                      bottom: 7,
+                    ),
+                  ),
+                  Grid(
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    crossAxisCount: state.columns,
+                    children: [
+                      for (int i = 0; i < state.profiles.length; i++)
+                        GridItem(
+                          child: ProfileItem(
+                            key: Key(state.profiles[i].id),
+                            profile: state.profiles[i],
+                            groupValue: state.currentProfileId,
+                            onChanged: globalState.appController.changeProfile,
+                          ),
+                        ),
+                    ],
+                  ),
+                  SettingsNote(
+                    text: appLocalizations.profileItemTip,
+                    padding: const EdgeInsets.only(
+                      left: 6,
+                      right: 6,
+                      top: 8,
+                    ),
+                  ),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// 类型 / 当前状态徽标：同一种宽度、同一种底色规则，
+/// 这样摘要卡与列表卡片里的徽标不会各自漂移。
+class _ProfileTypeBadge extends StatelessWidget {
+  final bool isCurrent;
+  final bool isUrl;
+
+  const _ProfileTypeBadge({
+    required this.isCurrent,
+    required this.isUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? colorScheme.primary.opacity12
+            : colorScheme.surfaceContainerHighest.opacity60,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isCurrent
+            ? appLocalizations.currentProfile
+            : (isUrl ? appLocalizations.url : appLocalizations.file),
+        style: context.textTheme.labelSmall?.copyWith(
+          color: isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+/// 当前配置摘要：订阅名 + 流量进度 + 更新时间。
+class _CurrentProfileSummary extends StatelessWidget {
+  final Profile profile;
+
+  const _CurrentProfileSummary({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final subscriptionInfo = profile.subscriptionInfo;
+    final traffic = subscriptionInfo != null && subscriptionInfo.total > 0
+        ? subscriptionInfo
+        : null;
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 4,
+        bottom: 4,
+      ),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 15, 16, 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(settingsCardRadius),
+          border: Border.all(
+            color: colorScheme.outlineVariant.opacity60,
+          ),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              colorScheme.primaryContainer.opacity60,
+              colorScheme.surfaceContainerLowest,
+            ],
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  appLocalizations.currentProfile,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                // 类型徽标紧跟在「当前配置」之后成一组信息；
+                // 之前用 Spacer 推到卡片最右，和左侧标签隔着整卡宽度。
+                _ProfileTypeBadge(
+                  isCurrent: false,
+                  isUrl: profile.type == ProfileType.url,
+                ),
+                const Spacer(),
+              ],
+            ),
+            const SizedBox(
+              height: 9,
+            ),
+            Text(
+              profile.label ?? profile.id,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.2,
+              ),
+            ),
+            if (traffic != null) ...[
+              const SizedBox(
+                height: 10,
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  minHeight: 6,
+                  value: (traffic.upload + traffic.download) / traffic.total,
+                  backgroundColor: colorScheme.primary.opacity12,
+                ),
+              ),
+              const SizedBox(
+                height: 7,
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "${TrafficValue(value: traffic.upload + traffic.download).show} / "
+                      "${TrafficValue(value: traffic.total).show}",
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  if (traffic.expire != 0)
+                    Text(
+                      DateTime.fromMillisecondsSinceEpoch(
+                        traffic.expire * 1000,
+                      ).show,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+            const SizedBox(
+              height: 9,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    profile.lastUpdateDate?.lastUpdateTimeDesc ??
+                        appLocalizations.noInfo,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.outline,
+                    ),
+                  ),
+                ),
+                if (profile.realAutoUpdate)
+                  Text(
+                    "${appLocalizations.autoUpdate} · ${profile.autoUpdateDuration.inMinutes} ${appLocalizations.minutes}",
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.outline,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -257,122 +485,218 @@ class ProfileItem extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildUrlProfileInfo(BuildContext context) {
-    final subscriptionInfo = profile.subscriptionInfo;
-    return [
-      const SizedBox(
-        height: 8,
-      ),
-      if (subscriptionInfo != null)
-        SubscriptionInfoView(
-          subscriptionInfo: subscriptionInfo,
-        ),
-      Text(
-        profile.lastUpdateDate?.lastUpdateTimeDesc ?? "",
-        style: context.textTheme.labelMedium?.toLight,
-      ),
-    ];
+  String _buildSubtitle() {
+    final lastUpdate = profile.lastUpdateDate?.lastUpdateTimeDesc;
+    final source = profile.type == ProfileType.url ? profile.url : null;
+    if (source == null || source.isEmpty) {
+      return lastUpdate ?? appLocalizations.noInfo;
+    }
+    final host = Uri.tryParse(source)?.host ?? source;
+    return host.isEmpty
+        ? (lastUpdate ?? appLocalizations.noInfo)
+        : (lastUpdate == null ? host : "$host · $lastUpdate");
   }
 
-  List<Widget> _buildFileProfileInfo(BuildContext context) {
-    return [
-      const SizedBox(
-        height: 8,
+  Widget? _buildTrafficLine(BuildContext context) {
+    final subscriptionInfo = profile.subscriptionInfo;
+    if (subscriptionInfo == null || subscriptionInfo.total <= 0) {
+      return null;
+    }
+    final use = subscriptionInfo.upload + subscriptionInfo.download;
+    final total = subscriptionInfo.total;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: LinearProgressIndicator(
+          minHeight: 5,
+          value: use / total,
+          backgroundColor: context.colorScheme.primary.opacity12,
+        ),
       ),
-      Text(
-        profile.lastUpdateDate?.lastUpdateTimeDesc ?? "",
-        style: context.textTheme.labelMedium?.toLight,
+    );
+  }
+
+  Widget? _buildTrafficDesc(BuildContext context) {
+    final subscriptionInfo = profile.subscriptionInfo;
+    if (subscriptionInfo == null || subscriptionInfo.total <= 0) {
+      return null;
+    }
+    final use = subscriptionInfo.upload + subscriptionInfo.download;
+    return Text(
+      "${TrafficValue(value: use).show} / ${TrafficValue(value: subscriptionInfo.total).show}",
+      style: context.textTheme.labelSmall?.copyWith(
+        color: context.colorScheme.outline,
       ),
-    ];
+    );
+  }
+
+  Widget _buildBadge(BuildContext context) {
+    final isCurrent = profile.id == groupValue;
+    if (!isCurrent && profile.isUpdating) {
+      return const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+    return _ProfileTypeBadge(
+      isCurrent: isCurrent,
+      isUrl: profile.type == ProfileType.url,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LongPressDetector(
-      onLongPress: () => _handleShowRuntimeConfig(context),
-      child: CommonCard(
-        isSelected: profile.id == groupValue,
-        onPressed: () {
+    final colorScheme = context.colorScheme;
+    final isCurrent = profile.id == groupValue;
+    return Material(
+      color: isCurrent
+          ? colorScheme.primaryContainer.opacity60
+          : colorScheme.surfaceContainerLow,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(settingsCardRadius),
+        side: BorderSide(
+          color: isCurrent
+              ? colorScheme.primary.opacity60
+              : colorScheme.outlineVariant.opacity60,
+          width: isCurrent ? 1.2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: () {
           onChanged(profile.id);
         },
-        child: ListItem(
-        key: Key(profile.id),
-        horizontalTitleGap: 16,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        trailing: SizedBox(
-          height: 40,
-          width: 40,
-          child: FadeBox(
-            child: profile.isUpdating
-                ? const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator(),
-                  )
-                : CommonPopupMenu<ProfileActions>(
-                    items: [
-                      CommonPopupMenuItem(
-                        action: ProfileActions.edit,
-                        label: appLocalizations.edit,
-                        iconData: Icons.edit,
-                      ),
-                      if (profile.type == ProfileType.url)
-                        CommonPopupMenuItem(
-                          action: ProfileActions.update,
-                          label: appLocalizations.update,
-                          iconData: Icons.sync,
-                        ),
-                      CommonPopupMenuItem(
-                        action: ProfileActions.delete,
-                        label: appLocalizations.delete,
-                        iconData: Icons.delete,
-                      ),
-                    ],
-                    onSelected: (ProfileActions? action) async {
-                      switch (action) {
-                        case ProfileActions.edit:
-                          _handleShowEditExtendPage(context);
-                          break;
-                        case ProfileActions.delete:
-                          _handleDeleteProfile(context);
-                          break;
-                        case ProfileActions.update:
-                          _handleUpdateProfile();
-                          break;
-                        case null:
-                          break;
-                      }
-                    },
-                  ),
-          ),
-        ),
-        title: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+        onLongPress: () => _handleShowRuntimeConfig(context),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                profile.label ?? profile.id,
-                style: context.textTheme.titleMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ...switch (profile.type) {
-                    ProfileType.file => _buildFileProfileInfo(context),
-                    ProfileType.url => _buildUrlProfileInfo(context),
-                  },
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: SettingsIconTile(
+                      iconData: profile.type == ProfileType.url
+                          ? Icons.cloud_outlined
+                          : Icons.description_outlined,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 11,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          profile.label ?? profile.id,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 3,
+                        ),
+                        Text(
+                          _buildSubtitle(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  // 徽标与 ⋮ 放在同一个 38 高的居中线里：
+                  // 之前徽标贴着行顶（22 高）而 ⋮ 是 38 高并从行顶开始，
+                  // 两者中心相差约 7dp，看起来不在一条线上。
+                  SizedBox(
+                    height: 38,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildBadge(context),
+                        const SizedBox(
+                          width: 2,
+                        ),
+                        SizedBox(
+                          width: 38,
+                          height: 38,
+                          child: FadeBox(
+                            child: profile.isUpdating
+                                ? const Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : CommonPopupMenu<ProfileActions>(
+                                    items: [
+                                      CommonPopupMenuItem(
+                                        action: ProfileActions.edit,
+                                        label: appLocalizations.edit,
+                                        iconData: Icons.edit,
+                                      ),
+                                      if (profile.type == ProfileType.url)
+                                        CommonPopupMenuItem(
+                                          action: ProfileActions.update,
+                                          label: appLocalizations.update,
+                                          iconData: Icons.sync,
+                                        ),
+                                      CommonPopupMenuItem(
+                                        action: ProfileActions.delete,
+                                        label: appLocalizations.delete,
+                                        iconData: Icons.delete,
+                                      ),
+                                    ],
+                                    onSelected: (ProfileActions? action) async {
+                                      switch (action) {
+                                        case ProfileActions.edit:
+                                          _handleShowEditExtendPage(context);
+                                          break;
+                                        case ProfileActions.delete:
+                                          _handleDeleteProfile(context);
+                                          break;
+                                        case ProfileActions.update:
+                                          _handleUpdateProfile();
+                                          break;
+                                        case null:
+                                          break;
+                                      }
+                                    },
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+              if (_buildTrafficDesc(context) != null) ...[
+                _buildTrafficLine(context)!,
+                const SizedBox(
+                  height: 4,
+                ),
+                _buildTrafficDesc(context)!,
+              ],
             ],
           ),
         ),
-        tileTitleAlignment: ListTileTitleAlignment.titleHeight,
-      ),
       ),
     );
   }
