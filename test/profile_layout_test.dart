@@ -42,7 +42,8 @@ void main() {
           width: 360,
           child: ProfileItem(
             profile: buildProfile(),
-            groupValue: 'p1',
+            // 非当前项才会显示类型徽标；当前项显示「当前」。
+            groupValue: null,
             onChanged: (_) {},
           ),
         ),
@@ -50,7 +51,6 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 50));
 
-    // 徽标（URL）应在 ⋮ 菜单左侧，且两者右边界接近卡片右边缘。
     final badge = find.text('URL');
     expect(badge, findsOneWidget);
 
