@@ -425,5 +425,6 @@
   "addProfileTip": "On desktop, QR code import opens an image picker instead of the camera.",
   "basicInfo": "Basic",
   "updateSection": "Update",
-  "autoUpdateDesc": "Fetch the latest subscription on a fixed interval"
+  "autoUpdateDesc": "Fetch the latest subscription on a fixed interval",
+  "notDownloaded": "Not downloaded"
 }

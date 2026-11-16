@@ -619,61 +619,70 @@ class ProfileItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(
-                    width: 6,
+                    width: 8,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 1),
-                    child: SizedBox(
-                      height: 22,
-                      child: Center(child: _buildBadge(context)),
-                    ),
-                  ),
+                  // 徽标与 ⋮ 放在同一个 38 高的居中线里：
+                  // 之前徽标贴着行顶（22 高）而 ⋮ 是 38 高并从行顶开始，
+                  // 两者中心相差约 7dp，看起来不在一条线上。
                   SizedBox(
-                    width: 38,
                     height: 38,
-                    child: FadeBox(
-                      child: profile.isUpdating
-                          ? const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : CommonPopupMenu<ProfileActions>(
-                              items: [
-                                CommonPopupMenuItem(
-                                  action: ProfileActions.edit,
-                                  label: appLocalizations.edit,
-                                  iconData: Icons.edit,
-                                ),
-                                if (profile.type == ProfileType.url)
-                                  CommonPopupMenuItem(
-                                    action: ProfileActions.update,
-                                    label: appLocalizations.update,
-                                    iconData: Icons.sync,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildBadge(context),
+                        const SizedBox(
+                          width: 2,
+                        ),
+                        SizedBox(
+                          width: 38,
+                          height: 38,
+                          child: FadeBox(
+                            child: profile.isUpdating
+                                ? const Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : CommonPopupMenu<ProfileActions>(
+                                    items: [
+                                      CommonPopupMenuItem(
+                                        action: ProfileActions.edit,
+                                        label: appLocalizations.edit,
+                                        iconData: Icons.edit,
+                                      ),
+                                      if (profile.type == ProfileType.url)
+                                        CommonPopupMenuItem(
+                                          action: ProfileActions.update,
+                                          label: appLocalizations.update,
+                                          iconData: Icons.sync,
+                                        ),
+                                      CommonPopupMenuItem(
+                                        action: ProfileActions.delete,
+                                        label: appLocalizations.delete,
+                                        iconData: Icons.delete,
+                                      ),
+                                    ],
+                                    onSelected: (ProfileActions? action) async {
+                                      switch (action) {
+                                        case ProfileActions.edit:
+                                          _handleShowEditExtendPage(context);
+                                          break;
+                                        case ProfileActions.delete:
+                                          _handleDeleteProfile(context);
+                                          break;
+                                        case ProfileActions.update:
+                                          _handleUpdateProfile();
+                                          break;
+                                        case null:
+                                          break;
+                                      }
+                                    },
                                   ),
-                                CommonPopupMenuItem(
-                                  action: ProfileActions.delete,
-                                  label: appLocalizations.delete,
-                                  iconData: Icons.delete,
-                                ),
-                              ],
-                              onSelected: (ProfileActions? action) async {
-                                switch (action) {
-                                  case ProfileActions.edit:
-                                    _handleShowEditExtendPage(context);
-                                    break;
-                                  case ProfileActions.delete:
-                                    _handleDeleteProfile(context);
-                                    break;
-                                  case ProfileActions.update:
-                                    _handleUpdateProfile();
-                                    break;
-                                  case null:
-                                    break;
-                                }
-                              },
-                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

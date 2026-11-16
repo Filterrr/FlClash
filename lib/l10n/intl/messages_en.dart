@@ -761,5 +761,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("Basic"),
     "updateSection": MessageLookupByLibrary.simpleMessage("Update"),
     "autoUpdateDesc": MessageLookupByLibrary.simpleMessage("Fetch the latest subscription on a fixed interval"),
+    "notDownloaded": MessageLookupByLibrary.simpleMessage("Not downloaded"),
   };
 }

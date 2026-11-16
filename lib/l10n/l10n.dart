@@ -3372,6 +3372,11 @@ class AppLocalizations {
     return Intl.message('Fetch the latest subscription on a fixed interval', name: 'autoUpdateDesc', desc: '', args: []);
   }
 
+  /// `Not downloaded`
+  String get notDownloaded {
+    return Intl.message('Not downloaded', name: 'notDownloaded', desc: '', args: []);
+  }
+
   /// `Release notes`
   String get releaseNotes {
     return Intl.message(

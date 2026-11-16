@@ -90,4 +90,29 @@ void main() {
       reason: '条目少时列表应按内容收缩，确定按钮不能被顶到底部',
     );
   });
+
+  testWidgets('badge and menu share one vertical centre line', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        SizedBox(
+          width: 360,
+          child: ProfileItem(
+            profile: buildProfile(),
+            groupValue: null,
+            onChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final badgeRect = tester.getRect(find.text('URL'));
+    final menuRect = tester.getRect(find.byIcon(Icons.more_vert));
+
+    expect(
+      (badgeRect.center.dy - menuRect.center.dy).abs(),
+      lessThan(3),
+      reason: '徽标与 ⋮ 必须共用同一条垂直中线',
+    );
+  });
 }

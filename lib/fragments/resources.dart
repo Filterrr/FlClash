@@ -81,8 +81,28 @@ class GeoDataListItem extends StatefulWidget {
 
 class _GeoDataListItemState extends State<GeoDataListItem> {
   final isUpdating = ValueNotifier<bool>(false);
+  late Future<FileInfo?> _fileInfoFuture;
 
   GeoItem get geoItem => widget.geoItem;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileInfoFuture = _loadFileInfo();
+  }
+
+  /// 文件不存在时 lastModified() 会抛异常；这里显式判定存在性，
+  /// 让「未下载」成为一个正常结果而不是一个永不完成的错误。
+  Future<FileInfo?> _loadFileInfo() async {
+    final info = await _getGeoFileLastModified(geoItem.fileName);
+    return info;
+  }
+
+  void _refreshFileInfo() {
+    setState(() {
+      _fileInfoFuture = _loadFileInfo();
+    });
+  }
 
   _updateUrl(String url) async {
     final newUrl = await globalState.showCommonDialog<String>(
@@ -111,9 +131,12 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
     }
   }
 
-  Future<FileInfo> _getGeoFileLastModified(String fileName) async {
+  Future<FileInfo?> _getGeoFileLastModified(String fileName) async {
     final homePath = await appPath.getHomeDirPath();
     final file = File(join(homePath, fileName));
+    if (!await file.exists()) {
+      return null;
+    }
     final lastModified = await file.lastModified();
     final size = await file.length();
     return FileInfo(
@@ -129,15 +152,21 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
         const SizedBox(
           height: 4,
         ),
-        FutureBuilder<FileInfo>(
-          future: _getGeoFileLastModified(geoItem.fileName),
+        FutureBuilder<FileInfo?>(
+          future: _fileInfoFuture,
           builder: (_, snapshot) {
+            final isLoading =
+                snapshot.connectionState == ConnectionState.waiting;
+            final info = snapshot.data;
+            final text = isLoading
+                ? null
+                : (info?.desc ?? appLocalizations.notDownloaded);
             return SizedBox(
               height: 24,
               child: FadeBox(
                 key: Key("fade_box_${geoItem.label}"),
                 alignment: Alignment.centerLeft,
-                child: snapshot.data == null
+                child: isLoading
                     ? const SizedBox(
                         width: 24,
                         height: 24,
@@ -146,7 +175,12 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
                         ),
                       )
                     : Text(
-                        snapshot.data!.desc,
+                        text!,
+                        style: info == null
+                            ? context.textTheme.bodySmall?.copyWith(
+                                color: context.colorScheme.outline,
+                              )
+                            : null,
                       ),
               ),
             );
@@ -201,6 +235,9 @@ class _GeoDataListItemState extends State<GeoDataListItem> {
       rethrow;
     }
     isUpdating.value = false;
+    if (mounted) {
+      _refreshFileInfo();
+    }
     return null;
   }
 
@@ -250,12 +287,8 @@ class UpdateGeoUrlFormDialog extends StatefulWidget {
   final String url;
   final String? defaultValue;
 
-  const UpdateGeoUrlFormDialog({
-    super.key,
-    required this.title,
-    required this.url,
-    this.defaultValue
-  });
+  const UpdateGeoUrlFormDialog(
+      {super.key, required this.title, required this.url, this.defaultValue});
 
   @override
   State<UpdateGeoUrlFormDialog> createState() => _UpdateGeoUrlFormDialogState();

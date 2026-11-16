@@ -514,5 +514,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "basicInfo": MessageLookupByLibrary.simpleMessage("基本信息"),
     "updateSection": MessageLookupByLibrary.simpleMessage("更新"),
     "autoUpdateDesc": MessageLookupByLibrary.simpleMessage("按固定间隔拉取最新订阅"),
+    "notDownloaded": MessageLookupByLibrary.simpleMessage("未下载"),
   };
 }
