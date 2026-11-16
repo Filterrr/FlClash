@@ -179,6 +179,12 @@ class _EditProfileState extends State<EditProfile> {
                       minLines: 1,
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.fromLTRB(
+                          14,
+                          14,
+                          14,
+                          14,
+                        ),
                         labelText: appLocalizations.url,
                       ),
                       validator: (String? value) {

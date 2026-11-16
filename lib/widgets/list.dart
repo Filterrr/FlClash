@@ -275,6 +275,9 @@ class ListItem<T> extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final effectiveLeading = leading ?? this.leading;
+    // build() 里的普通行只传 onTap，声明的 trailing 必须在这里回退，
+    // 否则「编辑 / 上传 / 绑定」这类行尾按钮会被整个丢掉。
+    final effectiveTrailing = trailing ?? this.trailing;
     final leadingIcon = effectiveLeading;
     final tileIcon =
         iconData ?? (leadingIcon is Icon ? leadingIcon.icon : null);
@@ -350,11 +353,11 @@ class ListItem<T> extends StatelessWidget {
                       isValueRow || showArrow || _cardDefaultArrow(context),
                 ),
               ],
-              if (trailing != null) ...[
+              if (effectiveTrailing != null) ...[
                 const SizedBox(
                   width: 10,
                 ),
-                trailing,
+                effectiveTrailing,
               ],
             ],
           ),

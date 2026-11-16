@@ -435,11 +435,13 @@ class SettingsSubBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    // 有 caption 时上方只需 2dp（caption 自带 8dp 下边距）；没有 caption 的
+    // 纯控件区块若也用 2dp，胶囊/分段控件会贴着卡片上沿，视觉上下失衡。
     return Padding(
-      padding: const EdgeInsets.only(
+      padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 2,
+        top: caption == null ? 14 : 2,
         bottom: 14,
       ),
       child: Column(
