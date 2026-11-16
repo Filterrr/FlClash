@@ -98,6 +98,8 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             tooltip: appLocalizations.profilesSort,
             onPressed: () {
               final profiles = globalState.appController.config.profiles;
+              // 高度只作为上限：条目少时由内部按内容收缩，
+              // 条目多时才在 400 以内滚动。
               showSheet(
                 title: appLocalizations.profilesSort,
                 context: context,
@@ -220,6 +222,41 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
   }
 }
 
+/// 类型 / 当前状态徽标：同一种宽度、同一种底色规则，
+/// 这样摘要卡与列表卡片里的徽标不会各自漂移。
+class _ProfileTypeBadge extends StatelessWidget {
+  final bool isCurrent;
+  final bool isUrl;
+
+  const _ProfileTypeBadge({
+    required this.isCurrent,
+    required this.isUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? colorScheme.primary.opacity12
+            : colorScheme.surfaceContainerHighest.opacity60,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        isCurrent
+            ? appLocalizations.currentProfile
+            : (isUrl ? appLocalizations.url : appLocalizations.file),
+        style: context.textTheme.labelSmall?.copyWith(
+          color: isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
 /// 当前配置摘要：订阅名 + 流量进度 + 更新时间。
 class _CurrentProfileSummary extends StatelessWidget {
   final Profile profile;
@@ -278,26 +315,16 @@ class _CurrentProfileSummary extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.opacity12,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    profile.type == ProfileType.url
-                        ? appLocalizations.url
-                        : appLocalizations.file,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                const SizedBox(
+                  width: 8,
                 ),
+                // 类型徽标紧跟在「当前配置」之后成一组信息；
+                // 之前用 Spacer 推到卡片最右，和左侧标签隔着整卡宽度。
+                _ProfileTypeBadge(
+                  isCurrent: false,
+                  isUrl: profile.type == ProfileType.url,
+                ),
+                const Spacer(),
               ],
             ),
             const SizedBox(
@@ -505,7 +532,6 @@ class ProfileItem extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final isCurrent = profile.id == groupValue;
     if (!isCurrent && profile.isUpdating) {
       return const SizedBox(
@@ -514,25 +540,9 @@ class ProfileItem extends StatelessWidget {
         child: CircularProgressIndicator(strokeWidth: 2),
       );
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? colorScheme.primary.opacity12
-            : colorScheme.surfaceContainerHighest.opacity60,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        isCurrent
-            ? appLocalizations.currentProfile
-            : (profile.type == ProfileType.url
-                ? appLocalizations.url
-                : appLocalizations.file),
-        style: context.textTheme.labelSmall?.copyWith(
-          color: isCurrent ? colorScheme.primary : colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    return _ProfileTypeBadge(
+      isCurrent: isCurrent,
+      isUrl: profile.type == ProfileType.url,
     );
   }
 
@@ -612,7 +622,7 @@ class ProfileItem extends StatelessWidget {
                     width: 6,
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 2),
+                    padding: const EdgeInsets.only(top: 1),
                     child: SizedBox(
                       height: 22,
                       child: Center(child: _buildBadge(context)),
@@ -780,56 +790,66 @@ class _ReorderableProfilesState extends State<ReorderableProfiles> {
     );
   }
 
+  static const _rowExtent = 62.0;
+
   @override
   Widget build(BuildContext context) {
+    final itemCount = profiles.length;
+    // 弹层高度由调用方给了固定 400；列表按实际条目高度收缩，
+    // 只剩少量条目时不会把按钮顶到弹层最底、中间空出一大片。
+    final listExtent = _rowExtent * itemCount;
+    final isScrollable = listExtent > 320;
+    final list = ReorderableListView.builder(
+      buildDefaultDragHandles: false,
+      shrinkWrap: !isScrollable,
+      physics: isScrollable
+          ? const ClampingScrollPhysics()
+          : const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      proxyDecorator: proxyDecorator,
+      // onReorderItem 已经为「移除后插入」修正过 newIndex，
+      // 这里不要再自己 -1，否则顺序会错位。
+      onReorderItem: (oldIndex, newIndex) {
+        setState(() {
+          final profile = profiles.removeAt(oldIndex);
+          profiles.insert(newIndex, profile);
+        });
+      },
+      itemBuilder: (_, index) {
+        return Container(
+          key: Key(profiles[index].id),
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: _buildRow(profiles[index], index),
+        );
+      },
+      itemCount: itemCount,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 1,
-          child: ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            proxyDecorator: proxyDecorator,
-            onReorderItem: (oldIndex, newIndex) {
-              setState(() {
-                final profile = profiles.removeAt(oldIndex);
-                profiles.insert(newIndex, profile);
-              });
-            },
-            itemBuilder: (_, index) {
-              return Container(
-                key: Key(profiles[index].id),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: _buildRow(profiles[index], index),
-              );
-            },
-            itemCount: profiles.length,
-          ),
+        Flexible(
+          child: isScrollable
+              ? list
+              : SizedBox(
+                  height: listExtent,
+                  child: list,
+                ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 16,
-            horizontal: 24,
-          ),
-          child: FilledButton.tonal(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+          child: FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
               globalState.appController.config.profiles = profiles;
             },
-            style: ButtonStyle(
-              padding: WidgetStateProperty.all(
-                const EdgeInsets.symmetric(vertical: 8),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(13),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  appLocalizations.confirm,
-                ),
-              ],
-            ),
+            child: Text(appLocalizations.confirm),
           ),
         ),
       ],
