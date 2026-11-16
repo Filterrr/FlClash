@@ -241,6 +241,7 @@ jobs:
             is_android: true
             go_version: '1.25.x'
             flutter_channel: 'stable'
+            flutter_version: '3.47.5'
 
           # --- Windows 平台 ---
           - platform: windows
@@ -248,7 +249,7 @@ jobs:
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
           # windows-11-arm：原生 ARM64 runner。windows-latest 是 x64，
           # 除 Go 内核交叉编译外，Flutter 及插件等产物均为 x64 模拟。
           # stable 通道没有 Windows arm64 的 Flutter 归档，故用 master 通道
@@ -266,13 +267,13 @@ jobs:
             arch: arm64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
           - platform: macos
             os: macos-latest
             arch: amd64
             go_version: '1.25.x'
             flutter_channel: 'stable'
-            flutter_version: '3.x'
+            flutter_version: '3.47.5'
             
     steps:
       - name: Checkout
