@@ -81,11 +81,20 @@ object GlobalState {
      */
     fun handleStop() {
         runLock.withLock {
-            if (runState.value != RunState.START) {
+            // 只有真正没在动时才忽略。旧实现是「非 START 就忽略」:PENDING 表示
+            // 启动流程正在异步推进,此时用户点停止会被静默丢弃,启动流程继续
+            // 跑到 START,VPN 最终还是连上。
+            if (runState.value == RunState.STOP) {
                 return@withLock
             }
             runState.value = RunState.PENDING
-            getCurrentTilePlugin()?.handleStop()
+            val tilePlugin = getCurrentTilePlugin()
+            if (tilePlugin == null) {
+                // 引擎还没建起来,没人能继续推进:直接把状态放回 STOP。
+                runState.value = RunState.STOP
+                return@withLock
+            }
+            tilePlugin.handleStop()
         }
     }
 

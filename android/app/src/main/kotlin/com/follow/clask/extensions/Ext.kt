@@ -18,7 +18,9 @@ import com.follow.clask.models.Metadata
 import com.follow.clask.models.VpnOptions
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.ByteArrayOutputStream
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -159,24 +161,45 @@ private fun numericToTextFormat(src: ByteArray): String {
     return sb.toString()
 }
 
+private const val defaultAwaitTimeoutMillis = 1_500L
+
+/**
+ * 请求目标引擎的方法并等待结果。
+ *
+ * 必须有超时:目标引擎的 Dart handler 尚未注册(引擎刚创建)或引擎正在销毁时,
+ * 结果回调永远不会触发,调用方(如用 runBlocking 取通知文案的
+ * AppPlugin.getText)会永久阻塞,连带 startForeground 永远执行不到。
+ */
 suspend fun <T> MethodChannel.awaitResult(
     method: String,
-    arguments: Any? = null
-): T? = withContext(Dispatchers.Main) {
-    suspendCoroutine { continuation ->
-        invokeMethod(method, arguments, object : MethodChannel.Result {
-            override fun success(result: Any?) {
-                @Suppress("UNCHECKED_CAST")
-                continuation.resume(result as T)
-            }
+    arguments: Any? = null,
+    timeoutMillis: Long = defaultAwaitTimeoutMillis,
+): T? = withTimeoutOrNull(timeoutMillis) {
+    withContext(Dispatchers.Main) {
+        // 用 suspendCancellableCoroutine + isActive 判断:超时后内层协程已被取消,
+        // 此时若 Dart 侧的回包才到,直接 resume 会抛 IllegalStateException。
+        suspendCancellableCoroutine { continuation ->
+            invokeMethod(method, arguments, object : MethodChannel.Result {
+                override fun success(result: Any?) {
+                    if (!continuation.isActive) {
+                        return
+                    }
+                    @Suppress("UNCHECKED_CAST")
+                    continuation.resume(result as T)
+                }
 
-            override fun error(code: String, message: String?, details: Any?) {
-                continuation.resume(null)
-            }
+                override fun error(code: String, message: String?, details: Any?) {
+                    if (continuation.isActive) {
+                        continuation.resume(null)
+                    }
+                }
 
-            override fun notImplemented() {
-                continuation.resume(null)
-            }
-        })
+                override fun notImplemented() {
+                    if (continuation.isActive) {
+                        continuation.resume(null)
+                    }
+                }
+            })
+        }
     }
 }

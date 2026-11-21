@@ -236,7 +236,8 @@ class Config extends ChangeNotifier {
     if (value == null) {
       return null;
     }
-    return _profiles.firstWhere((element) => element.id == value);
+    final index = _profiles.indexWhere((element) => element.id == value);
+    return index == -1 ? null : _profiles[index];
   }
 
   Profile? getCurrentProfile() {
@@ -511,7 +512,15 @@ class Config extends ChangeNotifier {
       if (_currentProfileId == null && onlyProfiles && profiles.isNotEmpty) {
         _currentProfileId = _profiles.first.id;
       }
-      if (onlyProfiles) return;
+      if (onlyProfiles) {
+        // 「仅恢复配置文件」只替换 _profiles,_currentProfileId 可能指向备份里
+        // 不存在的 profile(旧实现会让后续 getCurrentProfile() 抛 StateError,
+        // 配置再也下发不到 core)。这里把它校正到有效值。
+        if (getCurrentProfileForId(_currentProfileId) == null) {
+          _currentProfileId = _profiles.isEmpty ? null : _profiles.first.id;
+        }
+        return;
+      }
       _appSetting = config._appSetting;
       _currentProfileId = config._currentProfileId;
       _dav = config._dav;

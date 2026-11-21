@@ -112,10 +112,15 @@ class ProxiesTabFragmentState extends State<ProxiesTabFragment>
   _tabControllerListener([int? index]) {
     final appController = globalState.appController;
     final currentGroups = appController.appState.currentGroups;
-    if (_tabController?.index == null) {
+    final realIndex = index ?? _tabController?.index;
+    // TabController.length 与 currentGroups 来自两条不同的来源,分组数量
+    // 缩短后旧下标会越界(旧代码里的 `index == null` 是永不成立的守卫)。
+    if (realIndex == null ||
+        realIndex < 0 ||
+        realIndex >= currentGroups.length) {
       return;
     }
-    final currentGroup = currentGroups[index ?? _tabController!.index];
+    final currentGroup = currentGroups[realIndex];
     currentProxies = currentGroup.all;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appController.config.updateCurrentGroupName(
@@ -136,13 +141,18 @@ class ProxiesTabFragmentState extends State<ProxiesTabFragment>
       return;
     }
     final realIndex = index == -1 ? 0 : index;
-    _tabController ??= TabController(
-      length: length,
-      initialIndex: realIndex,
-      vsync: this,
-    );
+    if (_tabController == null) {
+      final tabController = TabController(
+        length: length,
+        initialIndex: realIndex,
+        vsync: this,
+      );
+      // 监听器只在创建时注册:build 每次都会调用本方法,写在 if 外面会随
+      // 重建次数线性累加,切一次 Tab 触发 N 次回调。
+      tabController.addListener(_tabControllerListener);
+      _tabController = tabController;
+    }
     _tabControllerListener(realIndex);
-    _tabController?.addListener(_tabControllerListener);
   }
 
   @override

@@ -30,8 +30,14 @@ class SubscriptionInfo with _$SubscriptionInfo {
     final list = info.split(";");
     Map<String, int?> map = {};
     for (final i in list) {
-      final keyValue = i.trim().split("=");
-      map[keyValue[0]] = int.tryParse(keyValue[1]);
+      // 段里可能没有 "="(空段、尾部多一个 ";" 等),直接取 keyValue[1]
+      // 会抛 RangeError 让整个订阅更新失败;key 统一小写匹配。
+      final separator = i.indexOf("=");
+      if (separator == -1) {
+        continue;
+      }
+      final key = i.substring(0, separator).trim().toLowerCase();
+      map[key] = int.tryParse(i.substring(separator + 1).trim());
     }
     return SubscriptionInfo(
       upload: map["upload"] ?? 0,
@@ -126,7 +132,15 @@ extension ProfileExtension on Profile {
   }
 
   Future<Profile> saveFile(Uint8List bytes) async {
-    final message = await clashCore.validateConfig(utf8.decode(bytes));
+    final String content;
+    try {
+      content = utf8.decode(bytes);
+    } on FormatException {
+      // 严格解码:非 UTF-8 的订阅/配置(如 GBK)会在这里失败,给出明确
+      // 原因,而不是丢出一个与用户操作无关的 FormatException。
+      throw "${label ?? url}: invalid config encoding (not UTF-8)";
+    }
+    final message = await clashCore.validateConfig(content);
     if (message.isNotEmpty) {
       throw message;
     }

@@ -379,6 +379,13 @@ class FlClashVpnService : VpnService(), BaseServiceInterface {
     override fun onDestroy() {
         screenStateWatcher.stop()
         stop()
+        // 服务被系统直接回收 / stopService 时 runState 不会有人复位,界面(磁贴)
+        // 会一直显示「已连接」而隧道其实已经不存在。
+        GlobalState.runLock.withLock {
+            if (GlobalState.runState.value != RunState.STOP) {
+                GlobalState.runState.value = RunState.STOP
+            }
+        }
         super.onDestroy()
     }
 }

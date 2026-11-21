@@ -22,24 +22,29 @@ int compareVersions(String version1, String version2) {
   return v1.build.compareTo(v2.build);
 }
 
+/// 取版本段里的数字前缀,容忍 `-beta`、`-rs.1` 这类后缀。
+///
+/// 旧实现直接用 int.parse:release tag 带后缀时抛 FormatException,调用方
+/// 只能把它归入「检查更新失败」(自动更新于是永远报错)。
+int _parseVersionPart(String value) {
+  final match = RegExp(r'^\d+').stringMatch(value.trim());
+  return match == null ? 0 : int.parse(match);
+}
+
 _VersionParts _parseVersion(String version) {
   final normalized = normalizeVersion(version);
   if (normalized.isEmpty) {
-    throw const FormatException('Version is empty');
+    return const _VersionParts(major: 0, minor: 0, patch: 0, build: 0);
   }
   final versionAndBuild = normalized.split('+');
-  if (versionAndBuild.length > 2) {
-    throw FormatException('Invalid version: $version');
-  }
   final parts = versionAndBuild.first.split('.');
-  if (parts.isEmpty || parts.length > 3) {
-    throw FormatException('Invalid version: $version');
-  }
   return _VersionParts(
-    major: int.parse(parts[0]),
-    minor: parts.length > 1 ? int.parse(parts[1]) : 0,
-    patch: parts.length > 2 ? int.parse(parts[2]) : 0,
-    build: versionAndBuild.length == 2 ? int.parse(versionAndBuild[1]) : 0,
+    major: parts.isNotEmpty ? _parseVersionPart(parts[0]) : 0,
+    minor: parts.length > 1 ? _parseVersionPart(parts[1]) : 0,
+    patch: parts.length > 2 ? _parseVersionPart(parts[2]) : 0,
+    build: versionAndBuild.length > 1
+        ? _parseVersionPart(versionAndBuild[1])
+        : 0,
   );
 }
 

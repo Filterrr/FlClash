@@ -324,7 +324,15 @@ class GlobalState {
     AppFlowingState? appFlowingState,
   }) async {
     final onlyProxy = config.appSetting.onlyProxy;
-    final traffic = await clashCore.getTraffic(onlyProxy);
+    final Traffic traffic;
+    // 轮询函数:core 未就绪 / 已退出时跳过本次 tick,不要往定时器回调里
+    // 抛未处理异常(调用方不 await)。
+    try {
+      traffic = await clashCore.getTraffic(onlyProxy);
+    } catch (e) {
+      debugPrint("update traffic failed ===> $e");
+      return;
+    }
     _lastTraffic = traffic;
     if (Platform.isAndroid && isVpnService == true) {
       // 后台时大幅降低通知更新频率，避免频繁唤醒系统通知管理器。
@@ -348,8 +356,12 @@ class GlobalState {
       // 后台时跳过 UI 状态更新，减少不必要的重建
       if (appFlowingState != null && !backgroundMemoryManager.isInBackground) {
         appFlowingState.addTraffic(traffic);
-        appFlowingState.totalTraffic =
-            await clashCore.getTotalTraffic(onlyProxy);
+        try {
+          appFlowingState.totalTraffic =
+              await clashCore.getTotalTraffic(onlyProxy);
+        } catch (e) {
+          debugPrint("update total traffic failed ===> $e");
+        }
       }
     }
   }

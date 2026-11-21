@@ -27,6 +27,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
@@ -67,11 +68,13 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         scope = CoroutineScope(Dispatchers.Default)
         context = flutterPluginBinding.applicationContext
-        scope.launch {
-            registerNetworkCallback()
-        }
         flutterMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "vpn")
         flutterMethodChannel.setMethodCallHandler(this)
+        // 注册必须同步(且在 channel 就绪之后):注册放在协程里、而注销是同步的,
+        // 引擎快速销毁时会出现「未注册就注销」(抛 IllegalArgumentException)或
+        // 注销后才注册(callback 永久泄漏);而 onAvailable 回调会立刻用到
+        // flutterMethodChannel,必须已经初始化。
+        registerNetworkCallback()
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -81,6 +84,11 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         // 而 VPN 服务应当继续在后台运行。
         unbindServiceSafely()
         flutterMethodChannel.setMethodCallHandler(null)
+        // 协程与网络回调不能再存活:否则引擎销毁后仍会向已 detach 的 channel
+        // 发消息,plugin / context / networks 也无法回收。
+        if (this::scope.isInitialized) {
+            scope.cancel()
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -88,6 +96,8 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "start" -> {
                 val data = call.argument<String>("data")
                 options = Gson().fromJson(data, VpnOptions::class.java)
+                // 记住发起本次启动时的停止序号,供 start() 判断是否已被取消。
+                pendingStartStopSeq = stopSeq
                 when (options.enable) {
                     true -> handleStartVpn()
                     false -> start()
@@ -180,6 +190,15 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private val networksLock = Any()
 
+    // 是否已成功注册 NetworkCallback(注册与注销必须严格配对)。
+    private var isNetworkCallbackRegistered = false
+
+    // 停止请求序号:每次 stop() 自增。启动流程是异步的(授权框 → 绑定服务 →
+    // onServiceConnected → start()),用户在中间点了停止时,这个序号会让在途的
+    // 启动流程放弃推进,而不是把状态重新推回 START 再建立隧道。
+    private var stopSeq = 0
+    private var pendingStartStopSeq = -1
+
     fun onUpdateNetwork() {
         updateUnderlyingNetworks()
         val dns = synchronized(networksLock) {
@@ -233,17 +252,38 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     private fun registerNetworkCallback() {
         synchronized(networksLock) {
+            if (isNetworkCallbackRegistered) {
+                return
+            }
+            isNetworkCallbackRegistered = true
             networks.clear()
         }
-        connectivity?.registerNetworkCallback(request, callback)
+        try {
+            connectivity?.registerNetworkCallback(request, callback)
+        } catch (e: Exception) {
+            Log.w("VpnPlugin", "register network callback failed", e)
+            synchronized(networksLock) {
+                isNetworkCallbackRegistered = false
+            }
+        }
     }
 
     private fun unRegisterNetworkCallback() {
-        connectivity?.unregisterNetworkCallback(callback)
-        synchronized(networksLock) {
+        val wasRegistered = synchronized(networksLock) {
+            val registered = isNetworkCallbackRegistered
+            isNetworkCallbackRegistered = false
             networks.clear()
+            registered
         }
-        onUpdateNetwork()
+        // 未注册就调用 unregister 会抛 IllegalArgumentException。
+        if (!wasRegistered) {
+            return
+        }
+        try {
+            connectivity?.unregisterNetworkCallback(callback)
+        } catch (e: IllegalArgumentException) {
+            Log.w("VpnPlugin", "unregister network callback failed", e)
+        }
     }
 
     private fun startForeground(title: String, content: String) {
@@ -259,8 +299,14 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             return
         }
         var startFailed = false
+        var cancelled = false
         GlobalState.runLock.withLock {
             if (GlobalState.runState.value == RunState.START) return
+            // 启动流程期间用户点了停止:放弃建立隧道,状态保持在 STOP。
+            if (pendingStartStopSeq != stopSeq) {
+                cancelled = true
+                return@withLock
+            }
             GlobalState.runState.value = RunState.START
             val fd = try {
                 flClashService?.start(options)
@@ -278,6 +324,12 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                     "started", fd
                 )
             }
+        }
+        if (cancelled) {
+            // 已经被取消:释放本次绑定,不要再动服务实例(它可能正被停止流程使用)。
+            unbindServiceSafely()
+            Log.i("VpnPlugin", "VPN start cancelled by user")
+            return
         }
         if (startFailed) {
             abortStart()
@@ -317,6 +369,8 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     fun stop() {
+        // 让在途的启动流程失效(见 start() 里的 stopSeq 判断)。
+        stopSeq++
         GlobalState.runLock.withLock {
             if (GlobalState.runState.value == RunState.STOP) return
             GlobalState.runState.value = RunState.STOP
@@ -326,7 +380,12 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         // 显式停止：连同系统（always-on / 粘性重启）自行拉起的实例一并结束。
         // 仅在此路径执行，避免误停后台仍在工作的服务。
         stopBackgroundServices()
-        GlobalState.destroyServiceEngine()
+        // 引擎销毁必须离开方法通道回调栈:本方法通常由服务引擎自己的
+        // ServicePlugin("destroy") 触发,同步销毁会让结果回复无法投递,
+        // Dart 侧 await service.destroy() 永不返回(abortStart 用的是同一处理)。
+        CoroutineScope(Dispatchers.Main).launch {
+            GlobalState.destroyServiceEngine()
+        }
     }
 
     /**

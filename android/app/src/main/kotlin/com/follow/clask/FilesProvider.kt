@@ -9,6 +9,7 @@ import android.provider.DocumentsContract.Root
 import android.provider.DocumentsProvider
 import java.io.File
 import java.io.FileNotFoundException
+import java.net.URLConnection
 
 
 class FilesProvider : DocumentsProvider() {
@@ -90,10 +91,9 @@ class FilesProvider : DocumentsProvider() {
             add(Document.COLUMN_DOCUMENT_ID, file.absolutePath)
             add(Document.COLUMN_DISPLAY_NAME, file.name)
             add(Document.COLUMN_SIZE, file.length())
-            add(
-                Document.COLUMN_FLAGS,
-                Document.FLAG_SUPPORTS_WRITE or Document.FLAG_SUPPORTS_DELETE
-            )
+            // 本 provider 未实现 deleteDocument / createDocument,声明
+            // WRITE / DELETE 会让系统文档 UI 给出用不了的操作。
+            add(Document.COLUMN_FLAGS, 0)
             add(Document.COLUMN_MIME_TYPE, getDocumentType(file))
         }
     }
@@ -102,7 +102,10 @@ class FilesProvider : DocumentsProvider() {
         return if (file.isDirectory) {
             Document.MIME_TYPE_DIR
         } else {
-            "application/octet-stream"
+            // 旧实现恒为 octet-stream,系统无法按类型分发
+            // (「用 FlClash 打开配置」这类场景依赖正确的 MIME)。
+            URLConnection.guessContentTypeFromName(file.name)
+                ?: "application/octet-stream"
         }
     }
 

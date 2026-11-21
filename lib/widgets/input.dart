@@ -87,6 +87,21 @@ class _InputDialogState extends State<InputDialog> {
     textController = TextEditingController(
       text: value,
     );
+    // 「重置」按钮的可见性取决于输入框当前文本,必须监听 controller 变化。
+    textController.addListener(_handleTextChanged);
+  }
+
+  void _handleTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    textController.removeListener(_handleTextChanged);
+    textController.dispose();
+    super.dispose();
   }
 
   _handleUpdate() async {
@@ -207,6 +222,19 @@ class ListPage<T> extends StatelessWidget {
       if (index != -1) {
         entries[index] = value;
       }
+    } else if (isMap) {
+      // Map 型列表(hosts / nameserver-policy 等)新增时必须按 key 去重:
+      // 出现同 key 的两条 MapEntry 后,下游 Map.fromEntries 只保留最后一条,
+      // 用户以为「追加了一条」,实际是覆盖。
+      final nextEntry = value as MapEntry<String, String>;
+      final existedIndex = entries.indexWhere(
+        (entry) => (entry as MapEntry<String, String>).key == nextEntry.key,
+      );
+      if (existedIndex == -1) {
+        entries.add(value);
+      } else {
+        entries[existedIndex] = value;
+      }
     } else {
       entries.add(value);
     }
@@ -287,7 +315,9 @@ class ListPage<T> extends StatelessWidget {
         itemBuilder: (_, index) {
           final e = itemList[index];
           return Padding(
-            key: ObjectKey(e.toString()),
+            // 列表允许重复条目,ObjectKey(e.toString()) 在重复项上会相等,
+            // 触发 Flutter 的 Duplicate keys 断言;用下标保证 key 唯一。
+            key: ValueKey('$index-${e.toString()}'),
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: CommonCard(
               child: ListItem(
@@ -365,6 +395,13 @@ class _AddDialogState extends State<AddDialog> {
     valueController = TextEditingController(
       text: valueField.value,
     );
+  }
+
+  @override
+  void dispose() {
+    keyController?.dispose();
+    valueController.dispose();
+    super.dispose();
   }
 
   _submit() {

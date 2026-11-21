@@ -151,8 +151,13 @@ class ApplicationState extends State<Application> {
   void _onLowMemoryModeChanged() {
     if (isLowMemoryMode) {
       _cancelTimer();
+      return;
     }
-    // reduced 和 normal 模式下 timer 继续运行（AdaptiveTimer 自身已处理降频）
+    // 从 low 回到 reduced / normal:定时器在进入 low 时已被取消并置空,
+    // 必须重建,否则代理组与延迟刷新会永久停摆(降频由 AdaptiveTimer 自己处理)。
+    if (groupUpdateTimer == null) {
+      _initTimer();
+    }
   }
 
   _initTimer() {

@@ -189,10 +189,11 @@ class BackgroundMemoryManager extends ChangeNotifier {
     _resumeAllUpdates();
     _stopBackgroundMaintenance();
 
-    if (_optimizationLevel != BackgroundOptimizationLevel.disabled) {
-      _transitionToMode(LowMemoryMode.normal);
-      _scheduleUiRefresh();
-    }
+    // 必须无条件复位:_optimizationLevel 是实时读配置的,如果进入后台时是
+    // balanced / aggressive(已切到 reduced / low),而在后台期间用户把
+    // 「后台优化」关掉,按开关判断就会跳过复位,全局永久停在低内存模式。
+    _transitionToMode(LowMemoryMode.normal);
+    _scheduleUiRefresh();
     _logStatsIfNeeded();
   }
 
