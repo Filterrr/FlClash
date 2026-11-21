@@ -544,7 +544,11 @@ class AppController {
   init() async {
     final isDisclaimerAccepted = await handlerDisclaimer();
     if (!isDisclaimerAccepted) {
-      handleExit();
+      // 拒绝免责声明后必须终止初始化:否则 handleExit()(内部会停 core / 停 VPN)
+      // 会与下面的 initCore() 并发操作同一套资源,出现「App 已退出但 VPN 又被
+      // 拉起」「core 进程残留」。
+      await handleExit();
+      return;
     }
     if (!config.appSetting.silentLaunch) {
       window?.show();
@@ -922,9 +926,14 @@ class AppController {
         configs.indexWhere((config) => config.name == "config.json");
     final clashConfigIndex =
         configs.indexWhere((config) => config.name == "clashConfig.json");
-    if (configIndex == -1 || clashConfigIndex == -1) throw "invalid backup.zip";
+    if (configIndex == -1 || clashConfigIndex == -1) {
+      throw const FormatException("invalid backup.zip");
+    }
     final configFile = configs[configIndex];
     final clashConfigFile = configs[clashConfigIndex];
+    if (!configFile.isFile || !clashConfigFile.isFile) {
+      throw const FormatException("invalid backup.zip");
+    }
     final tempConfig = Config.fromJson(
       json.decode(
         utf8.decode(configFile.content),
@@ -935,8 +944,18 @@ class AppController {
         utf8.decode(clashConfigFile.content),
       ),
     );
+    final normalizedHomeDirPath = normalize(homeDirPath);
     for (final profile in profiles) {
-      final filePath = join(homeDirPath, profile.name);
+      if (!profile.isFile) {
+        continue;
+      }
+      final filePath = normalize(join(homeDirPath, profile.name));
+      // 备份包可能来自 WebDAV 或外部文件:条目名必须落在 home 目录内,
+      // 否则 `../` 就能写到 app 有权限的任意路径(zip slip)。
+      if (filePath == normalizedHomeDirPath ||
+          !isWithin(normalizedHomeDirPath, filePath)) {
+        continue;
+      }
       final file = File(filePath);
       await file.create(recursive: true);
       await file.writeAsBytes(profile.content);

@@ -15,6 +15,11 @@ class ClashLib with ClashInterface {
   static ClashLib? _instance;
   final receiver = ReceivePort();
 
+  /// 等待 native 回包的最长时间。
+  ///
+  /// 只是兜底,不是性能目标:超时后调用方拿到明确错误,而不是永久挂起。
+  static const Duration messageTimeout = Duration(seconds: 60);
+
   late final ClashFFI clashFFI;
 
   late final DynamicLibrary lib;
@@ -59,9 +64,20 @@ class ClashLib with ClashInterface {
   Future<String> validateConfig(String data) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -78,9 +94,20 @@ class ClashLib with ClashInterface {
   Future<String> updateConfig(UpdateConfigParams updateConfigParams) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -131,9 +158,20 @@ class ClashLib with ClashInterface {
   }) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -156,9 +194,20 @@ class ClashLib with ClashInterface {
   }) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -178,9 +227,20 @@ class ClashLib with ClashInterface {
   Future<String> updateExternalProvider(String providerName) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -197,9 +257,20 @@ class ClashLib with ClashInterface {
   Future<String> changeProxy(ChangeProxyParams changeProxyParams) {
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -255,9 +326,20 @@ class ClashLib with ClashInterface {
     };
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });
@@ -280,9 +362,20 @@ class ClashLib with ClashInterface {
     };
     final completer = Completer<String>();
     final receiver = ReceivePort();
+    // native 侧不回调时必须自己收尾:旧实现只在收到消息的分支里 close,
+    // 一旦 native 出错/不回调,ReceivePort 永不关闭、Future 永不完成。
+    final timer = Timer(messageTimeout, () {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('ffi message timeout', messageTimeout),
+        );
+        receiver.close();
+      }
+    });
     receiver.listen((message) {
       if (!completer.isCompleted) {
         completer.complete(message);
+        timer.cancel();
         receiver.close();
       }
     });

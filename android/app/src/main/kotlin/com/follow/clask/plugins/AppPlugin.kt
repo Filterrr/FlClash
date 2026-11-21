@@ -39,6 +39,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.zip.ZipFile
@@ -57,6 +59,12 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private var vpnCallBack: (() -> Unit)? = null
 
     private val iconMap = mutableMapOf<String, String?>()
+
+    // iconMap / packages 会被 Dart 侧对 N 个应用的并发请求同时读写
+    // (协程跑在 Dispatchers.Default 上),必须串行化。
+    private val iconLock = Mutex()
+
+    private val packagesLock = Any()
 
     private val packages = mutableListOf<Package>()
 
@@ -275,35 +283,42 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private suspend fun getPackageIcon(packageName: String): String? {
         val packageManager = context.packageManager
-        if (iconMap[packageName] == null) {
-            iconMap[packageName] = try {
-                packageManager?.getApplicationIcon(packageName)?.getBase64()
-            } catch (_: Exception) {
-                null
+        return iconLock.withLock {
+            if (iconMap[packageName] == null) {
+                iconMap[packageName] = try {
+                    packageManager?.getApplicationIcon(packageName)?.getBase64()
+                } catch (_: Exception) {
+                    null
+                }
             }
-
+            iconMap[packageName]
         }
-        return iconMap[packageName]
     }
 
     private fun getPackages(): List<Package> {
-        val packageManager = context.packageManager
-        if (packages.isNotEmpty()) return packages
-        packageManager?.getInstalledPackages(PackageManager.GET_META_DATA)?.filter {
-            it.packageName != context.packageName
-                    || it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
-                    || it.packageName == "android"
-
-        }?.mapNotNull {
-            val appInfo = it.applicationInfo ?: return@mapNotNull null
-            Package(
-                packageName = it.packageName,
-                label = appInfo.loadLabel(packageManager).toString(),
-                isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 1,
-                firstInstallTime = it.firstInstallTime
-            )
-        }?.let { packages.addAll(it) }
-        return packages
+        // 返回快照,避免调用方在遍历时被并发的 addAll 影响。
+        synchronized(packagesLock) {
+            if (packages.isEmpty()) {
+                val packageManager = context.packageManager
+                packageManager?.getInstalledPackages(PackageManager.GET_META_DATA)
+                    ?.filter {
+                        it.packageName != context.packageName
+                            || it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
+                            || it.packageName == "android"
+                    }
+                    ?.mapNotNull {
+                        val appInfo = it.applicationInfo ?: return@mapNotNull null
+                        Package(
+                            packageName = it.packageName,
+                            label = appInfo.loadLabel(packageManager).toString(),
+                            isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 1,
+                            firstInstallTime = it.firstInstallTime
+                        )
+                    }
+                    ?.let { packages.addAll(it) }
+            }
+            return packages.toList()
+        }
     }
 
     private suspend fun getPackagesToJson(): String {
@@ -472,10 +487,15 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             if (resultCode == FlutterActivity.RESULT_OK) {
                 GlobalState.initServiceEngine(context)
                 vpnCallBack?.invoke()
-            } else {
-                // 用户在系统授权框中点了「取消」：同样必须中止启动，
-                // 否则磁贴卡住且后续启动请求全部被拒，而 VPN 从未建立。
+            } else if (GlobalState.runState.value != RunState.START) {
+                // 用户在系统授权框里取消了本次授权:必须中止本次启动,否则磁贴
+                // 卡住且后续启动请求全部被拒,而 VPN 从未建立。
+                //
+                // 并发启动下(磁贴连点 / 通知 + 磁贴)被取消的可能是后一次请求:
+                // 此时隧道已经建立,绝不能把正在运行的 VPN 拆掉。
                 abortIncompleteStart()
+            } else {
+                vpnCallBack = null
             }
         }
         return true

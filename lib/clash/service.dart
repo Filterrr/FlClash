@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/clash/interface.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/core.dart';
+import 'package:flutter/foundation.dart';
 
 class ClashService with ClashInterface {
   static ClashService? _instance;
@@ -20,6 +20,18 @@ class ClashService with ClashInterface {
 
   Process? process;
 
+  /// 当前与 core 的连接(用于判断断开的 socket 是否仍是当前连接)。
+  Socket? _socket;
+
+  /// 启动阶段(bind / 拉起 core 进程)的失败原因。
+  ///
+  /// 旧实现把失败原因直接丢掉:completer 永不完成,而 _invoke 又没有超时,
+  /// 界面会静默卡在初始化态。记录下来后,后续调用会立刻拿到明确错误。
+  Object? _startupError;
+
+  /// 等待 core 建立 socket 连接的最长时间。
+  static const Duration _socketReadyTimeout = Duration(seconds: 10);
+
   Timer? _completerCleanupTimer;
 
   factory ClashService() {
@@ -28,9 +40,35 @@ class ClashService with ClashInterface {
   }
 
   ClashService._internal() {
-    _createServer();
-    startCore();
+    // 这两个调用都不能 await(_createServer 内部是 server 的 accept 循环,
+    // 永不返回),但必须各自捕获异常:否则 bind / Process.start 失败时
+    // serverCompleter / socketCompleter 永不完成,配合 _invoke 里对 socket 的
+    // 无超时等待,App 会静默卡死在初始化态。
+    unawaited(_createServer().catchError((Object e, StackTrace s) {
+      debugPrint("create server error ===> $e\n$s");
+      _startupError = e;
+    }));
+    unawaited(startCore().catchError((Object e, StackTrace s) {
+      debugPrint("start core error ===> $e\n$s");
+      _startupError = e;
+    }));
     _startCompleterCleanup();
+  }
+
+  /// 等待与 core 的连接,失败/超时都抛出明确错误而不是永久挂起。
+  Future<Socket> _waitSocket() async {
+    final error = _startupError;
+    if (error != null) {
+      throw StateError("clash core is not ready: $error");
+    }
+    try {
+      return await socketCompleter.future.timeout(_socketReadyTimeout);
+    } on TimeoutException {
+      throw StateError(
+        "clash core is not ready: no socket connection in "
+        "${_socketReadyTimeout.inSeconds}s",
+      );
+    }
   }
 
   /// 定期清理已完成的 completer，防止内存累积
@@ -66,16 +104,15 @@ class ClashService with ClashInterface {
     serverCompleter.complete(server);
     await for (final socket in server) {
       await _destroySocket();
+      _socket = socket;
       socketCompleter.complete(socket);
       socket
-          .transform(
-            StreamTransformer<Uint8List, String>.fromHandlers(
-              handleData: (Uint8List data, EventSink<String> sink) {
-                sink.add(utf8.decode(data, allowMalformed: true));
-              },
-            ),
-          )
-          .transform(LineSplitter())
+          .cast<List<int>>()
+          // 用 Utf8Decoder 而不是逐包 utf8.decode:一个多字节字符被拆到两个
+          // 网络包里时(大 payload 如 getProxies),逐包解码会产生乱码,
+          // 下游 json.decode 抛 FormatException 且消息被整条丢掉。
+          .transform(const Utf8Decoder(allowMalformed: true))
+          .transform(const LineSplitter())
           .listen(
             (data) {
               _handleAction(
@@ -84,6 +121,14 @@ class ClashService with ClashInterface {
                 ),
               );
             },
+            onError: (Object e, StackTrace s) {
+              debugPrint("socket error ===> $e\n$s");
+              _handleSocketClosed(socket);
+            },
+            onDone: () {
+              _handleSocketClosed(socket);
+            },
+            cancelOnError: true,
           );
     }
   }
@@ -127,6 +172,17 @@ class ClashService with ClashInterface {
       await lastSocket.close();
       socketCompleter = Completer();
     }
+    _socket = null;
+  }
+
+  /// core 进程退出 / 连接断开:复位 socket 状态,避免后续 IPC 一直往死
+  /// socket 上写(只能等各自超时,且没有自愈路径)。
+  _handleSocketClosed(Socket socket) {
+    if (!identical(_socket, socket)) {
+      return;
+    }
+    _socket = null;
+    socketCompleter = Completer();
   }
 
   _handleAction(Action action) {
@@ -175,7 +231,7 @@ class ClashService with ClashInterface {
     FutureOr<T> Function()? onTimeout,
   }) async {
     final id = "${method.name}#${other.id}";
-    final socket = await socketCompleter.future;
+    final socket = await _waitSocket();
     callbackCompleterMap[id] = Completer<T>();
     socket.writeln(
       json.encode(
@@ -201,7 +257,7 @@ class ClashService with ClashInterface {
     dynamic data,
   }) async {
     final id = "${method.name}#${other.id}";
-    final socket = await socketCompleter.future;
+    final socket = await _waitSocket();
     socket.writeln(
       json.encode(
         Action(
@@ -454,9 +510,12 @@ class ClashService with ClashInterface {
       }
     }
     callbackCompleterMap.clear();
-    final server = await serverCompleter.future;
-    await server.close();
-    await _deleteSocketFile();
+    // ClashService 是单例,而监听用的 ServerSocket 与 unix socket 文件是
+    // 它的长期资源:旧实现在这里 server.close() + 删除 socket 文件,导致
+    // 「停止 → 再启动」时 startCore() 把已关闭/已删除的地址交给新的 core
+    // 进程(connect 必然失败),且 socketCompleter 也不会再完成,后续 IPC
+    // 全部挂起。这里只断开当前连接,保留监听端。
+    await _destroySocket();
   }
 }
 

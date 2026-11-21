@@ -42,7 +42,16 @@ class Tun with _$Tun {
     try {
       return Tun.fromJson(json);
     } catch (_) {
-      return defaultTun;
+      // congestion-controller 是严格枚举:配置里出现枚举外的取值(手改配置、
+      // 旧版本残留、核心新增算法)时,不能让**整个 tun 段**回退默认值
+      // (enable/device/stack/mtu 会被静默重置)。丢掉这一个字段重试。
+      final sanitized = Map<String, Object?>.from(json)
+        ..remove("congestion-controller");
+      try {
+        return Tun.fromJson(sanitized);
+      } catch (_) {
+        return defaultTun;
+      }
     }
   }
 }

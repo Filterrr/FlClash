@@ -117,7 +117,11 @@ Future<void> vpnService() async {
         ),
       );
 
-      // VPN 服务模式下使用更长的空闲间隔以节省电量
+      // VPN 服务模式下使用更长的空闲间隔以节省电量。
+      // handleStart() 已经通过 startListenUpdate() 建好一个 AdaptiveTimer,
+      // 替换前必须先停掉它:旧实例没人持有却仍在每秒 tick,
+      // 结果同一份 updateTraffic 被两个定时器重复调用(双倍 FFI 开销)。
+      globalState.adaptiveTimer?.stop();
       globalState.updateFunctionLists = [
         () {
           globalState.updateTraffic(config: config);

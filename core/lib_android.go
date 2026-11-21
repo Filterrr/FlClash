@@ -40,13 +40,20 @@ type Fd struct {
 var (
 	tunListener *sing_tun.Listener
 	fdMap       FdMap
-	fdCounter   int64 = 0
-	counter     int64 = 0
-	processMap  ProcessMap
-	tunLock     sync.Mutex
-	runTime     *time.Time
-	errBlocked  = errors.New("blocked")
+	// fdWaiters 记录「已发出 protect 请求、正在等待 Dart 回包」的 fd:
+	// key 是 fd 序号,value 是 chan struct{}。收到 setFdMap 后 close 该 channel,
+	// 拨号 goroutine 立即返回,不再轮询忙等(见 initSocketHook)。
+	fdWaiters  sync.Map
+	fdCounter  int64 = 0
+	counter    int64 = 0
+	processMap ProcessMap
+	tunLock    sync.Mutex
+	runTime    *time.Time
+	errBlocked = errors.New("blocked")
 )
+
+// socketProtectTimeout 是等待 Dart 侧回 protect(fd) 的最长时间。
+const socketProtectTimeout = 500 * time.Millisecond
 
 func (cm *ProcessMap) Store(key int64, value string) {
 	cm.m.Store(key, value)
@@ -93,7 +100,31 @@ func startTUN(fd C.int, port C.longlong) {
 		if mtu == 0 {
 			mtu = state.DefaultMtu
 		}
-		tunListener, _ = t.Start(f, currentConfig.General.Tun.Device, currentConfig.General.Tun.Stack, currentConfig.General.Tun.CongestionController, mtu)
+		listener, err := t.Start(
+			f,
+			currentConfig.General.Tun.Device,
+			currentConfig.General.Tun.Stack,
+			currentConfig.General.Tun.CongestionController,
+			mtu,
+		)
+		if err != nil {
+			// 隧道没有建立起来:必须清掉旧 listener 与运行时间。
+			// 旧实现丢弃错误并照样把 runTime 置位,getRunTime() 会让界面显示
+			// 「已连接」而实际所有流量都在直连;fd 的所有权已交给 t.Start
+			// (失败时由它自己关闭),这里不再处理。
+			if tunListener != nil {
+				_ = tunListener.Close()
+			}
+			tunListener = nil
+			runTime = nil
+			log.Errorln("startTUN failed, tunnel is not established: %v", err)
+			return
+		}
+		// 覆盖前先关闭上一个 listener,避免重复启动时泄漏 sing-tun 资源。
+		if tunListener != nil {
+			_ = tunListener.Close()
+		}
+		tunListener = listener
 		if tunListener != nil {
 			log.Infoln("TUN address: %v", tunListener.Address())
 		}
@@ -130,6 +161,10 @@ func setFdMap(fd C.long) {
 	fdInt := int64(fd)
 	go func() {
 		fdMap.Store(fdInt)
+		// 唤醒正在等待该 fd 被 protect 的拨号 goroutine(见 initSocketHook)。
+		if waiter, ok := fdWaiters.LoadAndDelete(fdInt); ok {
+			close(waiter.(chan struct{}))
+		}
 	}()
 }
 
@@ -147,25 +182,29 @@ func initSocketHook() {
 		}
 		return conn.Control(func(fd uintptr) {
 			fdInt := int64(fd)
-			timeout := time.After(500 * time.Millisecond)
 			id := atomic.AddInt64(&fdCounter, 1)
+			// 先登记等待用的 channel,再发出 protect 请求:这样 setFdMap
+			// 回来时一定能唤醒本 goroutine,不会出现「先回包后等待」的竞态。
+			waiter := make(chan struct{})
+			fdWaiters.Store(id, waiter)
+			defer fdWaiters.Delete(id)
 
 			markSocket(Fd{
 				Id:    id,
 				Value: fdInt,
 			})
 
-			for {
-				select {
-				case <-timeout:
-					return
-				default:
-					exists := fdMap.Load(id)
-					if exists {
-						return
-					}
-					time.Sleep(20 * time.Millisecond)
-				}
+			timer := time.NewTimer(socketProtectTimeout)
+			defer timer.Stop()
+			select {
+			case <-waiter:
+				return
+			case <-timer.C:
+				// 超时:不能一直卡在拨号路径上。放行该 socket,但留下日志,
+				// 便于定位「Dart 侧 protect 往返过慢」导致的漏流量问题。
+				fdMap.Store(id)
+				log.Warnln("protect socket timeout, socket %d is not protected", fdInt)
+				return
 			}
 		})
 	}
@@ -224,6 +263,8 @@ func setProcessMap(s *C.char) {
 
 //export getCurrentProfileName
 func getCurrentProfileName() *C.char {
+	state.CurrentStateLock.RLock()
+	defer state.CurrentStateLock.RUnlock()
 	if state.CurrentState == nil {
 		return C.CString("")
 	}
@@ -238,6 +279,9 @@ func getAndroidVpnOptions() *C.char {
 	if mtu == 0 {
 		mtu = state.DefaultMtu
 	}
+	// 与 setState 的写入互斥,避免读到「一半新一半旧」的配置。
+	state.CurrentStateLock.RLock()
+	defer state.CurrentStateLock.RUnlock()
 	options := state.AndroidVpnOptions{
 		Enable:           state.CurrentState.Enable,
 		Port:             currentConfig.General.MixedPort,
@@ -263,10 +307,16 @@ func getAndroidVpnOptions() *C.char {
 //export setState
 func setState(s *C.char) {
 	paramsString := C.GoString(s)
-	err := json.Unmarshal([]byte(paramsString), state.CurrentState)
-	if err != nil {
+	// 先解析到临时结构体,成功后再整体替换:解析失败时不会留下「半更新」状态。
+	// 写入必须与读侧(tun.Start / getAndroidVpnOptions)通过 CurrentStateLock 互斥。
+	var nextState state.State
+	if err := json.Unmarshal([]byte(paramsString), &nextState); err != nil {
+		log.Errorln("setState error: %v", err)
 		return
 	}
+	state.CurrentStateLock.Lock()
+	*state.CurrentState = nextState
+	state.CurrentStateLock.Unlock()
 }
 
 //export updateDns
