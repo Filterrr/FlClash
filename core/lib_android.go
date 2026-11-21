@@ -202,7 +202,6 @@ func initSocketHook() {
 			case <-timer.C:
 				// 超时:不能一直卡在拨号路径上。放行该 socket,但留下日志,
 				// 便于定位「Dart 侧 protect 往返过慢」导致的漏流量问题。
-				fdMap.Store(id)
 				log.Warnln("protect socket timeout, socket %d is not protected", fdInt)
 				return
 			}

@@ -200,11 +200,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                             result.success(it)
                             return@launch
                         }
-                        if (iconMap["default"] == null) {
-                            iconMap["default"] =
-                                context.packageManager?.defaultActivityIcon?.getBase64()
-                        }
-                        result.success(iconMap["default"])
+                        // iconMap 是并发共享容器,兜底图标同样要在锁内读写。
+                        result.success(iconLock.withLock {
+                            if (iconMap["default"] == null) {
+                                iconMap["default"] =
+                                    context.packageManager?.defaultActivityIcon?.getBase64()
+                            }
+                            iconMap["default"]
+                        })
                         return@launch
                     }
                 }

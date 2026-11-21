@@ -96,6 +96,8 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "start" -> {
                 val data = call.argument<String>("data")
                 options = Gson().fromJson(data, VpnOptions::class.java)
+                // 记住发起本次启动时的停止序号,供 start() 判断是否已被取消。
+                pendingStartStopSeq = stopSeq
                 when (options.enable) {
                     true -> handleStartVpn()
                     false -> start()
@@ -190,6 +192,12 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     // 是否已成功注册 NetworkCallback(注册与注销必须严格配对)。
     private var isNetworkCallbackRegistered = false
+
+    // 停止请求序号:每次 stop() 自增。启动流程是异步的(授权框 → 绑定服务 →
+    // onServiceConnected → start()),用户在中间点了停止时,这个序号会让在途的
+    // 启动流程放弃推进,而不是把状态重新推回 START 再建立隧道。
+    private var stopSeq = 0
+    private var pendingStartStopSeq = -1
 
     fun onUpdateNetwork() {
         updateUnderlyingNetworks()
@@ -291,8 +299,14 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             return
         }
         var startFailed = false
+        var cancelled = false
         GlobalState.runLock.withLock {
             if (GlobalState.runState.value == RunState.START) return
+            // 启动流程期间用户点了停止:放弃建立隧道,状态保持在 STOP。
+            if (pendingStartStopSeq != stopSeq) {
+                cancelled = true
+                return@withLock
+            }
             GlobalState.runState.value = RunState.START
             val fd = try {
                 flClashService?.start(options)
@@ -310,6 +324,12 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                     "started", fd
                 )
             }
+        }
+        if (cancelled) {
+            // 已经被取消:释放本次绑定,不要再动服务实例(它可能正被停止流程使用)。
+            unbindServiceSafely()
+            Log.i("VpnPlugin", "VPN start cancelled by user")
+            return
         }
         if (startFailed) {
             abortStart()
@@ -349,6 +369,8 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     fun stop() {
+        // 让在途的启动流程失效(见 start() 里的 stopSeq 判断)。
+        stopSeq++
         GlobalState.runLock.withLock {
             if (GlobalState.runState.value == RunState.STOP) return
             GlobalState.runState.value = RunState.STOP

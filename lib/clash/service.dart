@@ -32,6 +32,12 @@ class ClashService with ClashInterface {
   /// 等待 core 建立 socket 连接的最长时间。
   static const Duration _socketReadyTimeout = Duration(seconds: 10);
 
+  /// core 进程是否已经退出。
+  ///
+  /// 进程没了还去等 socket,只会让每次轮询白等 [_socketReadyTimeout];
+  /// 记住这个事实后,后续调用立刻拿到明确错误。
+  bool _coreExited = false;
+
   Timer? _completerCleanupTimer;
 
   factory ClashService() {
@@ -60,6 +66,9 @@ class ClashService with ClashInterface {
     final error = _startupError;
     if (error != null) {
       throw StateError("clash core is not ready: $error");
+    }
+    if (_coreExited) {
+      throw StateError("clash core exited");
     }
     try {
       return await socketCompleter.future.timeout(_socketReadyTimeout);
@@ -105,6 +114,9 @@ class ClashService with ClashInterface {
     await for (final socket in server) {
       await _destroySocket();
       _socket = socket;
+      // 连接建立即代表 core 已就绪:清掉历史启动错误,否则一次瞬时失败会让
+      // 之后每次 IPC 都直接抛错(即使 core 早就重启成功了)。
+      _startupError = null;
       socketCompleter.complete(socket);
       socket
           .cast<List<int>>()
@@ -134,6 +146,9 @@ class ClashService with ClashInterface {
   }
 
   startCore() async {
+    // 重新拉起 core 时不要沿用上一次的启动错误,否则重试永远拿到旧异常。
+    _startupError = null;
+    _coreExited = false;
     if (process != null) {
       await shutdown();
     }
@@ -155,6 +170,18 @@ class ClashService with ClashInterface {
       ],
     );
     process!.stdout.listen((_) {});
+    // core 退出后(socket 断开、crash、被外部 kill)立刻记下来并复位连接状态,
+    // 这样后续 IPC 走明确错误而不是逐个等超时。
+    final currentProcess = process;
+    unawaited(currentProcess!.exitCode.then((code) {
+      if (!identical(process, currentProcess)) {
+        return;
+      }
+      debugPrint("core exited with code $code");
+      _coreExited = true;
+      _socket = null;
+      socketCompleter = Completer();
+    }));
   }
 
   _deleteSocketFile() async {
@@ -279,15 +306,30 @@ class ClashService with ClashInterface {
 
   @override
   shutdown() async {
-    await _invoke<bool>(
-      method: ActionMethod.shutdown,
-    );
+    // core 可能已经退出(core/server.go 在连接断开后直接 return,进程随之结束)。
+    // 此时再 _invoke 会走 _waitSocket 白等 10 秒再抛错,把「停止/重启」拖成
+    // 十几秒的无响应。这里只在连接还活着时才礼貌通知,其余一律走本地清理。
+    try {
+      if (socketCompleter.isCompleted) {
+        await _invoke<bool>(
+          method: ActionMethod.shutdown,
+        );
+      }
+    } catch (e) {
+      debugPrint("shutdown error ===> $e");
+    }
     if (Platform.isWindows) {
-      await request.stopCoreByHelper();
+      try {
+        await request.stopCoreByHelper();
+      } catch (e) {
+        debugPrint("stop core by helper error ===> $e");
+      }
     }
     await _destroySocket();
     process?.kill();
     process = null;
+    // 进程已被回收:残留的启动错误不再有意义。
+    _startupError = null;
   }
 
   @override
@@ -510,12 +552,11 @@ class ClashService with ClashInterface {
       }
     }
     callbackCompleterMap.clear();
-    // ClashService 是单例,而监听用的 ServerSocket 与 unix socket 文件是
-    // 它的长期资源:旧实现在这里 server.close() + 删除 socket 文件,导致
-    // 「停止 → 再启动」时 startCore() 把已关闭/已删除的地址交给新的 core
-    // 进程(connect 必然失败),且 socketCompleter 也不会再完成,后续 IPC
-    // 全部挂起。这里只断开当前连接,保留监听端。
-    await _destroySocket();
+    // 注意:这里既不能关监听 ServerSocket,也不能关与 core 的连接。
+    //  - 监听端是单例的长期资源,关掉后 startCore() 拿到的地址再也连不上;
+    //  - core 侧的 server.go 读到 EOF 就 return,main 随之退出,关连接等于
+    //    杀进程 —— 之后「停止 → 再启动」就没有进程可连了。
+    // 真正的进程回收走 shutdown()。destroy() 只负责让在途调用尽快失败。
   }
 }
 
