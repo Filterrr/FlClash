@@ -8,6 +8,7 @@ import 'package:fl_clash/clash/interface.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
@@ -147,12 +148,29 @@ class ClashCore {
     return connectionsRaw.map((e) => Connection.fromJson(e)).toList();
   }
 
+  /// 即发即弃的调用:core 未就绪 / 已退出时直接放弃。
+  ///
+  /// 这些调用点(切换配置、界面按钮)从不 await,所以失败必须在内部消化,
+  /// 否则每次都会冒出一个未处理的异步异常。
+  void _bestEffort(FutureOr<dynamic> Function() action) {
+    try {
+      final result = action();
+      if (result is Future) {
+        unawaited(result.catchError((Object e) {
+          debugPrint("best effort call failed ===> $e");
+        }));
+      }
+    } catch (e) {
+      debugPrint("best effort call failed ===> $e");
+    }
+  }
+
   closeConnection(String id) {
-    clashInterface.closeConnection(id);
+    _bestEffort(() => clashInterface.closeConnection(id));
   }
 
   closeConnections() {
-    clashInterface.closeConnections();
+    _bestEffort(() => clashInterface.closeConnections());
   }
 
   Future<List<ExternalProvider>> getExternalProviders() async {

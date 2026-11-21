@@ -279,21 +279,29 @@ class ClashService with ClashInterface {
     );
   }
 
+  /// 即发即弃的调用(forceGc / resetTraffic / startLog / stopLog)。
+  ///
+  /// 调用方不关心结果,core 未就绪或已退出时直接放弃 —— 否则每次都会抛出
+  /// 未处理的异步异常(新增的快速失败路径会让它每分钟出现几十次)。
   _prueInvoke({
     required ActionMethod method,
     dynamic data,
   }) async {
-    final id = "${method.name}#${other.id}";
-    final socket = await _waitSocket();
-    socket.writeln(
-      json.encode(
-        Action(
-          id: id,
-          method: method,
-          data: data,
+    try {
+      final id = "${method.name}#${other.id}";
+      final socket = await _waitSocket();
+      socket.writeln(
+        json.encode(
+          Action(
+            id: id,
+            method: method,
+            data: data,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      debugPrint("prue invoke ${method.name} failed ===> $e");
+    }
   }
 
   @override
