@@ -186,7 +186,11 @@ func initSocketHook() {
 		if platform.ShouldBlockConnection() {
 			return errBlocked
 		}
-		return conn.Control(func(fd uintptr) {
+		// Control 的回调签名是 func(fd uintptr),没有返回值,所以不能
+		// 在回调里直接 return 错误:先把 protect 结果记到局部变量,
+		// Control 返回后再决定这次拨号是否失败。
+		protected := true
+		if err := conn.Control(func(fd uintptr) {
 			fdInt := int64(fd)
 			id := atomic.AddInt64(&fdCounter, 1)
 			// 先登记等待用的 channel,再发出 protect 请求:这样 setFdMap /
@@ -204,22 +208,25 @@ func initSocketHook() {
 			timer := time.NewTimer(socketProtectTimeout)
 			defer timer.Stop()
 			select {
-			case protected := <-waiter:
-				if !protected {
-					// Dart 侧 protect() 明确失败(服务在销毁 / fd 非法)。
-					// 放行就是漏流量:这条连接会绕过 TUN 直连,界面却仍
-					// 显示“已保护”。宁可让本次拨号失败。
-					log.Warnln("protect socket failed, block socket %d", fdInt)
-					return errBlocked
-				}
-				return
+			case ok := <-waiter:
+				protected = ok
 			case <-timer.C:
-				// 超时:不能一直卡在拨号路径上。放行该 socket,但留下日志,
-				// 便于定位「Dart 侧 protect 往返过慢」导致的漏流量问题。
+				// 超时:不能一直卡在拨号路径上。放行该 socket(protected
+				// 保持 true),但留下日志,便于定位「Dart 侧 protect 往返
+				// 过慢」导致的漏流量问题。
 				log.Warnln("protect socket timeout, socket %d is not protected", fdInt)
-				return
 			}
-		})
+		}); err != nil {
+			return err
+		}
+		if !protected {
+			// Dart 侧 protect() 明确失败(服务在销毁 / fd 非法)。放行就是
+			// 漏流量:这条连接会绕过 TUN 直连,界面却仍显示“已保护”。
+			// 宁可让本次拨号失败。
+			log.Warnln("protect socket failed, block connection")
+			return errBlocked
+		}
+		return nil
 	}
 }
 
