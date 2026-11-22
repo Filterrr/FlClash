@@ -6,13 +6,13 @@ import "C"
 import (
 	"core/state"
 	"github.com/metacubex/mihomo/constant"
-	"syscall"
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/listener/sing_tun"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"net"
 	"net/netip"
+	"syscall"
 )
 
 type Props struct {
@@ -59,9 +59,8 @@ func Start(fd int, device string, stack constant.TUNStack, congestionController 
 	var dnsHijack []string
 	dnsHijack = append(dnsHijack, net.JoinHostPort(dnsServerAddress, "53"))
 
-	// dup 一份交给 sing_tun.New(它只在自己内部成功接管后才持有该 fd),
-	// 原始 fd 由本函数始终关闭 —— 与上游对同一问题的处理方式一致:
-	// 只看 New 的返回错误无法判断它是否已经接管 fd。
+	// dup 一份交给 sing_tun.New:成功时由它接管,失败时由本函数关闭。
+	// 原始 fd 由下面的 defer 始终关闭。
 	dupFd, err := syscall.Dup(fd)
 	if err != nil {
 		return fail(err)
@@ -87,6 +86,10 @@ func Start(fd int, device string, stack constant.TUNStack, congestionController 
 	listener, err := sing_tun.New(options, tunnel.Tunnel)
 
 	if err != nil {
+		// New 失败时无法确定它是否已经接管 dupFd:对已关闭的 fd 再 Close
+		// 只会返回 EBADF,不会误伤别的 fd,所以这里无条件关闭 —— 否则每次
+		// 启动失败都会泄漏一个 fd,攒到 fd 上限后所有新连接都会被直接拦掉。
+		_ = syscall.Close(dupFd)
 		log.Errorln("startTUN error:", err)
 		return nil, err
 	}
