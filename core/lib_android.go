@@ -28,10 +28,6 @@ type ProcessMap struct {
 	m sync.Map
 }
 
-type FdMap struct {
-	m sync.Map
-}
-
 type Fd struct {
 	Id    int64 `json:"id"`
 	Value int64 `json:"value"`
@@ -39,7 +35,6 @@ type Fd struct {
 
 var (
 	tunListener *sing_tun.Listener
-	fdMap       FdMap
 	// fdWaiters 记录「已发出 protect 请求、正在等待 Dart 回包」的 fd:
 	// key 是 fd 序号,value 是 chan struct{}。收到 setFdMap 后 close 该 channel,
 	// 拨号 goroutine 立即返回,不再轮询忙等(见 initSocketHook)。
@@ -59,21 +54,18 @@ func (cm *ProcessMap) Store(key int64, value string) {
 	cm.m.Store(key, value)
 }
 
-func (cm *ProcessMap) Load(key int64) (string, bool) {
-	value, ok := cm.m.Load(key)
+// LoadAndDelete 取走并删除:进程解析结果只用一次,旧实现只 Store 不 Delete,
+// 每解析一次连接就永久留下一条(长会话下是确定性内存增长)。
+func (cm *ProcessMap) LoadAndDelete(key int64) (string, bool) {
+	value, ok := cm.m.LoadAndDelete(key)
 	if !ok || value == nil {
 		return "", false
 	}
 	return value.(string), true
 }
 
-func (cm *FdMap) Store(key int64) {
-	cm.m.Store(key, struct{}{})
-}
-
-func (cm *FdMap) Load(key int64) bool {
-	_, ok := cm.m.Load(key)
-	return ok
+func (cm *ProcessMap) Delete(key int64) {
+	cm.m.Delete(key)
 }
 
 //export startTUN
@@ -160,8 +152,9 @@ func stopTun() {
 func setFdMap(fd C.long) {
 	fdInt := int64(fd)
 	go func() {
-		fdMap.Store(fdInt)
 		// 唤醒正在等待该 fd 被 protect 的拨号 goroutine(见 initSocketHook)。
+		// 旧实现还会把 fd 塞进 fdMap,但全仓库没有任何地方读它,纯属
+		// 每条新连接一条、永不回收的内存增长。
 		if waiter, ok := fdWaiters.LoadAndDelete(fdInt); ok {
 			close(waiter.(chan struct{}))
 		}
@@ -233,9 +226,15 @@ func init() {
 		for {
 			select {
 			case <-timeout:
+				// 超时后 Dart 侧仍可能迟到回包。延迟清掉这个 id,否则那条
+				// 迟到结果会永久留在 map 里,把「用完即删」又漏回去。
+				go func(id int64) {
+					time.Sleep(5 * time.Second)
+					processMap.Delete(id)
+				}(id)
 				return "", errors.New("package resolver timeout")
 			default:
-				value, exists := processMap.Load(id)
+				value, exists := processMap.LoadAndDelete(id)
 				if exists {
 					return value, nil
 				}

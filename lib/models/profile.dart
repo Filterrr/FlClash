@@ -76,7 +76,10 @@ class Profile with _$Profile {
     return Profile(
       label: label,
       url: url,
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // 毫秒时间戳在快速连续添加(URL + 二维码/批量导入)时会撞 id,
+      // 撞了就是同一个 profiles/<id>.yaml,后加的覆盖先加的。
+      // other.id = 微秒时间戳 + 8 位随机后缀。
+      id: other.id,
       autoUpdateDuration: defaultUpdateDuration,
     );
   }
