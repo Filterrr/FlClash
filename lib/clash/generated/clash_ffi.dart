@@ -2763,6 +2763,20 @@ class ClashFFI {
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Long)>>('setFdMap');
   late final _setFdMap = _setFdMapPtr.asFunction<void Function(int)>();
 
+  void setProtectFailed(
+    int fd,
+  ) {
+    return _setProtectFailed(
+      fd,
+    );
+  }
+
+  late final _setProtectFailedPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Long)>>(
+          'setProtectFailed');
+  late final _setProtectFailed =
+      _setProtectFailedPtr.asFunction<void Function(int)>();
+
   void setProcessMap(
     ffi.Pointer<ffi.Char> s,
   ) {

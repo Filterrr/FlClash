@@ -149,8 +149,22 @@ Future<void> vpnService() async {
   vpn?.setServiceMessageHandler(
     ServiceMessageHandler(
       onProtect: (Fd fd) async {
-        await vpn?.setProtect(fd.value);
-        clashLib?.setFdMap(fd.id);
+        var protected = false;
+        try {
+          protected = await vpn?.setProtect(fd.value) ?? false;
+        } catch (e) {
+          // 方法通道本身出错(引擎正在销毁等):按失败处理,别让 Go 等到
+          // 超时后把 socket 放行。
+          debugPrint("setProtect error ===> $e");
+        }
+        if (protected) {
+          clashLib?.setFdMap(fd.id);
+        } else {
+          // protect 失败(服务正在停止 / fd 非法):必须让 Go 侧中止这次
+          // 拨号。旧实现无条件 setFdMap,Go 认为已保护并放行,这条连接
+          // 实际绕过 VPN 直连,且不会报任何错。
+          clashLib?.setProtectFailed(fd.id);
+        }
       },
       onProcess: (ProcessData process) async {
         final packageName = await vpn?.resolverProcess(process);

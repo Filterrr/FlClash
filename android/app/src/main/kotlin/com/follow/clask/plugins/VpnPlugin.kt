@@ -112,14 +112,19 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
             "setProtect" -> {
                 val fd = call.argument<Int>("fd")
-                if (fd != null) {
-                    if (flClashService is FlClashVpnService) {
-                        (flClashService as FlClashVpnService).protect(fd)
-                    }
-                    result.success(true)
-                } else {
-                    result.success(false)
+                val service = flClashService
+                // 把 protect() 的真实结果回给 Dart:旧实现无条件 success(true),
+                // 失败时 Go 侧仍会放行 socket,造成真实漏流量。
+                val protected = try {
+                    fd != null && service is FlClashVpnService && service.protect(fd)
+                } catch (e: Exception) {
+                    Log.w("VpnPlugin", "protect fd $fd failed", e)
+                    false
                 }
+                if (!protected && fd != null) {
+                    Log.w("VpnPlugin", "protect fd $fd failed, connection will be blocked")
+                }
+                result.success(protected)
             }
 
             "startForeground" -> {
@@ -372,9 +377,13 @@ class VpnPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         // 让在途的启动流程失效(见 start() 里的 stopSeq 判断)。
         stopSeq++
         GlobalState.runLock.withLock {
-            if (GlobalState.runState.value == RunState.STOP) return
-            GlobalState.runState.value = RunState.STOP
-            flClashService?.stop()
+            // 状态已是 STOP 时只跳过“下发 stop 指令”,绝不能 return:
+            // always-on / START_STICKY 拉起、而 Dart 侧状态还停在 STOP 时,
+            // 早退会把下面的解绑和 stopService 一起跳掉,留下停不掉的幽灵服务。
+            if (GlobalState.runState.value != RunState.STOP) {
+                GlobalState.runState.value = RunState.STOP
+                flClashService?.stop()
+            }
         }
         unbindServiceSafely()
         // 显式停止：连同系统（always-on / 粘性重启）自行拉起的实例一并结束。

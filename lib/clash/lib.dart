@@ -472,6 +472,11 @@ class ClashLib with ClashInterface {
     clashFFI.setFdMap(fd);
   }
 
+  /// protect 失败时通知 Go 侧放弃本次拨号,避免 socket 绕过 VPN 直连。
+  setProtectFailed(int fd) {
+    clashFFI.setProtectFailed(fd);
+  }
+
   DateTime? getRunTime() {
     final runTimeRaw = clashFFI.getRunTime();
     final runTimeString = runTimeRaw.cast<Utf8>().toDartString();
