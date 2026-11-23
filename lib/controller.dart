@@ -11,6 +11,7 @@ import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/update.dart';
+import 'package:fl_clash/services/node_metrics.dart';
 import 'package:fl_clash/services/update_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/update_dialog.dart';
@@ -582,6 +583,8 @@ class AppController {
 
   setDelay(Delay delay) {
     appState.setDelay(delay);
+    // 节点质量采样收口在这里:手动测速 / 批量测速 / 定时测速最终都走这条路径
+    nodeMetrics.record(delay);
   }
 
   toPage(int index, {bool hasAnimate = false}) {

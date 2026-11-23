@@ -7,6 +7,7 @@ import 'package:fl_clash/fragments/access.dart';
 import 'package:fl_clash/fragments/application_setting.dart';
 import 'package:fl_clash/fragments/config/config.dart';
 import 'package:fl_clash/fragments/app_routing.dart';
+import 'package:fl_clash/fragments/statistics.dart';
 import 'package:fl_clash/fragments/diagnostics.dart';
 import 'package:fl_clash/fragments/hotkey.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -259,6 +260,15 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
         label: appLocalizations.other,
         dividerIndentWithIcon: true,
         children: [
+          ListItem.open(
+            iconData: Icons.bar_chart,
+            title: const Text('流量统计'),
+            subtitle: const Text('今日 / 本月 / 近 14 天'),
+            delegate: const OpenDelegate(
+              title: '流量统计',
+              widget: StatisticsFragment(),
+            ),
+          ),
           ListItem.open(
             iconData: Icons.call_split,
             title: const Text('按应用分流'),

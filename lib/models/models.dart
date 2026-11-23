@@ -5,6 +5,8 @@ export 'connection_extra.dart';
 export 'config.dart';
 export 'core.dart';
 export 'core_health.dart';
+export 'daily_traffic.dart';
+export 'delay_sample.dart';
 export 'profile.dart';
 export 'rule_match.dart';
 export 'selector.dart';

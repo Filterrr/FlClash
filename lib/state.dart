@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
+import 'services/node_metrics.dart';
+import 'services/traffic_statistics.dart';
 import 'manager/background_memory_manager.dart';
 import 'models/models.dart';
 
@@ -70,6 +72,8 @@ class GlobalState {
     required ClashConfig clashConfig,
     required Config config,
   }) async {
+    // 节点质量采样要在第一次 record 之前把历史读回来,否则会被覆盖
+    unawaited(nodeMetrics.ensureLoaded());
     await globalState.init(
       appState: appState,
       config: config,
@@ -323,6 +327,9 @@ class GlobalState {
     required Config config,
     AppFlowingState? appFlowingState,
   }) async {
+    // 每日流量统计:内部自带 30s 节流与重入保护,高频调用无妨。
+    // 采样的是 core 的累计值,后台挂起期间漏掉的量会在恢复后补齐。
+    unawaited(trafficStatistics.sample());
     final onlyProxy = config.appSetting.onlyProxy;
     final Traffic traffic;
     // 轮询函数:core 未就绪 / 已退出时跳过本次 tick,不要往定时器回调里

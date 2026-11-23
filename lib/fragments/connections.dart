@@ -103,20 +103,6 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
     );
   }
 
-  void _showConnectionDetail(Connection connection) {
-    final extra =
-        connectionExtraStore[connection.id] ?? ConnectionExtra.empty;
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (_) => _ConnectionDetailSheet(
-        connection: connection,
-        extra: extra,
-      ),
-    );
-  }
-
   void _stopTimer() {
     if (timer != null) {
       timer?.cancel();
@@ -260,7 +246,7 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
                           IconButton(
                             icon: const Icon(Icons.info_outline),
                             tooltip: '详情',
-                            onPressed: () => _showConnectionDetail(connection),
+                            onPressed: () => showConnectionDetail(context, connection),
                           ),
                           IconButton(
                             icon: const Icon(Icons.block),
@@ -423,7 +409,7 @@ class ConnectionsSearchDelegate extends SearchDelegate {
                         IconButton(
                           icon: const Icon(Icons.info_outline),
                           tooltip: '详情',
-                          onPressed: () => _showConnectionDetail(connection),
+                          onPressed: () => showConnectionDetail(context, connection),
                         ),
                         IconButton(
                           icon: const Icon(Icons.block),
@@ -448,6 +434,23 @@ class ConnectionsSearchDelegate extends SearchDelegate {
       },
     );
   }
+}
+
+/// 打开某条连接的详情面板。
+///
+/// 必须是顶层函数而不是 State 的私有方法:连接列表有两处渲染
+/// (主列表 + 搜索代理类),后者是另一个类,够不到 State 的成员。
+void showConnectionDetail(BuildContext context, Connection connection) {
+  final extra = connectionExtraStore[connection.id] ?? ConnectionExtra.empty;
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (_) => _ConnectionDetailSheet(
+      connection: connection,
+      extra: extra,
+    ),
+  );
 }
 
 /// 单条连接的完整元数据面板。

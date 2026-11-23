@@ -1,5 +1,6 @@
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
 
 /// 诊断工具页:分流诊断 + core 运行时健康状况。
@@ -23,6 +24,8 @@ class _DiagnosticsFragmentState extends State<DiagnosticsFragment> {
   CoreMemoryStats _stats = CoreMemoryStats.empty;
   bool _loadingStats = false;
 
+  List<Log> _dnsLogs = [];
+
   @override
   void initState() {
     super.initState();
@@ -42,7 +45,26 @@ class _DiagnosticsFragmentState extends State<DiagnosticsFragment> {
     setState(() {
       _stats = stats;
       _loadingStats = false;
+      _dnsLogs = _collectDnsLogs();
     });
+  }
+
+  /// 从 core 推上来的日志里挑出 DNS 相关行。
+  ///
+  /// 用宽松匹配(大小写无关地找 "dns")而不是死抠 `[DNS]` 前缀 ——
+  /// mihomo 各版本的 DNS 日志措辞会变,抠死了就静默什么都看不到。
+  /// 前提是「日志」开关是打开的,core 不推送就没有数据。
+  List<Log> _collectDnsLogs() {
+    try {
+      final logs = globalState.appController.appFlowingState.logs;
+      final matched = logs
+          .where((e) => (e.payload ?? '').toLowerCase().contains('dns'))
+          .toList();
+      // 新的在上面
+      return matched.reversed.take(60).toList();
+    } catch (_) {
+      return const [];
+    }
   }
 
   Future<void> _check() async {
@@ -244,6 +266,48 @@ class _DiagnosticsFragmentState extends State<DiagnosticsFragment> {
     );
   }
 
+  Widget _buildDnsPanel() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return _buildCard(
+      title: 'DNS 解析',
+      icon: Icons.dns_outlined,
+      trailing: IconButton(
+        onPressed: () => setState(() => _dnsLogs = _collectDnsLogs()),
+        icon: const Icon(Icons.refresh, size: 20),
+        tooltip: '刷新',
+      ),
+      child: _dnsLogs.isEmpty
+          ? Text(
+              '暂无 DNS 日志。需要在设置里打开「日志」开关,core 才会推送。',
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '最近 ${_dnsLogs.length} 条(来自 core 日志)',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final log in _dnsLogs.take(40))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: SelectableText(
+                      log.payload ?? '',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -251,6 +315,7 @@ class _DiagnosticsFragmentState extends State<DiagnosticsFragment> {
       children: [
         _buildRuleChecker(),
         _buildCoreHealth(),
+        _buildDnsPanel(),
       ],
     );
   }
