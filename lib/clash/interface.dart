@@ -67,4 +67,11 @@ mixin ClashInterface {
   FutureOr<bool> closeConnection(String id);
 
   FutureOr<bool> closeConnections();
+
+  /// core 运行时内存 / GC 快照(JSON 字符串)。
+  FutureOr<String> getMemoryStats();
+
+  /// 分流诊断:按当前生效配置匹配一条域名 / IP / host:port。
+  /// 返回命中规则与落点(JSON 字符串)。
+  FutureOr<String> matchRule(String target);
 }

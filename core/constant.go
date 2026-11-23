@@ -90,6 +90,7 @@ const (
 	startListenerMethod            Method = "startListener"
 	stopListenerMethod             Method = "stopListener"
 	getMemoryStatsMethod           Method = "getMemoryStats"
+	matchRuleMethod                Method = "matchRule"
 	lightGcMethod                  Method = "lightGc"
 	setBackgroundModeMethod        Method = "setBackgroundMode"
 	setLogLevelMethod              Method = "setLogLevel"

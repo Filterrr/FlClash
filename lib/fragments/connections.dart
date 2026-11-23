@@ -240,12 +240,22 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
                       key: Key(connection.id),
                       connection: connection,
                       onClick: _addKeyword,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.block),
-                        onPressed: () {
-                          _handleBlockConnection(connection.id);
-                        },
-                      ),
+                        trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                          IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            tooltip: '详情',
+                            onPressed: () => showConnectionDetail(context, connection),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.block),
+                            onPressed: () {
+                              _handleBlockConnection(connection.id);
+                            },
+                          ),
+                            ],
+                        ),
                     );
                   },
                   separatorBuilder: (BuildContext context, int index) {
@@ -393,12 +403,22 @@ class ConnectionsSearchDelegate extends SearchDelegate {
                     key: Key(connection.id),
                     connection: connection,
                     onClick: _addKeyword,
-                    trailing: IconButton(
-                      icon: const Icon(Icons.block),
-                      onPressed: () {
-                        _handleBlockConnection(connection.id);
-                      },
-                    ),
+                      trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                        IconButton(
+                          icon: const Icon(Icons.info_outline),
+                          tooltip: '详情',
+                          onPressed: () => showConnectionDetail(context, connection),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.block),
+                          onPressed: () {
+                            _handleBlockConnection(connection.id);
+                          },
+                        ),
+                          ],
+                      ),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {
@@ -412,6 +432,109 @@ class ConnectionsSearchDelegate extends SearchDelegate {
           ],
         );
       },
+    );
+  }
+}
+
+/// 打开某条连接的详情面板。
+///
+/// 必须是顶层函数而不是 State 的私有方法:连接列表有两处渲染
+/// (主列表 + 搜索代理类),后者是另一个类,够不到 State 的成员。
+void showConnectionDetail(BuildContext context, Connection connection) {
+  final extra = connectionExtraStore[connection.id] ?? ConnectionExtra.empty;
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (_) => _ConnectionDetailSheet(
+      connection: connection,
+      extra: extra,
+    ),
+  );
+}
+
+/// 单条连接的完整元数据面板。
+///
+/// 数据分两处取:基础字段一直在 Connection.metadata 里;
+/// 规则命中 / ASN / GeoIP / 进程路径来自旁挂的 ConnectionExtra
+/// (core 返回里本来就有,只是 codegen 模型没解析)。
+class _ConnectionDetailSheet extends StatelessWidget {
+  final Connection connection;
+  final ConnectionExtra extra;
+
+  const _ConnectionDetailSheet({
+    required this.connection,
+    required this.extra,
+  });
+
+  String get _ruleText {
+    if (extra.rule.isEmpty) return '';
+    if (extra.rulePayload.isEmpty) return extra.rule;
+    return '${extra.rule},${extra.rulePayload}';
+  }
+
+  Widget _row(String label, String value) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ),
+          Expanded(
+            child: SelectableText(
+              value,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final metadata = connection.metadata;
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          children: [
+            Text(
+              '连接详情',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            _row('目标 IP', metadata.destinationIP),
+            _row('域名', metadata.host),
+            _row('端口', metadata.destinationPort),
+            _row('网络', metadata.network),
+            _row('来源', metadata.sourceIP),
+            _row('进程', metadata.process),
+            _row('进程路径', extra.processPath),
+            _row('SNI', extra.sniffHost),
+            _row('DNS 模式', extra.dnsMode),
+            _row('命中规则', _ruleText),
+            _row('目标 ASN', extra.destinationIPASN),
+            _row('目标地区', extra.destinationGeoIP.join(', ')),
+            _row('来源 ASN', extra.sourceIPASN),
+            _row('来源地区', extra.sourceGeoIP.join(', ')),
+            _row('特殊规则', extra.specialRules),
+            _row('特殊代理', extra.specialProxy),
+            _row('链路', connection.chains.join(' -> ')),
+          ],
+        ),
+      ),
     );
   }
 }

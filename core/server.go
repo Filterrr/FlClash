@@ -166,6 +166,10 @@ func handleAction(action *Action) {
 	case getMemoryStatsMethod:
 		action.callback(handleGetMemoryStats())
 		return
+	case matchRuleMethod:
+		target, _ := action.Data.(string)
+		action.callback(handleMatchRule(target))
+		return
 	case lightGcMethod:
 		handleLightGc()
 		return

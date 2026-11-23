@@ -209,3 +209,8 @@ func stopLog() {
 func getMemoryStats() *C.char {
 	return C.CString(handleGetMemoryStats())
 }
+
+//export matchRule
+func matchRule(target *C.char) *C.char {
+	return C.CString(handleMatchRule(C.GoString(target)))
+}

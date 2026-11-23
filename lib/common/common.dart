@@ -16,6 +16,7 @@ export 'link.dart';
 export 'list.dart';
 export 'lock.dart';
 export 'low_memory_mode.dart';
+export 'local_store.dart';
 export 'measure.dart';
 export 'navigation.dart';
 export 'navigator.dart';

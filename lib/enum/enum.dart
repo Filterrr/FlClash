@@ -211,6 +211,8 @@ enum ActionMethod {
   lightGc,
   setBackgroundMode,
   setLogLevel,
+  getMemoryStats,
+  matchRule,
 }
 
 enum AuthorizeCode { none, success, error }
