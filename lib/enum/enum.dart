@@ -208,6 +208,9 @@ enum ActionMethod {
   stopLog,
   startListener,
   stopListener,
+  lightGc,
+  setBackgroundMode,
+  setLogLevel,
 }
 
 enum AuthorizeCode { none, success, error }

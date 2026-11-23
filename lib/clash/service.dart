@@ -245,8 +245,12 @@ class ClashService with ClashInterface {
         clashMessage.controller.add(action.data as String);
         return;
       case ActionMethod.forceGc:
+      case ActionMethod.lightGc:
       case ActionMethod.startLog:
       case ActionMethod.stopLog:
+      case ActionMethod.setBackgroundMode:
+      case ActionMethod.setLogLevel:
+        // 即发即弃:core 不会为这些方法回包,调用方也不等结果。
         return;
     }
   }
@@ -350,6 +354,21 @@ class ClashService with ClashInterface {
   @override
   forceGc() {
     _prueInvoke(method: ActionMethod.forceGc);
+  }
+
+  @override
+  void lightGc() {
+    _prueInvoke(method: ActionMethod.lightGc);
+  }
+
+  @override
+  void setBackgroundMode(bool isBackground) {
+    _prueInvoke(method: ActionMethod.setBackgroundMode, data: isBackground);
+  }
+
+  @override
+  void setLogLevel(int level) {
+    _prueInvoke(method: ActionMethod.setLogLevel, data: level);
   }
 
   @override

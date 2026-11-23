@@ -90,6 +90,9 @@ const (
 	startListenerMethod            Method = "startListener"
 	stopListenerMethod             Method = "stopListener"
 	getMemoryStatsMethod           Method = "getMemoryStats"
+	lightGcMethod                  Method = "lightGc"
+	setBackgroundModeMethod        Method = "setBackgroundMode"
+	setLogLevelMethod              Method = "setLogLevel"
 )
 
 type Method string

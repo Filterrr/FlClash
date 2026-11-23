@@ -40,6 +40,11 @@ func handleInitClash(homeDirStr string) bool {
 	if !isInit {
 		constant.SetHomeDir(homeDirStr)
 		isInit = true
+		// 给 Go 堆设一个软上限(设备内存的 1/8)。必须早于任何真实负载,
+		// 越早设越能压住首次峰值。
+		initMemoryLimit()
+		// 平台相关的进程级调优(降 core 线程优先级等)。
+		applyPlatformTuning()
 	}
 	return isInit
 }
@@ -79,6 +84,11 @@ func logMemoryStats(prefix string) {
 	)
 }
 
+// handleForceGc 重量回收:GC 之后把空闲内存真正还给操作系统。
+//
+// 会触发两次 STW GC + madvise 归还页,代价明显高于普通 GC,所以调用点
+// 必须是低频、且确实需要压 RSS 的场景:切换配置后、内存压力回调、
+// 系统的 onTrimMemory。
 func handleForceGc() {
 	go func() {
 		log.Infoln("[APP] request force GC")
@@ -87,6 +97,32 @@ func handleForceGc() {
 		debug.FreeOSMemory()
 		logMemoryStats("after-FreeOSMemory")
 	}()
+}
+
+// handleLightGc 轻量回收:只跑一次 runtime.GC(),不把空闲页还给内核。
+//
+// 给「前台空闲」这类高频路径用(AdaptiveTimer 进入 idle 时触发)。旧实现
+// 在这里也做 FreeOSMemory:用户正用着 App,却吃两次 STW 把页还给内核,
+// 而下一次分配又要重新 mmap 回来 —— 纯亏。
+func handleLightGc() {
+	go func() {
+		runtime.GC()
+	}()
+}
+
+// handleSetLogLevel 切换 core 的日志级别。
+//
+// 取值 0=debug 1=info 2=warning 3=error 4=silent,与 FlClash 的 LogLevel
+// 枚举、mihomo 的 log.LogLevel 三边同序。后台 / 低内存时提到 warning,
+// 让 mihomo 内部连日志事件都不产生 —— 而不是「产生事件 → 序列化 →
+// 跨 FFI 传输 → Dart 侧一行 return 丢掉」这种全套白干。
+// 范围外的值直接忽略,免得手改配置把日志彻底打哑之后没人查得出原因。
+func handleSetLogLevel(level int) {
+	if level < int(log.DEBUG) || level > int(log.SILENT) {
+		log.Warnln("[APP] ignore invalid log level: %d", level)
+		return
+	}
+	log.SetLevel(log.LogLevel(level))
 }
 
 func handleShutdown() bool {
@@ -560,18 +596,18 @@ func handleGetMemoryStats() string {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	stats := map[string]uint64{
-		"alloc":        m.Alloc,
-		"totalAlloc":   m.TotalAlloc,
-		"sys":          m.Sys,
-		"heapAlloc":    m.HeapAlloc,
-		"heapSys":      m.HeapSys,
-		"heapReleased": m.HeapReleased,
-		"heapIdle":     m.HeapIdle,
-		"heapInUse":    m.HeapInuse,
-		"stackInUse":   m.StackInuse,
-		"stackSys":     m.StackSys,
-		"numGC":        uint64(m.NumGC),
-		"numForcedGC":  uint64(m.NumForcedGC),
+		"alloc":         m.Alloc,
+		"totalAlloc":    m.TotalAlloc,
+		"sys":           m.Sys,
+		"heapAlloc":     m.HeapAlloc,
+		"heapSys":       m.HeapSys,
+		"heapReleased":  m.HeapReleased,
+		"heapIdle":      m.HeapIdle,
+		"heapInUse":     m.HeapInuse,
+		"stackInUse":    m.StackInuse,
+		"stackSys":      m.StackSys,
+		"numGC":         uint64(m.NumGC),
+		"numForcedGC":   uint64(m.NumForcedGC),
 		"gcCPUFraction": uint64(m.GCCPUFraction * 1e6),
 	}
 	data, err := json.Marshal(stats)

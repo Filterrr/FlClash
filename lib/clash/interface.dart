@@ -53,6 +53,15 @@ mixin ClashInterface {
 
   stopLog();
 
+  /// 轻量回收:只触发一次 GC,不把空闲页还给内核。前台高频路径用。
+  lightGc();
+
+  /// 前后台切换:core 据此调整 GC 百分比(后台更积极)。
+  setBackgroundMode(bool isBackground);
+
+  /// 切换 core 日志级别。取值与 LogLevel 枚举同序(0=debug … 4=silent)。
+  setLogLevel(int level);
+
   FutureOr<String> getConnections();
 
   FutureOr<bool> closeConnection(String id);

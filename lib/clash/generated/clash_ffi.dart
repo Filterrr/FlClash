@@ -2457,6 +2457,32 @@ class ClashFFI {
       _lookup<ffi.NativeFunction<ffi.Void Function()>>('forceGc');
   late final _forceGc = _forceGcPtr.asFunction<void Function()>();
 
+  void lightGc() {
+    return _lightGc();
+  }
+
+  late final _lightGcPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('lightGc');
+  late final _lightGc = _lightGcPtr.asFunction<void Function()>();
+
+  void setBackgroundMode(int isBackground) {
+    return _setBackgroundMode(isBackground);
+  }
+
+  late final _setBackgroundModePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>(
+          'setBackgroundMode');
+  late final _setBackgroundMode =
+      _setBackgroundModePtr.asFunction<void Function(int)>();
+
+  void setLogLevel(int level) {
+    return _setLogLevel(level);
+  }
+
+  late final _setLogLevelPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>('setLogLevel');
+  late final _setLogLevel = _setLogLevelPtr.asFunction<void Function(int)>();
+
   void validateConfig(
     ffi.Pointer<ffi.Char> s,
     int port,

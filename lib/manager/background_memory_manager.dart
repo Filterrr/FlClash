@@ -134,9 +134,11 @@ class BackgroundMemoryManager extends ChangeNotifier {
   void _setupResourceCallbacks() {
     resourceController.onEnterLowMemory(() {
       _startBackgroundMaintenance();
+      _enterCoreFrugalMode();
     });
     resourceController.onExitLowMemory(() {
       _stopBackgroundMaintenance();
+      _exitCoreFrugalMode();
     });
   }
 
@@ -152,6 +154,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
 
     _reduceGlobalStateTimerFrequency();
     _stopNonEssentialUpdates();
+    _enterCoreFrugalMode();
     // 延迟清理缓存，避免进入后台瞬间的 CPU 峰值
     Future.delayed(const Duration(seconds: 2), () {
       if (_isInBackground) {
@@ -188,6 +191,7 @@ class BackgroundMemoryManager extends ChangeNotifier {
     _restoreGlobalStateTimerFrequency();
     _resumeAllUpdates();
     _stopBackgroundMaintenance();
+    _exitCoreFrugalMode();
 
     // 必须无条件复位:_optimizationLevel 是实时读配置的,如果进入后台时是
     // balanced / aggressive(已切到 reduced / low),而在后台期间用户把
@@ -353,9 +357,62 @@ class BackgroundMemoryManager extends ChangeNotifier {
     _backgroundMaintenanceTimer = null;
   }
 
+  /// 重量回收:GC + 把空闲内存归还 OS。
+  ///
+  /// 调用点都是低频场景(后台分阶段维护定时器、内存压力回调),
+  /// 扛得住 FreeOSMemory 的两次 STW。前台高频的空闲路径走的是
+  /// 轻量的 clashCore.lightGc(),不碰 FreeOSMemory。
   void _requestGc() {
     clashCore.requestGc();
     _perfStats.recordGc();
+  }
+
+  /// 进入 core 省电档位:后台没人看 UI,多花点 CPU 换更小的常驻堆。
+  ///
+  /// 三件事一起做,少一件效果都打折:
+  /// 1. GC 百分比降到 50;
+  /// 2. 日志级别抬到 warning,让 mihomo 内部连日志事件都不产生,
+  ///    而不是"产生 -> 序列化 -> 跨 FFI 传输 -> Dart 侧一行 return 丢";
+  /// 3. 日志订阅整个停掉,即使级别抬了,残留的订阅 channel 仍会为
+  ///    通过的日志做一轮无谓的序列化与跨语言传输。
+  ///
+  /// 幂等,重复进入无副作用。
+  void _enterCoreFrugalMode() {
+    clashCore.setBackgroundMode(true);
+    clashCore.setLogLevel(LogLevel.warning.index);
+    if (_isLogEnabled) {
+      clashCore.stopLog();
+    }
+  }
+
+  /// 退出 core 省电档位,把 GC 百分比与日志级别还原成用户配置。
+  ///
+  /// _isInBackground 的守卫是必须的:内存压力回调可能在"仍在后台"时
+  /// 先 enter 再 exit(压力解除),若不判断就会把级别提前还原成前台的
+  /// info,后台的日志省电直接失效。
+  void _exitCoreFrugalMode() {
+    if (_isInBackground) return;
+    clashCore.setBackgroundMode(false);
+    clashCore.setLogLevel(_configuredLogLevelIndex);
+    if (_isLogEnabled) {
+      clashCore.startLog();
+    }
+  }
+
+  bool get _isLogEnabled {
+    try {
+      return globalState.appController.config.appSetting.openLogs;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  int get _configuredLogLevelIndex {
+    try {
+      return globalState.appController.clashConfig.logLevel.index;
+    } catch (_) {
+      return LogLevel.info.index;
+    }
   }
 
   /// 请求 Dart 侧回收内存。
