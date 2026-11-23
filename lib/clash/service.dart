@@ -239,6 +239,8 @@ class ClashService with ClashInterface {
       case ActionMethod.updateGeoData:
       case ActionMethod.updateExternalProvider:
       case ActionMethod.sideLoadExternalProvider:
+      case ActionMethod.getMemoryStats:
+      case ActionMethod.matchRule:
         completer?.complete(action.data as String);
         return;
       case ActionMethod.message:
@@ -497,6 +499,21 @@ class ClashService with ClashInterface {
   @override
   resetTraffic() {
     _prueInvoke(method: ActionMethod.resetTraffic);
+  }
+
+  @override
+  FutureOr<String> getMemoryStats() {
+    return _invoke<String>(
+      method: ActionMethod.getMemoryStats,
+    );
+  }
+
+  @override
+  FutureOr<String> matchRule(String target) {
+    return _invoke<String>(
+      method: ActionMethod.matchRule,
+      data: target,
+    );
   }
 
   @override

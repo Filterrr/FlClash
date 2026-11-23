@@ -440,6 +440,24 @@ class ClashLib with ClashInterface {
     clashFFI.setLogLevel(level);
   }
 
+  @override
+  String getMemoryStats() {
+    final raw = clashFFI.getMemoryStats();
+    final result = raw.cast<Utf8>().toDartString();
+    clashFFI.freeCString(raw);
+    return result;
+  }
+
+  @override
+  String matchRule(String target) {
+    final targetChar = target.toNativeUtf8().cast<Char>();
+    final raw = clashFFI.matchRule(targetChar);
+    malloc.free(targetChar);
+    final result = raw.cast<Utf8>().toDartString();
+    clashFFI.freeCString(raw);
+    return result;
+  }
+
   startTun(int fd, int port) {
     if (!Platform.isAndroid) return;
     clashFFI.startTUN(fd, port);

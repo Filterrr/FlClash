@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"net"
 	nhttp "net/http"
+	"net/netip"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
@@ -123,6 +125,70 @@ func handleSetLogLevel(level int) {
 		return
 	}
 	log.SetLevel(log.LogLevel(level))
+}
+
+// MatchRuleResult 是分流诊断的返回结构。
+//
+// 一次调用回答三个问题:命中哪条规则、规则的内容是什么、最终落到哪个
+// 策略组(Adapter 会是组名,或者是 DIRECT / REJECT 这类内置目标)。
+type MatchRuleResult struct {
+	Matched bool   `json:"matched"`
+	Rule    string `json:"rule"`
+	Payload string `json:"payload"`
+	Adapter string `json:"adapter"`
+}
+
+// buildRuleMetadata 把用户输入拼成规则匹配用的 Metadata。
+//
+// 支持三种形态,顺序不能反:纯 IP、host:port、裸域名。
+// 端口缺省填 443 —— 相当一部分规则带端口条件(dst-port),
+// 不给端口会让这些规则静默不命中,诊断结果就骗人了。
+func buildRuleMetadata(target string) *constant.Metadata {
+	target = strings.TrimSpace(target)
+	metadata := &constant.Metadata{}
+	if addr, err := netip.ParseAddr(target); err == nil {
+		metadata.DstIP = addr
+		metadata.DstPort = 443
+		return metadata
+	}
+	host := target
+	port := 0
+	if h, p, err := net.SplitHostPort(target); err == nil {
+		host = h
+		port, _ = strconv.Atoi(p)
+	}
+	if port <= 0 || port > 65535 {
+		port = 443
+	}
+	metadata.Host = host
+	metadata.DstPort = uint16(port)
+	return metadata
+}
+
+// handleMatchRule 按当前生效配置逐条试规则,返回第一条命中的。
+//
+// 返回 JSON 字符串,由 Dart 侧解析。core 未初始化 / 配置为空时返回
+// matched=false,而不是报错 —— 诊断页在 core 起来之前被打开是常态。
+func handleMatchRule(target string) string {
+	result := MatchRuleResult{}
+	cfg := currentConfig
+	if cfg != nil && target != "" {
+		metadata := buildRuleMetadata(target)
+		for _, rule := range cfg.Rules {
+			if matched, adapter := rule.Match(metadata, constant.RuleMatchHelper{}); matched {
+				result.Matched = true
+				result.Rule = rule.RuleType().String()
+				result.Payload = rule.Payload()
+				result.Adapter = adapter
+				break
+			}
+		}
+	}
+	data, err := json.Marshal(result)
+	if err != nil {
+		return "{}"
+	}
+	return string(data)
 }
 
 func handleShutdown() bool {

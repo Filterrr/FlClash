@@ -2657,6 +2657,31 @@ class ClashFFI {
   late final _getExternalProviders =
       _getExternalProvidersPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
+  ffi.Pointer<ffi.Char> getMemoryStats() {
+    return _getMemoryStats();
+  }
+
+  late final _getMemoryStatsPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'getMemoryStats');
+  late final _getMemoryStats =
+      _getMemoryStatsPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  ffi.Pointer<ffi.Char> matchRule(
+    ffi.Pointer<ffi.Char> target,
+  ) {
+    return _matchRule(
+      target,
+    );
+  }
+
+  late final _matchRulePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<ffi.Char>)>>('matchRule');
+  late final _matchRule = _matchRulePtr.asFunction<
+      ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>();
+
   ffi.Pointer<ffi.Char> getExternalProvider(
     ffi.Pointer<ffi.Char> externalProviderNameChar,
   ) {

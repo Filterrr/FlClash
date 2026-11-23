@@ -1,8 +1,11 @@
 export 'app.dart';
 export 'clash_config.dart';
 export 'common.dart';
+export 'connection_extra.dart';
 export 'config.dart';
 export 'core.dart';
+export 'core_health.dart';
 export 'profile.dart';
+export 'rule_match.dart';
 export 'selector.dart';
 export 'update_check.dart';

@@ -145,6 +145,21 @@ class ClashCore {
     final res = await clashInterface.getConnections();
     final connectionsData = json.decode(res) as Map;
     final connectionsRaw = connectionsData['connections'] as List? ?? [];
+    // 顺手把规则命中 / ASN / GeoIP 这类扩展信息按 id 旁挂起来。
+    // 走 codegen 模型加字段要同步两个生成文件,这里零侵入。
+    // 连接列表本身是全量的,整体替换即可,不做增量。
+    final extras = <String, ConnectionExtra>{};
+    for (final item in connectionsRaw) {
+      if (item is Map) {
+        final id = item['id']?.toString();
+        if (id != null && id.isNotEmpty) {
+          extras[id] = ConnectionExtra.fromJson(
+            Map<String, dynamic>.from(item),
+          );
+        }
+      }
+    }
+    connectionExtraStore.replaceAll(extras);
     return connectionsRaw.map((e) => Connection.fromJson(e)).toList();
   }
 
@@ -261,6 +276,31 @@ class ClashCore {
 
   stopLog() {
     clashInterface.stopLog();
+  }
+
+  /// 读取 core 运行时内存 / GC 快照。
+  ///
+  /// core 未就绪时返回空快照,而不是抛错 —— 诊断页在 core 起来之前
+  /// 被打开是常态。
+  Future<CoreMemoryStats> getMemoryStats() async {
+    final raw = await clashInterface.getMemoryStats();
+    if (raw.isEmpty) return CoreMemoryStats.empty;
+    try {
+      return CoreMemoryStats.fromJson(json.decode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return CoreMemoryStats.empty;
+    }
+  }
+
+  /// 分流诊断:给定域名 / IP / host:port,返回命中的规则与落点。
+  Future<RuleMatchResult> matchRule(String target) async {
+    final raw = await clashInterface.matchRule(target);
+    if (raw.isEmpty) return RuleMatchResult.empty;
+    try {
+      return RuleMatchResult.fromJson(json.decode(raw) as Map<String, dynamic>);
+    } catch (_) {
+      return RuleMatchResult.empty;
+    }
   }
 
   requestGc() {

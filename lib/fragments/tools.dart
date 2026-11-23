@@ -6,6 +6,8 @@ import 'package:fl_clash/fragments/about.dart';
 import 'package:fl_clash/fragments/access.dart';
 import 'package:fl_clash/fragments/application_setting.dart';
 import 'package:fl_clash/fragments/config/config.dart';
+import 'package:fl_clash/fragments/app_routing.dart';
+import 'package:fl_clash/fragments/diagnostics.dart';
 import 'package:fl_clash/fragments/hotkey.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -257,6 +259,24 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
         label: appLocalizations.other,
         dividerIndentWithIcon: true,
         children: [
+          ListItem.open(
+            iconData: Icons.call_split,
+            title: const Text('按应用分流'),
+            subtitle: const Text('生成 PROCESS-NAME 规则'),
+            delegate: const OpenDelegate(
+              title: '按应用分流',
+              widget: AppRoutingFragment(),
+            ),
+          ),
+          ListItem.open(
+            iconData: Icons.troubleshoot,
+            title: const Text('诊断工具'),
+            subtitle: const Text('分流规则测试 / 核心内存'),
+            delegate: const OpenDelegate(
+              title: '诊断工具',
+              widget: DiagnosticsFragment(),
+            ),
+          ),
           ListItem.open(
             iconData: Icons.info_outline,
             title: Text(appLocalizations.about),
