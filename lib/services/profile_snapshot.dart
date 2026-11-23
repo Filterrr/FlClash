@@ -28,6 +28,7 @@ class ProfileSnapshotService {
   static Future<File?> _snapshotFile(String profileId) async {
     try {
       final profilePath = await appPath.getProfilePath(profileId);
+      if (profilePath == null) return null;
       final source = File(profilePath);
       if (!await source.exists()) return null;
       return source;
@@ -78,6 +79,7 @@ class ProfileSnapshotService {
       final backup = File(join(dir.path, _fileName(profileId)));
       if (!await backup.exists()) return false;
       final profilePath = await appPath.getProfilePath(profileId);
+      if (profilePath == null) return false;
       await backup.copy(profilePath);
       return true;
     } catch (_) {

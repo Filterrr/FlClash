@@ -1,6 +1,5 @@
 import 'package:fl_clash/clash/clash.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/automation_service.dart';
 import 'package:fl_clash/services/profile_snapshot.dart';
 import 'package:fl_clash/state.dart';
@@ -198,7 +197,7 @@ class _AutomationFragmentState extends State<AutomationFragment> {
                 : () async {
                     setState(() => _testing = true);
                     final delays = await automationService.testOnce();
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     setState(() => _testing = false);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -245,7 +244,7 @@ class _AutomationFragmentState extends State<AutomationFragment> {
                     );
                     if (confirmed != true) return;
                     final ok = await ProfileSnapshotService.restore(profileId);
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(ok ? '已恢复' : '恢复失败')),
                     );
