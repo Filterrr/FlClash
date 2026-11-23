@@ -12,6 +12,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/background_memory_manager.dart';
 import 'package:fl_clash/models/update.dart';
 import 'package:fl_clash/services/node_metrics.dart';
+import 'package:fl_clash/services/profile_snapshot.dart';
 import 'package:fl_clash/services/update_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/update_dialog.dart';
@@ -150,6 +151,9 @@ class AppController {
   }
 
   Future<void> updateProfile(Profile profile) async {
+    // 更新前留一份快照:订阅拉到半截断了 / 上游推了坏配置,
+    // 本地那份好配置不至于跟着一起没。
+    await ProfileSnapshotService.snapshot(profile.id);
     final newProfile = await profile.update();
     config.setProfile(
       newProfile.copyWith(isUpdating: false),

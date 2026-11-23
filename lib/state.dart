@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
 import 'controller.dart';
+import 'services/automation_service.dart';
 import 'services/node_metrics.dart';
 import 'services/traffic_statistics.dart';
 import 'manager/background_memory_manager.dart';
@@ -74,6 +75,8 @@ class GlobalState {
   }) async {
     // 节点质量采样要在第一次 record 之前把历史读回来,否则会被覆盖
     unawaited(nodeMetrics.ensureLoaded());
+    // 恢复自动化配置(定时测速 / 网络变化触发)
+    unawaited(automationService.apply());
     await globalState.init(
       appState: appState,
       config: config,

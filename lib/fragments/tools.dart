@@ -6,6 +6,7 @@ import 'package:fl_clash/fragments/about.dart';
 import 'package:fl_clash/fragments/access.dart';
 import 'package:fl_clash/fragments/application_setting.dart';
 import 'package:fl_clash/fragments/config/config.dart';
+import 'package:fl_clash/fragments/automation.dart';
 import 'package:fl_clash/fragments/app_routing.dart';
 import 'package:fl_clash/fragments/statistics.dart';
 import 'package:fl_clash/fragments/diagnostics.dart';
@@ -260,6 +261,15 @@ class _ToolboxFragmentState extends State<ToolsFragment> {
         label: appLocalizations.other,
         dividerIndentWithIcon: true,
         children: [
+          ListItem.open(
+            iconData: Icons.auto_mode,
+            title: const Text('自动化'),
+            subtitle: const Text('定时测速 / 优选 / 网络变化 / 回滚'),
+            delegate: const OpenDelegate(
+              title: '自动化',
+              widget: AutomationFragment(),
+            ),
+          ),
           ListItem.open(
             iconData: Icons.bar_chart,
             title: const Text('流量统计'),
