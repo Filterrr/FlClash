@@ -57,6 +57,21 @@ func forceGc() {
 	handleForceGc()
 }
 
+//export lightGc
+func lightGc() {
+	handleLightGc()
+}
+
+//export setBackgroundMode
+func setBackgroundMode(isBackground C.int) {
+	handleSetBackgroundMode(int(isBackground) == 1)
+}
+
+//export setLogLevel
+func setLogLevel(level C.int) {
+	handleSetLogLevel(int(level))
+}
+
 //export validateConfig
 func validateConfig(s *C.char, port C.longlong) {
 	i := int64(port)

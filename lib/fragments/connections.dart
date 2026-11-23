@@ -72,8 +72,11 @@ class _ConnectionsFragmentState extends State<ConnectionsFragment> {
 
   void _startTimer() {
     _stopTimer();
+    // 2s 而不是 1s:这里是「全量连接列表 -> 序列化 -> 跨 FFI 传输 ->
+    // Dart 侧 json.decode」的完整链路,连接数上百时每次都是 MB 级分配。
+    // 间隔翻倍在观感上几乎无差别,功耗与内存抖动却是实打实减半。
     timer = Timer.periodic(
-      const Duration(seconds: 1),
+      const Duration(seconds: 2),
       (timer) async {
         if (!context.mounted) {
           return;

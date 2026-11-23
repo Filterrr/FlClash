@@ -166,6 +166,22 @@ func handleAction(action *Action) {
 	case getMemoryStatsMethod:
 		action.callback(handleGetMemoryStats())
 		return
+	case lightGcMethod:
+		handleLightGc()
+		return
+	case setBackgroundModeMethod:
+		// 类型断言用 comma-ok:Dart 侧若漏传 data(json null)会解成 nil,
+		// 直接断言会 panic 掉整个 server 循环,把 core 打死。
+		if value, ok := action.Data.(bool); ok {
+			handleSetBackgroundMode(value)
+		}
+		return
+	case setLogLevelMethod:
+		// JSON 里的数字一律解成 float64
+		if value, ok := action.Data.(float64); ok {
+			handleSetLogLevel(int(value))
+		}
+		return
 	}
 
 }

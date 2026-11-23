@@ -425,6 +425,21 @@ class ClashLib with ClashInterface {
     clashFFI.forceGc();
   }
 
+  @override
+  void lightGc() {
+    clashFFI.lightGc();
+  }
+
+  @override
+  void setBackgroundMode(bool isBackground) {
+    clashFFI.setBackgroundMode(isBackground ? 1 : 0);
+  }
+
+  @override
+  void setLogLevel(int level) {
+    clashFFI.setLogLevel(level);
+  }
+
   startTun(int fd, int port) {
     if (!Platform.isAndroid) return;
     clashFFI.startTUN(fd, port);

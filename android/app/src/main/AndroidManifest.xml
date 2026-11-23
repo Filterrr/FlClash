@@ -63,9 +63,15 @@
             </intent-filter>
         </activity>
 
-        <!--        <meta-data-->
-        <!--                android:name="io.flutter.embedding.android.EnableImpeller"-->
-        <!--                android:value="true" />-->
+        <!--
+            Impeller 取舍:这里不写 EnableImpeller,即沿用 Flutter 的默认
+            渲染后端(3.29+ 在 Android 上默认 Impeller)。
+
+            关掉 Impeller 退回 Skia 确实能省一些 GPU 侧内存,但代价是动画 /
+            滚动流畅度下降。而本轮的优化目标是「后台」内存与电量 —— 后台时
+            Flutter 根本不渲染(vsync 已停),Impeller 对后台指标零影响。
+            结论:不为一个不受影响的指标牺牲前台流畅度,保持默认。
+        -->
 
         <activity
             android:name=".TempActivity"

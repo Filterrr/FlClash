@@ -173,7 +173,32 @@ func sideUpdateExternalProvider(p cp.Provider, bytes []byte) error {
 func decorationConfig(profileId string, cfg config.RawConfig) *config.RawConfig {
 	prof := getRawConfigWithId(profileId)
 	overwriteConfig(prof, cfg)
+	applyTunTimeoutDefaults(prof)
 	return prof
+}
+
+// defaultTunUDPTimeoutSec 是 TUN 模式下 UDP 会话空闲超时的兜底值(秒)。
+//
+// mihomo 的运行时默认是 sing.UDPTimeout = 5 分钟(见 listener/sing/sing.go)。
+// TUN 模式下每个长命 UDP 会话(QUIC / DNS / 实时通信)都要占着 socket +
+// goroutine + 收发缓冲,手机上几十上百个会话累积起来是实打实的常驻内存。
+//
+// 收到 120s:QUIC 与实时通信都有各自的 keepalive,不会因为空闲两分钟被
+// 误伤;DNS 之类本来就短命。ICMP 不在这里动 —— mihomo 的默认
+// (sing.ICMPTimeout = 10s)已经足够短,再设反而可能放宽。
+//
+// 只对 0(未显式配置)兜底,用户手写在配置里的值一律尊重,免得把游戏 /
+// 长连接场景改坏。
+const defaultTunUDPTimeoutSec int64 = 120
+
+// applyTunTimeoutDefaults 给未显式配置的 TUN 会话超时兜底。
+//
+// 必须在 overwriteConfig 之后调用:那一步会把 Dart 侧传来的
+// tun.udp-timeout(默认 0)原样覆盖进目标配置,放前面会被这次覆盖清掉。
+func applyTunTimeoutDefaults(rawConfig *config.RawConfig) {
+	if rawConfig.Tun.UDPTimeout == 0 {
+		rawConfig.Tun.UDPTimeout = defaultTunUDPTimeoutSec
+	}
 }
 
 func genHosts(hosts, patchHosts map[string]any) {

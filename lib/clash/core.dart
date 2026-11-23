@@ -266,6 +266,24 @@ class ClashCore {
   requestGc() {
     clashInterface.forceGc();
   }
+
+  /// 轻量回收:只触发一次 GC,不把空闲页还给内核。
+  ///
+  /// 前台空闲路径专用(AdaptiveTimer 进入 idle)。那边的旧实现走的是
+  /// requestGc -> FreeOSMemory,两次 STW 却换不来实际收益,故单列一条。
+  lightGc() {
+    _bestEffort(() => clashInterface.lightGc());
+  }
+
+  /// 前后台切换:core 据此调整 GC 百分比。
+  setBackgroundMode(bool isBackground) {
+    _bestEffort(() => clashInterface.setBackgroundMode(isBackground));
+  }
+
+  /// 切换 core 日志级别(0=debug … 4=silent)。
+  setLogLevel(int level) {
+    _bestEffort(() => clashInterface.setLogLevel(level));
+  }
 }
 
 final clashCore = ClashCore();

@@ -105,7 +105,7 @@ class AdaptiveTimer {
     if (_gcRequested) return;
     _gcRequested = true;
     try {
-      (requestGc ?? () => clashCore.requestGc())();
+      (requestGc ?? () => clashCore.lightGc())();
     } catch (_) {}
   }
 
